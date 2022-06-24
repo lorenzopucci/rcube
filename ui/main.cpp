@@ -3,7 +3,6 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-#include "shader.hpp"
 #include "mainloop.hpp"
 
 
@@ -24,7 +23,8 @@ int main ()
 
 
     GLFWwindow* window;
-    window = glfwCreateWindow(600, 600, "Rubiks cube", NULL, NULL);
+    window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT,
+        "Rubiks cube", NULL, NULL);
     if (window == NULL)
     {
         std::cerr << "Failed to open GLFW window. If you have an Intel GPU, "
@@ -36,18 +36,17 @@ int main ()
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1);
 
+    glEnable(GL_DEPTH_TEST);
+
     if (glewInit() != GLEW_OK)
     {
         std::cerr << "Failed to initialize GLEW\n";
         return 1;
     }
-             
-    Shader *shader = new Shader(VERTEX_SHADER, FRAGMENT_SHADER);
-    shader->bind();
 
     glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
-    
-    mainLoop(window, shader);
+
+    mainLoop(window);
 
     return 0;
 }

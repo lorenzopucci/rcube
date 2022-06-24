@@ -4,4 +4,7 @@
 
 #include "shader.hpp"
 
-void mainLoop (GLFWwindow* window, Shader* shader);
+#define WINDOW_WIDTH 640
+#define WINDOW_HEIGHT 480
+
+void mainLoop (GLFWwindow* window);

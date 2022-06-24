@@ -2,6 +2,8 @@
 
 #include <string>
 
+#include <glm/glm.hpp>
+
 #define VERTEX_SHADER "ui/res/shaders/vertex.shader"
 #define FRAGMENT_SHADER "ui/res/shaders/fragment.shader"
 
@@ -22,6 +24,7 @@ public:
 
 	void setUniform4f(const std::string& name,
 		float r, float g, float b, float a);
+	void setUniformMat4f(const std::string& name, const glm::mat4& mat);
 private:
 	unsigned int id;
 	unsigned int getUniformLocation(const std::string& name);

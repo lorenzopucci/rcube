@@ -2,6 +2,8 @@
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 #include "mainloop.hpp"
 #include "cube.hpp"
@@ -10,6 +12,7 @@
 #include "vertexArray.hpp"
 #include "shader.hpp"
 #include "renderer.hpp"
+#include "camera.hpp"
 
 struct color
 {
@@ -30,7 +33,7 @@ std::map<char, color> colorMapping
 };
 
 
-void mainLoop (GLFWwindow* window, Shader* shader)
+void mainLoop (GLFWwindow* window)
 {
     VertexArray va;
     VertexBuffer vb(vertices, 8 * 3 * sizeof(float));
@@ -42,21 +45,24 @@ void mainLoop (GLFWwindow* window, Shader* shader)
     IndexBuffer ib(indices, 36);
 
     Renderer renderer;
+    Camera camera(window);
 
+    Shader shader(VERTEX_SHADER, FRAGMENT_SHADER);
+    shader.bind();
+    
     char i = 'g';
 
-    while (glfwGetKey(window, GLFW_KEY_ESCAPE ) != GLFW_PRESS &&
-        glfwWindowShouldClose(window) == 0 )
+    while (!glfwWindowShouldClose(window))
     {
     	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    
-        shader->setUniform4f("u_color",
+        shader.setUniformMat4f("MVP", camera.getMVP(window));
+        shader.setUniform4f("u_color",
             colorMapping[i].red,
             colorMapping[i].green,
             colorMapping[i].blue,
             colorMapping[i].alpha);
         
-        renderer.draw(&va, &ib, shader);
+        renderer.draw(&va, &ib, &shader);
 
         glfwSwapBuffers(window);
         glfwPollEvents();

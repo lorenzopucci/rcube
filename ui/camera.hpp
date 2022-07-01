@@ -5,10 +5,7 @@
 
 #define MOUSE_SPEED 0.5f
 #define SPEED 3.0f
-#define FOV 45.0f
-
-#define INITIAL_VANGLE 0.0f
-#define INITIAL_HANGLE 3.14f
+#define INITIAL_FOV 45.0f
 
 struct MouseCoordinates
 {
@@ -20,16 +17,18 @@ class Camera
 {
 public:
     Camera(GLFWwindow* window);
-    ~Camera();
+    ~Camera() = default;
+
     void computeFromInput(GLFWwindow* window);
+    void scrollCallback(GLFWwindow *window, double deltaY);
+
     glm::mat4 getMVP(GLFWwindow* window);
 
 private:
     glm::mat4 viewMatrix;
     glm::mat4 projectionMatrix;
-    float vAngle = INITIAL_VANGLE;
-    float hAngle = INITIAL_HANGLE;
-    glm::vec3 position = glm::vec3(0.0f, 0.0f, 5.0f);
+    glm::mat4 modelMatrix = glm::mat4(1.0f);
+    float FoV = INITIAL_FOV;
     MouseCoordinates getMouseCoordinates(GLFWwindow* window);
 
     double lastTime;

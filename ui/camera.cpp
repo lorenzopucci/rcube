@@ -2,8 +2,6 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include <iostream>
-
 #include "camera.hpp"
 
 Camera::Camera(GLFWwindow* window)
@@ -12,11 +10,12 @@ Camera::Camera(GLFWwindow* window)
 
     int width, height;
     glfwGetWindowSize(window, &width, & height);
-    projectionMatrix = glm::perspective(glm::radians(FOV),
+
+    projectionMatrix = glm::perspective(glm::radians(FoV),
         float(width)/float(height), 0.1f, 100.0f);
 
     viewMatrix = glm::lookAt(
-        position, 
+        glm::vec3(0.0f, 0.0f, 5.0f), // camera position
         glm::vec3(0.0f, 0.0f, 0.0f),
         glm::vec3(0.0f, 1.0f, 0.0f)
     );
@@ -41,32 +40,20 @@ void Camera::computeFromInput(GLFWwindow* window)
         if (isRotating)
         {
             MouseCoordinates currPos = getMouseCoordinates(window);
-            double delta_x = currPos.x - previousMousePos.x;
-            double delta_y =currPos.y - previousMousePos.y;
+            double deltaX = currPos.x - previousMousePos.x;
+            double deltaY =currPos.y - previousMousePos.y;
             previousMousePos = currPos;
 
             int width, height;
-            glfwGetWindowSize(window, &width, & height);
+            glfwGetWindowSize(window, &width, &height);
 
-            hAngle += MOUSE_SPEED * deltaTime * float(delta_x);
-            vAngle += MOUSE_SPEED * deltaTime * float(delta_y);
+            float delta_hAngle = MOUSE_SPEED * deltaTime * float(deltaX);
+            float delta_vAngle = MOUSE_SPEED * deltaTime * float(deltaY);
 
-            //std::cout << "hAngle: " << hAngle << " vAngle: " << vAngle << std::endl;
-
-            position = glm::vec3(
-                5.0f * cos(hAngle),
-                5.0f * sin(vAngle),
-                5.0f * sin(hAngle)
-            );
-
-            projectionMatrix = glm::perspective(glm::radians(FOV),
-                float(width)/float(height), 0.1f, 100.0f);
-
-            viewMatrix = glm::lookAt(
-                position, 
-                glm::vec3(0.0f, 0.0f, 0.0f),
-                glm::vec3(0.0f, 1.0f, 0.0f)
-            );
+            viewMatrix = glm::rotate(viewMatrix,
+                delta_hAngle, glm::vec3(0.0f, 1.0f, 0.0f));
+            viewMatrix = glm::rotate(viewMatrix,
+                delta_vAngle, glm::vec3(1.0f, 0.0f, 0.0f));
         }
         else
         {
@@ -84,10 +71,21 @@ void Camera::computeFromInput(GLFWwindow* window)
 glm::mat4 Camera::getMVP(GLFWwindow* window)
 {
     computeFromInput(window);
-    return projectionMatrix * viewMatrix * glm::mat4(1.0);
+    return projectionMatrix * viewMatrix * modelMatrix;
 }
 
-Camera::~Camera()
+void Camera::scrollCallback(GLFWwindow *window, double deltaY)
 {
-    return;
+    FoV -= deltaY;
+    if (FoV < 2.0f || FoV > 80.0f)
+    {
+        FoV += deltaY;
+        return;
+    }
+
+    int width, height;
+    glfwGetWindowSize(window, &width, &height);
+
+    projectionMatrix = glm::perspective(glm::radians(FoV),
+        float(width)/float(height), 0.1f, 100.0f);
 }

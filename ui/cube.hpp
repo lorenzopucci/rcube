@@ -43,3 +43,44 @@ struct Color
     float blue;
     float alpha = 1.0f;
 };
+
+#ifdef 0
+
+enum Axis {
+        X = 0, Y = 1, Z = 2
+};
+
+struct Position
+{
+        Axis axis;
+        int direction; // either +1 or -1
+};
+
+struct StickerIndices
+{
+        unsigned int indices[6];
+};
+
+enum Stickers
+{
+        TL = 0, TC = 1, TR = 2,
+        CL = 3, CC = 4, CR = 5,
+        BL = 6, BC = 7, BR = 8
+};
+
+
+class Cube
+{
+public:
+        Cube(const Position& position);
+
+        void setStickersColors(char* stickerColors);
+        void bindToVertexArray(VertexArray* va);
+
+        void draw(VertexArray* va, Shader* shader);
+private:
+        char *facesColors;
+        float vertices[24];
+};
+
+#endif

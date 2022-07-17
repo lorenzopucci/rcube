@@ -1,29 +1,43 @@
-#include <unordered_map>
+#include <map>
 #include <vector>
 #include <string>
 
-#include <definitions.hpp>
+#include <utility.hpp>
 
-#ifndef RCUBE_CUBE
-#define RCUBE_CUBE
+#ifndef RCUBE
+#define RCUBE
 
 namespace rcube {
+    enum Axis
+    {
+        X = 0, Y = 1, Z = 2
+    };
+
+    struct Face
+    {
+        Face(char stdNotation);
+        Face(rcube::Axis axis, int direction);
+        rcube::Axis axis;
+        int direction; // eithher +1 or -1
+        char getStdNotation;
+    };
 
     class Move {
     public:
-        Move(char face, int direction);
+        Move(MoveFace face, MoveDirection direction);
+	Move(char face, int direction);
         /*
         * This class represents a single rotation of a cube's face.
-        * @param face: the face to rotate (expressed by number)
-        * @param direction: the direction of the rotation (+1, -1, 2)
+        * @param face: the face to rotate
+        * @param direction: the direction of the rotation
         */
 
         ~Move();
 
         std::string to_string();
 
-        char face; // the face to rotate (expressed by number)
-        int direction; // the direction of the rotation (+1, -1, 2)
+	MoveFace face; // the face to rotate (expressed by number)
+        MoveDirection direction; // the direction of the rotation
     };
 
     class Algorithm {
@@ -55,15 +69,19 @@ namespace rcube {
      * These structs are designed for internal use, only. However, if you want
      * to use them, they are quite self-explanatory.
     */
-    
-
+    struct Orientation
+    {
+        rcube::Axis axis;
+        int direction;
+    };
     struct Center {
         char color;
     };
 
     struct Sticker {
-        char color;
+        Color color;
         rcube::Center* face;
+        Orientation orientation;
     };
 
     struct Edge {
@@ -78,26 +96,28 @@ namespace rcube {
         rcube::Center* centers[4];
     };
 
+    struct Block
+    {
+        std::map<Orientation, Color> stickers; 
+    };
+
     class Cube {
-    /*
-     * This class represents a Rubik's cube.
-    */
     public:
-        Cube (char topColor = WHITE, char frontColor = GREEN);
+        Cube (Color topColor = WHITE, Color frontColor = GREEN);
         /*
          * Initializes a solved cube with the yellow face on top and the green
          * one in front.
         */
-        ~Cube ();
+        ~Cube() = default;
 
-        void performMove (rcube::Move* move);
+        void performMove (const rcube::Move& move);
         /*
          * Performs either a rotation of a cube's face or changes the
          * viewpoint.
          * @param move: the move to perform (refer to the Move class below)
         */
 
-        void performAlgorithm (rcube::Algorithm *algorithm);
+        void performAlgorithm (const rcube::Algorithm& algorithm);
         /*
          * Performs an algorithm (set of moves).
          * @param algorithm: the algorithm to perform (refer to the Algorithm
@@ -112,11 +132,14 @@ namespace rcube {
          * generated algorithm (default=nullptr)
         */
 
-        char** render ();
+        char** netRender();
         /*
-         * Returns a 2d array representing the cube. This is a much more
-         * convenient way of interfacing with the cube, rather than the
-         * unmanageable data structure that is used in the backend.
+         * Renders the cube as a 2D array.
+        */
+
+        rcube::Block** blockRender();
+        /*
+         * Renders the cube as an array of Blocks.
         */
 
         void display ();
@@ -125,12 +148,12 @@ namespace rcube {
         rcube::Center centers[6];
         rcube::Edge edges[12];
         rcube::Corner corners[8];
-        std::unordered_map<int, rcube::Center*> viewpoint;
-        std::unordered_map<rcube::Center*, rcube::AdjacentCenters> adjacentCentersPtr;
-        void changeViewpoint (rcube::Move* move);
-        void rotateLayer (rcube::Move* move);
-        int getCenterIndex (char color);
-        rcube::Center* getCenterPtr (char color);
+        std::map<Orientation, rcube::Center*> viewpoint;
+        std::map<rcube::Center*, rcube::AdjacentCenters> adjacentCentersPtr;
+        void changeViewpoint (const rcube::Move& move);
+        void rotateLayer (const rcube::Move& move);
+	//int getCenterIndex (char color);
+        //rcube::Center* getCenterPtr (char color);
         //void displayRaw ();
     };
 };

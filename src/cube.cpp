@@ -2,14 +2,13 @@
 #include <set>
 #include <cmath>
 #include <iostream>
-#include <unordered_map>
 #include <algorithm>
 #include <iterator>
 
-#include <new.hpp>
-#include <definitions.hpp>
+#include <rcube.hpp>
+#include <utility.hpp>
 
-std::unordered_map<char, int> moveToFace = {
+std::map<char, int> moveToFace = {
     {UP, TOP_FACE},
     {DOWN, BOTTOM_FACE},
     {FRONT, FRONT_FACE},
@@ -93,7 +92,51 @@ void rcube::Cube::displayRaw ()
 }
 */
 
-rcube::Cube::Cube (char topColor, char frontColor)
+rcube::Cube::Cube(Color topColor, Color frontColor)
+{
+    // Initialises the cube by assigning a value to:
+    // - edges, centers and corners
+    // - viewpoint
+    // - adjacentCentersPtr
+    
+    // template
+    CenterIndices adjacentCenters[6][4] = {
+        {GREEN_CENTER, ORANGE_CENTER, BLUE_CENTER, RED_CENTER},
+        {GREEN_CENTER, RED_CENTER, BLUE_CENTER, ORANGE_CENTER},
+        {WHITE_CENTER, RED_CENTER, YELLOW_CENTER, ORANGE_CENTER},
+        {WHITE_CENTER, ORANGE_CENTER, YELLOW_CENTER, RED_CENTER},
+        {WHITE_CENTER, BLUE_CENTER, YELLOW_CENTER, GREEN_CENTER},
+        {WHITE_CENTER, GREEN_CENTER, YELLOW_CENTER, BLUE_CENTER}
+    };
+
+    for (int i = 0; i < 6; ++i)
+        centers[i] = (rcube::Center) {(char)static_cast<Color>(i)}
+
+    for (int i = 0; i < 6; ++i)
+    {
+        std::pair<rcube::Center*, rcube::AdjacentCenters> toAdd(
+            &centers[i],
+            (rcube::AdjacentCenters){}
+        );
+        for (int x = 0; x < 4; ++x)
+        {
+            toAdd.second.centers[x] = &centers[adjacentCenters[i][x]];
+        }
+        adjacentCentersPtr.insert(toAdd);
+    }
+
+    viewpoint.insert(std::pair<rcube::Orientation, rcube::Center*> (
+        (rcube::Orientation) {X, 1},
+        getCenterPtr(topColor)
+    ));
+    viewpoint.insert(std::pair<rcube::Orientation, rcube::Center*> (
+        (rcube::Orientation) {Z, 1},
+        getCenterPtr(frontColor)
+    ));
+    
+}
+
+rcube::Cube::Cube (Color topColor, Color frontColor)
 {
     /*
      * Initialises the cube by assigning a value to:
@@ -117,7 +160,7 @@ rcube::Cube::Cube (char topColor, char frontColor)
     for (int i = 0; i < 6; ++i)
         centers[i] = (rcube::Center) {colorsList[i]};
 
-    // conver template to adjacentCentersPtr
+    // convert template to adjacentCentersPtr
     Center* tmp[4];
     for (int i = 0; i < 6; ++i)
     {

@@ -1,17 +1,11 @@
-/*
- * @file algorithm.cpp
- * @author Lorenzo Pucci
- * @date September 10, 2021
- * @brief File containing the definition of the Algorithm class
- */
+#include <string>
+#include <vector>
+#include <sstream>
 
- #include <string>
- #include <vector>
+#include <rcube.hpp>
+#include <utility.hpp>
 
- #include <new.hpp>
- #include <definitions.hpp>
-
-rcube::Algorithm::Algorithm(std::string fromString)
+rcube::Algorithm::Algorithm(const std::string& fromString)
 {
   for (int i = 0; i < fromString.length(); ++i) {
 
@@ -56,35 +50,11 @@ rcube::Algorithm::Algorithm(std::string fromString)
       
         ++i;
         break;
-/*
-      case '$':
 
-        std::string *algoName = new string("");
-        while (fromString[i] =! '$') {
-          algoName->push_back(fromString[i]);
-          ++i;
-        }
-
-        auto *stdAlgo = searchAlgorithm(algoName);
-        for (auto move = stdAlgo->begin(); move < stdAlgo->end(); ++move) {
-          this->algorithm.push_back(*move);
-        }
-        ++i;
-        break;
-      */
       default:
 
-          /*std::cerr << "Error: invalid algorithm: ";
-          for (int x = 0; x < fromString.length(); ++x) {
-            if (x == i) {
-              std::cerr << "\033[31m" << fromString[x] << "\033[0m";
-            } else {
-              std::cerr << fromString[x];
-            } 
-          }
-          std::cerr << std::endl;*/
-          this->algorithm.erase(this->algorithm.begin(), this->algorithm.end());
-          break;
+        throw std::invalid_argument("Invalid algorithm");
+        delete this;
      }
    }
  }
@@ -92,30 +62,46 @@ rcube::Algorithm::Algorithm(std::string fromString)
 
 std::string rcube::Algorithm::to_string()
 {
-  std::string stringAlgorithm;
+  std::stringstream ss;
 
   for (Move move : this->algorithm)
   {
-    stringAlgorithm.push_back(move.face);
+    ss << (char) move.face;
 
     switch (move.direction)
     {
-      case 1: continue; break;
-      case -1: stringAlgorithm.push_back('\''); break;
-      case 2: stringAlgorithm.push_back('2'); break;
+      case 1: break;
+      case -1: ss << '\''; break;
+      case 2: ss << '2'; break;
     }
   }
-  return stringAlgorithm;
+  return ss.str();
 }
 
 
-rcube::Algorithm::Algorithm(std::vector<Move> fromVector)
+rcube::Algorithm::Algorithm(const std::vector<rcube::Move>& fromVector)
 {
   this->algorithm = fromVector;
 }
 
-
-rcube::Algorithm::~Algorithm()
+rcube::Algorithm rcube::Algorithm::operator*(const int& factor)
 {
-  return;
+  rcube::Algorithm result = rcube::Algorithm(algorithm);
+
+  for (auto it = result.algorithm.begin(); it < result.algorithm.end(); ++it)
+  {
+    int newDirection = (factor * it->direction) % 4;
+    if (newDirection < -1) newDirection += 4;
+    if (newDirection == 0) result.algorithm.erase(it);
+
+    it->direction = static_cast<MoveDirection>(newDirection);
+  }
+  return result;
+}
+
+rcube::Algorithm rcube::Algorithm::operator+(const rcube::Algorithm a)
+{
+  std::vector<rcube::Move> dest = algorithm;
+  dest.insert(dest.end(), a.algorithm.begin(), a.algorithm.end());
+  return rcube::Algorithm(dest);
 }

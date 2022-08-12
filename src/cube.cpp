@@ -123,7 +123,7 @@ rcube::Cube::Cube(const Color& topColor, const Color& frontColor)
             viewpoint[{X, -1}] = adjToBottom.centers[(i + 3) % 4];
             break;
         }
-        assert(i == 3);
+        assert(i != 3);
     }
 
     // initialize edges and corners
@@ -334,19 +334,18 @@ rcube::Net rcube::Cube::netRender()
     return net;
 }
 
-rcube::Block** rcube::Cube::blockRender()
+rcube::BlockArray rcube::Cube::blockRender()
 {
-    rcube::Block** pattern; // to return
-    pattern = (rcube::Block**) malloc(sizeof(rcube::Block*) * 6);
+    rcube::BlockArray pattern; // to return
     
     int patternIndex = 0;
 
     for (int a = 0, d = -1; a < 3; d *= -1) // centers
     {
         rcube::Orientation o {static_cast<Axis>(a), d};
-        pattern[patternIndex] = new rcube::Block {rcube::Coordinates(o), {}};
+        pattern.blocks[patternIndex] = rcube::Block {rcube::Coordinates(o), {}};
 
-        pattern[patternIndex]->stickers.insert(pairOrientColor(
+        pattern.blocks[patternIndex].stickers.insert(pairOrientColor(
             o,
             viewpoint[o]->color
         ));
@@ -355,31 +354,33 @@ rcube::Block** rcube::Cube::blockRender()
         if (d == 1) a++;
     }
 
-    for (int i = 0; i < 12; ++i) // edges
+    for (int i = 0; i < 12; ++i)
     {
-        pattern[patternIndex] = new rcube::Block {edges[i].location, {}};
+        // edges
+        pattern.blocks[patternIndex] = rcube::Block {edges[i].location, {}};
         for (int k = 0; k < 2; ++k)
         {
-            pattern[patternIndex]->stickers.insert(pairOrientColor(
-                edges[i].stickers[i].orientation,
+            pattern.blocks[patternIndex].stickers.insert(pairOrientColor(
+                edges[i].stickers[k].orientation,
                 edges[i].stickers[k].color
             ));
         }
         patternIndex++;
-    }
 
-    for (int i = 0; i < 8; ++i) // corners
-    {
-        pattern[patternIndex] = new rcube::Block {corners[i].location, {}};
+        if (i >= 8) continue;
+
+        // corners
+        pattern.blocks[patternIndex] = rcube::Block {corners[i].location, {}};
         for (int k = 0; k < 3; ++k)
         {
-            pattern[patternIndex]->stickers.insert(pairOrientColor(
-                corners[i].stickers[i].orientation,
+            pattern.blocks[patternIndex].stickers.insert(pairOrientColor(
+                corners[i].stickers[k].orientation,
                 corners[i].stickers[k].color
             ));
         }
         patternIndex++;
     }
+    assert(patternIndex == 26);
 
     return pattern;
 }

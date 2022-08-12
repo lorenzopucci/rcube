@@ -90,8 +90,12 @@ namespace rcube
 
     struct Block
     {
-        rcube::Coordinates position;
+        rcube::Coordinates position = rcube::Coordinates(0, 0, 0);
         std::map<rcube::Orientation, Color> stickers;
+    };
+    struct BlockArray
+    {
+        rcube::Block blocks[26];
     };
 
     struct Face
@@ -200,7 +204,7 @@ namespace rcube
          * Renders the cube as a 2D array (see rcube::Net)
         */
 
-        rcube::Block** blockRender();
+        rcube::BlockArray blockRender();
         /*
          * Renders the cube as an array of Blocks.
         */

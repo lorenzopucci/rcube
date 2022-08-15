@@ -21,13 +21,14 @@ public:
 
     void computeFromInput(GLFWwindow* window);
     void scrollCallback(GLFWwindow *window, double deltaY);
+    void translate(int* coords);
 
-    glm::mat4 getMVP(GLFWwindow* window);
+    glm::mat4 getMVP();
 
 private:
     glm::mat4 viewMatrix;
     glm::mat4 projectionMatrix;
-    glm::mat4 modelMatrix = glm::mat4(1.0f);
+    glm::mat4 modelMatrix;
     float FoV = INITIAL_FOV;
     MouseCoordinates getMouseCoordinates(GLFWwindow* window);
 

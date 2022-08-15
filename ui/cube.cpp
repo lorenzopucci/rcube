@@ -1,7 +1,8 @@
-#ifdef 0
-
 #include <map>
-#include <iostream>
+#include <algorithm>
+
+#include <rcube.hpp>
+#include <utility.hpp>
 
 #include "cube.hpp"
 #include "renderer.hpp"
@@ -9,26 +10,23 @@
 #include "shader.hpp"
 #include "vertexBuffer.hpp"
 #include "indexBuffer.hpp"
+#include "camera.hpp"
 
 
-std::map<char, Color> colors
+std::map<Color, RGBA> colors
 {
-    {'w', {1.0f, 1.0f, 1.0f}},
-    {'y', {1.0f, 1.0f, 0.0f}},
-    {'g', {0.0f, 1.0f, 0.0f}},
-    {'b', {0.0f, 0.0f, 1.0f}},
-    {'r', {1.0f, 0.0f, 0.0f}},
-    {'o', {1.0f, 0.5f, 0.0f}}
+    {Color::White, {1.0f, 1.0f, 1.0f}},
+    {Color::Yellow, {1.0f, 1.0f, 0.0f}},
+    {Color::Green, {0.0f, 1.0f, 0.0f}},
+    {Color::Blue, {0.0f, 0.0f, 1.0f}},
+    {Color::Red, {1.0f, 0.0f, 0.0f}},
+    {Color::Orange, {1.0f, 0.5f, 0.0f}}
 };
 
-Cube::Cube(const Position& position)
-{
-    // TODO: init vertices
-}
 
-void Cube::setStickersColors(char* stickerColors)
+Cube::Cube(rcube::BlockArray blocks)
 {
-    this->stickerColors = stickerColors;
+    std::copy(blocks.blocks, blocks.blocks + 26, this->blocks);
 }
 
 void Cube::bindToVertexArray(VertexArray* va)
@@ -40,22 +38,28 @@ void Cube::bindToVertexArray(VertexArray* va)
     va->addBuffer(vb, layout);
 }
 
-void Cube::draw(VertexArray* va, Shader* shader)
+void Cube::draw(VertexArray* va, Shader* shader, Camera* camera)
 {
     shader->bind();
-
-    for (int face = 0; face < 9; ++face)
+    
+    for (int block = 0; block < 26; ++block)
     {
-        shader->setUniform4f("u_color",
-            colors[].red,
-            colors[].green,
-            colors[].blue,
-            colors[].alpha);
-            
-        IndexBuffer ib();
+        camera->translate(blocks[block].position.coords);
+        shader->setUniformMat4f("MVP", camera->getMVP());
 
-        render(va, &ib, shader);
+        for (int face = 0; face < 6; ++face)
+        {
+            rcube::Orientation o = {(Axis)(face % 3), (face % 2) * 2 - 1};
+            
+            shader->setUniform4f("u_color",
+                colors[blocks[block].stickers[o]].red,
+                colors[blocks[block].stickers[o]].green,
+                colors[blocks[block].stickers[o]].blue,
+                colors[blocks[block].stickers[o]].alpha);
+                
+            IndexBuffer* ib = new IndexBuffer(indices + face * 6, 6);
+
+            render(va, ib, shader);
+        }
     }
 }
-
-#endif

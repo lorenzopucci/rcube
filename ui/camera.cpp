@@ -19,6 +19,8 @@ Camera::Camera(GLFWwindow* window)
         glm::vec3(0.0f, 0.0f, 0.0f),
         glm::vec3(0.0f, 1.0f, 0.0f)
     );
+
+    modelMatrix = glm::mat4(1.0f);
 }
 
 MouseCoordinates Camera::getMouseCoordinates(GLFWwindow* window)
@@ -68,9 +70,17 @@ void Camera::computeFromInput(GLFWwindow* window)
         glfwSetWindowShouldClose(window, true);
 }
 
-glm::mat4 Camera::getMVP(GLFWwindow* window)
+void Camera::translate(int* coords)
 {
-    computeFromInput(window);
+    modelMatrix = glm::translate(glm::mat4(), glm::vec3(
+        static_cast<float>(*coords),
+        static_cast<float>(*(coords + 1)),
+        static_cast<float>(*(coords + 2))
+    ));
+}
+
+glm::mat4 Camera::getMVP()
+{
     return projectionMatrix * viewMatrix * modelMatrix;
 }
 

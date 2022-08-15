@@ -3,6 +3,9 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
+#include <rcube.hpp>
+#include <utility.hpp>
+
 #include "mainloop.hpp"
 
 
@@ -46,7 +49,7 @@ int main ()
 
     glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
 
-    mainLoop(window);
+    mainloop(window, new rcube::Cube());
 
     return 0;
 }

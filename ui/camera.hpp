@@ -21,7 +21,9 @@ public:
 
     void computeFromInput(GLFWwindow* window);
     void scrollCallback(GLFWwindow *window, double deltaY);
-    void translate(int* coords);
+    void arrangeBlock(int* coords);
+    void scale(const float &factor);
+    void resetTransformations();
 
     glm::mat4 getMVP();
 

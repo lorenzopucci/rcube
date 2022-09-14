@@ -24,42 +24,49 @@ std::map<Color, RGBA> colors
 };
 
 
-Cube::Cube(rcube::BlockArray blocks)
+Cube::Cube(const rcube::BlockArray &blocks)
 {
-    std::copy(blocks.blocks, blocks.blocks + 26, this->blocks);
+    this->update(blocks);
 }
 
-void Cube::bindToVertexArray(VertexArray* va)
+void Cube::update(const rcube::BlockArray &blocks)
 {
-    VertexBufferLayout layout;
-    layout.push<float>(3);
-
-    VertexBuffer vb(vertices, 8 * 3 * sizeof(float));
-    va->addBuffer(vb, layout);
+    this->blocks = blocks;
 }
 
 void Cube::draw(VertexArray* va, Shader* shader, Camera* camera)
 {
-    shader->bind();
-    
+    // render black inner cube
+    camera->scale(3.19f);
+    shader->setUniformMat4f("MVP", camera->getMVP());
+    shader->setUniform4f("u_color", 0.0f, 0.0f, 0.0f, 1.0f);
+
+    IndexBuffer *ib = new IndexBuffer(indices, 36);
+    render(va, ib, shader);
+    delete ib;
+
+    camera->resetTransformations();
+
+    // render all 26 blocks
     for (int block = 0; block < 26; ++block)
     {
-        camera->translate(blocks[block].position.coords);
+        camera->arrangeBlock(blocks.blocks[block].position.coords);
         shader->setUniformMat4f("MVP", camera->getMVP());
 
         for (int face = 0; face < 6; ++face)
         {
             rcube::Orientation o = {(Axis)(face % 3), (face % 2) * 2 - 1};
-            
-            shader->setUniform4f("u_color",
-                colors[blocks[block].stickers[o]].red,
-                colors[blocks[block].stickers[o]].green,
-                colors[blocks[block].stickers[o]].blue,
-                colors[blocks[block].stickers[o]].alpha);
-                
-            IndexBuffer* ib = new IndexBuffer(indices + face * 6, 6);
 
-            render(va, ib, shader);
+            if (blocks.blocks[block].stickers.find(o) ==
+                blocks.blocks[block].stickers.end()) continue;
+            
+            RGBA col = colors[blocks.blocks[block].stickers[o]];
+            shader->setUniform4f("u_color", col.red, col.green, col.blue,
+                col.alpha);
+                
+            IndexBuffer ib(indices + (face * 6), 6);
+
+            render(va, &ib, shader);
         }
     }
 }

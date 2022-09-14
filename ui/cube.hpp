@@ -11,7 +11,7 @@
 #include "shader.hpp"
 #include "camera.hpp"
 
-static const float vertices[] = {
+const float vertices[] = {
         -0.5f, -0.5f, -0.5f,
         -0.5f, -0.5f, 0.5f,
         -0.5f, 0.5f, -0.5f,
@@ -19,21 +19,21 @@ static const float vertices[] = {
         0.5f, -0.5f, -0.5f,
         0.5f, -0.5f, 0.5f,
         0.5f, 0.5f, -0.5f,
-        0.5f, 0.5f, 0.5f
+        0.5f, 0.5f, 0.5f,
 };
 
-static const unsigned int indices[] = {
+const unsigned int indices[] = {
         1, 3, 0, // Left
         3, 0, 2,
 
         3, 2, 6, // Top
-        2, 6, 7,
+        3, 6, 7,
 
         0, 4, 2, // Back
         4, 2, 6,
 
         5, 7, 6, // Right
-        7, 6, 4,
+        5, 6, 4,
 
         0, 1, 4, // Bottom
         1, 4, 5,
@@ -53,11 +53,11 @@ struct RGBA
 class Cube
 {
 public:
-        Cube(rcube::BlockArray blocks);
+        Cube(const rcube::BlockArray &blocks);
 
-        void bindToVertexArray(VertexArray* va);
+        void update(const rcube::BlockArray &blocks);
 
         void draw(VertexArray* va, Shader* shader, Camera* camera);
 private:
-        rcube::Block blocks[26];
+        rcube::BlockArray blocks;
 };

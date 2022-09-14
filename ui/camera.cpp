@@ -70,13 +70,25 @@ void Camera::computeFromInput(GLFWwindow* window)
         glfwSetWindowShouldClose(window, true);
 }
 
-void Camera::translate(int* coords)
+void Camera::arrangeBlock(int* coords)
 {
-    modelMatrix = glm::translate(glm::mat4(), glm::vec3(
-        static_cast<float>(*coords),
-        static_cast<float>(*(coords + 1)),
-        static_cast<float>(*(coords + 2))
+    // multiplied by 1.1f to leave a small gap between blocks
+    modelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(
+        static_cast<float>(*coords) * 1.1f,
+        static_cast<float>(*(coords + 1)) * 1.1f,
+        static_cast<float>(*(coords + 2)) * 1.1f
     ));
+}
+
+void Camera::scale(const float &factor)
+{
+    modelMatrix = glm::scale(glm::mat4(1.0f),
+        glm::vec3(factor, factor, factor));
+}
+
+void Camera::resetTransformations()
+{
+    modelMatrix = glm::mat4(1.0f);
 }
 
 glm::mat4 Camera::getMVP()

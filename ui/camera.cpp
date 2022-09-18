@@ -2,7 +2,41 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+#include <math.h>
+#include <algorithm>
+
 #include "camera.hpp"
+
+
+Rotation Arcball::update(const MouseCoordinates &current)
+{
+    this->prevMouseCoords = this->currMouseCoords;
+    this->currMouseCoords = current;
+
+    glm::vec3 currVec = getVector(currMouseCoords.x, currMouseCoords.y);
+    glm::vec3 prevVec = getVector(prevMouseCoords.x, prevMouseCoords.y);
+
+    float angle = SPEED * acos(std::min(1.0f, glm::dot(prevVec, currVec)));
+    glm::vec3 axis = glm::cross(prevVec, currVec);
+
+    return {angle, axis};
+}
+
+glm::vec3 Arcball::getVector(const double &x, const double &y)
+{
+    glm::vec3 vector = glm::vec3(
+        2 * x / screenWidth - 1.0f,
+        -2 * y / screenHeight + 1.0f,
+        0.0f
+    );
+
+    float zSquared = pow(vector.x, 2) + pow(vector.y, 2);
+
+    if (zSquared > 1.0f) return glm::normalize(vector);
+
+    vector.z = sqrt(1.0f - zSquared);
+    return vector;
+}
 
 Camera::Camera(GLFWwindow* window)
 {
@@ -39,32 +73,24 @@ void Camera::computeFromInput(GLFWwindow* window)
 
     if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
     {
-        if (isRotating)
+        if (arcball.on)
         {
-            MouseCoordinates currPos = getMouseCoordinates(window);
-            double deltaX = currPos.x - previousMousePos.x;
-            double deltaY =currPos.y - previousMousePos.y;
-            previousMousePos = currPos;
+            Rotation rot = arcball.update(getMouseCoordinates(window));
 
-            int width, height;
-            glfwGetWindowSize(window, &width, &height);
-
-            float delta_hAngle = MOUSE_SPEED * deltaTime * float(deltaX);
-            float delta_vAngle = MOUSE_SPEED * deltaTime * float(deltaY);
-
-            viewMatrix = glm::rotate(viewMatrix,
-                delta_hAngle, glm::vec3(0.0f, 1.0f, 0.0f));
-            viewMatrix = glm::rotate(viewMatrix,
-                delta_vAngle, glm::vec3(1.0f, 0.0f, 0.0f));
+            if (rot.axis.x != 0.0f || rot.axis.y != 0.0f || rot.axis.z != 0.0f)
+            {
+                glm::vec3 axis = glm::inverse(glm::mat3(viewMatrix)) * rot.axis;
+                viewMatrix = glm::rotate(viewMatrix, rot.angle, axis);
+            }
         }
         else
         {
-            isRotating = true;
-            previousMousePos = getMouseCoordinates(window);
+            arcball.on = true;
+            arcball.currMouseCoords = getMouseCoordinates(window);
         }
     }
     if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_RELEASE)
-        isRotating = false;
+        arcball.on = false;
     
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
@@ -93,7 +119,7 @@ void Camera::resetTransformations()
 
 glm::mat4 Camera::getMVP()
 {
-    return projectionMatrix * viewMatrix * modelMatrix;
+    return projectionMatrix * viewMatrix *  modelMatrix;
 }
 
 void Camera::scrollCallback(GLFWwindow *window, double deltaY)

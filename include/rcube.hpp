@@ -159,7 +159,7 @@ namespace rcube
         * @param a: the second addend
         */
 
-        std::string to_string();
+        std::string to_string() const;
         /*
         * Returns string in the standard notation (e.g. "RUR'U'").
         */

@@ -14,12 +14,15 @@ bool rcube::Orientation::operator==(const rcube::Orientation& a) const
 
 void rcube::Orientation::rotate(const Axis& rotAxis, int step)
 {
-    step = ((step % 4) + 4) % 4; // sanitize input
+    // reduce input to {-2, -1, 0, 1, 2}
+    step = step % 4;
+    if (abs(step) == 3) step /= -abs(step);
+
     Axis lastAxis = axis;
 
-    if (rotAxis == axis || step % 4 == 0) return;
+    if (rotAxis == axis || step == 0) return;
 
-    if (step % 2 == 0)
+    if (abs(step) == 2)
     {
         direction *= -1;
         return;
@@ -35,9 +38,19 @@ void rcube::Orientation::rotate(const Axis& rotAxis, int step)
         }
     }
 
-    // direction changes happen to occur when the difference between the indices
-    // of axis and lastAxis is 1
-    if ((axis - lastAxis + 3) % 3 == 1) direction *= -1;
+    if (step == 1)
+    {
+        // direction changes happen to occur when the difference between the
+        // indices of axis and lastAxis is 1
+        if ((axis - lastAxis + 3) % 3 == 1) direction *= -1;
+        return;
+    }
+    else if (step == -1)
+    {
+        // direction changes happen to occur when the difference between the
+        // indices of axis and lastAxis is -1
+        if ((axis - lastAxis + 3) % 3 == 2) direction *= -1;
+    }
 }
 
 rcube::Coordinates::Coordinates(const rcube::Orientation& o1)
@@ -115,13 +128,13 @@ rcube::Coordinates2D::Coordinates2D()
 }
 
 rcube::Coordinates2D::Coordinates2D(const int& x, const int& y)
+    : coords({x, y})
 {
-    coords[Axis::X] = x;
-    coords[Axis::Y] = y;
+    return;
 }
 
 rcube::Coordinates2D::Coordinates2D(const rcube::Coordinates& coords3D,
-            const rcube::Orientation& o)
+    const rcube::Orientation& o)
 {
     coords[Axis::X] = coords3D.coords[(o.axis + 1) % 3];
     coords[Axis::Y] = coords3D.coords[(o.axis + 2) % 3];

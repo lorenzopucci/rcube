@@ -22,7 +22,7 @@ rcube::Algorithm::Algorithm(const std::string& fromString)
       case ROTATE_X:
       case ROTATE_Y:
       case ROTATE_Z:
-
+      {
         switch (fromString[i+1])
         {
           case '\'':
@@ -40,6 +40,7 @@ rcube::Algorithm::Algorithm(const std::string& fromString)
             break;
         }
         break;
+      }
 
       case ' ':
       case '(':
@@ -47,24 +48,25 @@ rcube::Algorithm::Algorithm(const std::string& fromString)
       case '[':
       case ']':
       case '\t':
-      
-        ++i;
+      {
         break;
+      }
 
       default:
-
+      {
         throw std::invalid_argument("Invalid algorithm");
         delete this;
+      }
      }
    }
  }
 
 
-std::string rcube::Algorithm::to_string()
+std::string rcube::Algorithm::to_string() const
 {
   std::stringstream ss;
 
-  for (Move move : this->algorithm)
+  for (rcube::Move move : algorithm)
   {
     ss << (char) move.face;
 

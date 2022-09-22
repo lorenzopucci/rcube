@@ -236,7 +236,6 @@ void rcube::Cube::rotateLayer(const rcube::Move& move)
 {
     rcube::Orientation o = move.getAffectedFace();
     int step = o.direction * move.direction;
-    rcube::Center* affectedFace = viewpoint[o];
 
     for (int i = 0; i < 12; ++i)
     {
@@ -260,11 +259,11 @@ void rcube::Cube::rotateLayer(const rcube::Move& move)
             corners[i].location.rotate(o.axis, step);
             for (int k = 0; k < 3; ++k)
             {
-                if (edges[i].stickers[k].orientation == o) continue;
+                if (corners[i].stickers[k].orientation == o) continue; 
 
                 corners[i].stickers[k].orientation.rotate(o.axis, step);
                 corners[i].stickers[k].face =
-                    viewpoint[edges[i].stickers[k].orientation];
+                    viewpoint[corners[i].stickers[k].orientation];
             }
         }
     }

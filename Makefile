@@ -5,15 +5,21 @@ TEST_DIR := test
 UI_DIR := ui
 
 CC := g++
-CFLAGS := -I$(INCLUDE_DIR) -fpermissive -g
-TARGET := $(BIN_DIR)/rubiks_cube.o
+CFLAGS := -I$(INCLUDE_DIR) -fpermissive
+
+ifeq ($(DEBUG),true)
+	CFLAGS := $(CFLAGS) -g
+endif
+
 TEST_TARGET := $(BIN_DIR)/test.o
 UI_TARGET := $(BIN_DIR)/ui.o
 
 FILES := $(wildcard $(SRC_DIR)/*.cpp)
 OBJECTS := $(patsubst $(SRC_DIR)/%.cpp,$(BIN_DIR)/%.o,$(FILES))
+
 TEST_FILES := $(wildcard $(TEST_DIR)/*.cpp)
 TEST_OBJECTS := $(patsubst $(TEST_DIR)/%.cpp,$(BIN_DIR)/test_%.o,$(TEST_FILES))
+
 UI_FILES := $(wildcard $(UI_DIR)/*.cpp)
 UI_OBJECTS := $(patsubst $(UI_DIR)/%.cpp,$(BIN_DIR)/ui_%.o,$(UI_FILES))
 
@@ -24,10 +30,6 @@ UI_LD_FLAGS := $(shell pkg-config --libs $(UI_LD_LIBS))
 
 # create directories if they don't exist
 $(shell if [ ! -d "${BIN_DIR}" ]; then mkdir -p ${BIN_DIR}; fi;)
-
-
-$(TARGET): $(OBJECTS)
-	$(CC) $(CFLAGS) -o $@ $^
 
 $(TEST_TARGET): $(OBJECTS) $(TEST_OBJECTS)
 	$(CC) $(CFLAGS) -o $@ $^
@@ -49,9 +51,9 @@ $(BIN_DIR)/ui_%.o: $(UI_DIR)/%.cpp
 	$(CC) -c $(CFLAGS) -c $^ -o $@
 
 
-.PHONY: all clean clean-all test ui
+.PHONY: all clean clean-all test ui lib
 
-all: $(TARGET)
+lib: $(OBJECTS)
 
 clean:
 	rm $(BIN_DIR)/*
@@ -61,3 +63,5 @@ clean-all: clean
 test: $(TEST_TARGET)
 
 ui: $(UI_TARGET)
+
+all: $(OBJECTS) $(TEST_TARGET) $(UI_TARGET)

@@ -9,23 +9,26 @@
 #include <rcube.hpp>
 #include <utility.hpp>
 
-using pairOrientCenter = std::pair<rcube::Orientation, rcube::Center*>;
 using pairCoords2DColor = std::pair<rcube::Coordinates2D, Color>;
 using pairOrientColor = std::pair<rcube::Orientation, Color>;
 
 
-int rcube::Cube::getCenterIndex (const Color& color)
+rcube::Center* rcube::Cube::getCenterFrom(const Color &color)
 {
-    for (int index = 0; index < 6; ++index)
+    for (int i = 0; i < 6; ++i)
     {
-        if (centers[index].color == color)
-            return index;
+        if (centers[i].color == color) return centers + i;
     }
+    assert(false);
 }
 
-rcube::Center* rcube::Cube::getCenterPtr (const Color& color)
+rcube::Center* rcube::Cube::getCenterFrom(const rcube::Coordinates &coords)
 {
-    return centers + getCenterIndex(color);
+    for (int i = 0; i < 6; ++i)
+    {
+        if (centers[i].location == coords) return centers + i;
+    }
+    assert(false);
 }
 
 std::string colorize (const char& color)
@@ -45,15 +48,16 @@ std::string colorize (const char& color)
 void rcube::Cube::display ()
 {
     rcube::Net toDisplay = netRender();
-    for (int i = 0; i < 6; ++i)
+    for (rcube::Orientation o : rcube::Orientation::iterate())
     {
-        std::cout << "\nFace at index: " << i << std::endl;
+        std::cout << "\nFace at orientation (" << o.axis << "; " <<
+            o.direction << "):" << std::endl;
 
         for (int y = 1; y >= -1; --y)
         {
             for (int x = -1; x <= 1; ++x)
             {
-                std::cout << colorize((char)toDisplay.faces[i].stickers[
+                std::cout << colorize((char)toDisplay.faces[o].stickers[
                     {x, y}]);
             }
             std::cout << std::endl;
@@ -63,104 +67,79 @@ void rcube::Cube::display ()
 
 rcube::Cube::Cube(const Color& topColor, const Color& frontColor)
 {
-    // Initializes the cube by assigning a value to:
-    // - edges, centers and corners
-    // - viewpoint
-    // - adjacentCentersPtr
-    
-    // template
-    CenterId adjacentCenters[6][4] = {
-        {CenterId::Green, CenterId::Orange, CenterId::Blue, CenterId::Red},
-        {CenterId::Green, CenterId::Red, CenterId::Blue, CenterId::Orange},
-        {CenterId::White, CenterId::Red, CenterId::Yellow, CenterId::Orange},
-        {CenterId::White, CenterId::Orange, CenterId::Yellow, CenterId::Red},
-        {CenterId::White, CenterId::Blue, CenterId::Yellow, CenterId::Green},
-        {CenterId::White, CenterId::Green, CenterId::Yellow, CenterId::Blue}
-    };
+    // centers, edges and corners are first initialized in the default position
+    // (top: white, front: green), then the cube is rotated until the desired
+    // position is reached
 
-    // initialize centers
-    char colors[6] = {'w', 'y', 'g', 'b', 'r', 'o'};
-    for (int i = 0; i < 6; ++i)
-        centers[i] = (rcube::Center) {static_cast<Color>(colors[i])};
+    std::vector<rcube::Orientation> orients = rcube::Orientation::iterate();
+    char defaultColors[] = {'o', 'r', 'y', 'w', 'b', 'g'};
 
-    // initialize adjacentCentersPtr
     for (int i = 0; i < 6; ++i)
     {
-        std::pair<rcube::Center*, rcube::AdjacentCenters> toAdd(
-            centers + i,
-            (rcube::AdjacentCenters) {{}}
-        );
-        for (int x = 0; x < 4; ++x)
-        {
-            toAdd.second.centers[x] = centers + (int)adjacentCenters[i][x];
-        }
-        adjacentCentersPtr.insert(toAdd);
-    }
-
-    // initialize viewpoint
-    viewpoint.insert(pairOrientCenter({Y, 1}, getCenterPtr(topColor)));
-    viewpoint.insert(pairOrientCenter({Z, 1}, getCenterPtr(frontColor)));
-
-    rcube::AdjacentCenters adjToFront = adjacentCentersPtr[viewpoint[{Z, 1}]];
-
-    for (int i = 0; i < 4; ++i) // find bottom center
-    {
-        if (adjToFront.centers[i] == viewpoint[{Y, 1}])
-        {
-            viewpoint[{Y, -1}] = adjToFront.centers[(i + 2) % 4];
-            break;
-        }
-    }
-
-    rcube::AdjacentCenters adjToBottom = adjacentCentersPtr[viewpoint[{Y, -1}]];
-
-    for (int i = 0; i < 4; ++i)
-    {
-        if (adjToBottom.centers[i] == viewpoint[{Z, 1}])
-        {
-            viewpoint[{X, 1}] = adjToBottom.centers[(i + 1) % 4];
-            viewpoint[{Z, -1}] = adjToBottom.centers[(i + 2) % 4];
-            viewpoint[{X, -1}] = adjToBottom.centers[(i + 3) % 4];
-            break;
-        }
-        assert(i != 3);
+        centers[i] = rcube::Center((Color)defaultColors[i], orients[i]);
     }
 
     // initialize edges and corners
-    int edgesIndex = 0; // index in edges array
-    int cornersIndex = 0; // index in corner array
+    int eIdx = 0; // index in edges array
+    int cIdx = 0; // index in corner array
+    rcube::Orientation o[3];
 
     for (int a1 = 0, d1 = -1; a1 < 2; d1 *= -1)
     {
-        rcube::Orientation o1 = {(Axis)a1, d1};
-        rcube::Orientation o3 = {(Axis)((a1 + 1) % 2), d1 * (-1 + a1 * 2)};
+        o[0] = {(Axis)a1, d1};
+        o[2] = {(Axis)((a1 + 1) % 2), d1 * (-1 + a1 * 2)};
 
         for (int d2 = -1; d2 < 2; d2 += 2)
         {
-            rcube::Orientation o2 = {Axis::Z, d2};
+            o[1] = {Axis::Z, d2};
 
-            Edge edge = {{}, rcube::Coordinates(o1, o2)};
-            edge.stickers[0] = {viewpoint[o1]->color, viewpoint[o1], o1};
-            edge.stickers[1] = {viewpoint[o2]->color, viewpoint[o2], o2};
-            edges[edgesIndex] = edge;
-            edgesIndex++;
+            edges[eIdx].location = rcube::Coordinates(o[0], o[1]);
+            for (int i = 0; i <= 1; ++i)
+            {
+                edges[eIdx].stickers[i] = {
+                    getCenterFrom(rcube::Coordinates(o[i]))->color, o[i]};
+            }
 
-            Corner corner = {{}, rcube::Coordinates(o1, o2, o3)};
-            corner.stickers[0] = edge.stickers[0];
-            corner.stickers[1] = edge.stickers[1];
-            corner.stickers[2] = {viewpoint[o3]->color, viewpoint[o3], o3};
-            corners[cornersIndex] = corner;
-            cornersIndex++;
+            corners[cIdx].location = rcube::Coordinates(o[0], o[1], o[2]);
+            for (int i = 0; i <= 1; ++i)
+                corners[cIdx].stickers[i] = edges[eIdx].stickers[i];
+            corners[cIdx].stickers[2] = {
+                getCenterFrom(rcube::Coordinates(o[2]))->color, o[2]};
+            cIdx++;
+            eIdx++;
         }
 
-        Edge edge = {{}, rcube::Coordinates(o1, o3)};
-        edge.stickers[0] = {viewpoint[o1]->color, viewpoint[o1], o1};
-        edge.stickers[1] = {viewpoint[o3]->color, viewpoint[o3], o3};
-        edges[edgesIndex] = edge;
-        edgesIndex++;
+        edges[eIdx].location = rcube::Coordinates(o[0], o[2]);
+        for (int i = 0; i <= 1; ++i)
+        {
+            edges[eIdx].stickers[i] = {
+                getCenterFrom(rcube::Coordinates(o[i*2]))->color, o[i*2]};
+        }
+        eIdx++;
 
         if (d1 == 1) a1++;
     }
+
+    // rotate the cube to the desired position
+    if (getCenterFrom(topColor)->location.coords[Axis::X] != 0)
+        this->performMove(rcube::Move(MoveFace::ROTATE_Z, MoveDirection::CW));
+
+    for (int i = 0; i < 4; ++i)
+    {
+        if (getCenterFrom(rcube::Coordinates(0, 1, 0))->color == topColor)
+            break;
+        this->performMove(rcube::Move(MoveFace::ROTATE_X, MoveDirection::CW));
+    }
+
+    for (int i = 0; i < 4; ++i)
+    {
+        if (getCenterFrom(rcube::Coordinates(0, 0, 1))->color == frontColor)
+            break;
+        this->performMove(rcube::Move(MoveFace::ROTATE_Y, MoveDirection::CW));
+    }
+
+    assert(getCenterFrom(rcube::Coordinates(0, 0, 1))->color == frontColor
+        && getCenterFrom(rcube::Coordinates(0, 1, 0))->color == topColor);
 }
 
 void rcube::Cube::performMove (const rcube::Move& move)
@@ -199,36 +178,25 @@ void rcube::Cube::performMove (const rcube::Move& move)
 
 void rcube::Cube::changeViewpoint (const rcube::Move& move)
 {
-    Axis affectedAxis[2]; // all the axis apart form the rotation one
-    for (int i = 0; i < 2; ++i)
-        affectedAxis[i] = (Axis)(((int)move.axis + i + 1) % 3);
-
-    if (move.direction == MoveDirection::DOUBLE)
+    for (int i = 0; i < 12; ++i)
     {
-        // maintain same axis but swap direction
-        for (int i = 0; i < 2; ++i)
+        edges[i].location.rotate(move.axis, move.direction);
+        for (int k = 0; k < 2; ++k)
         {
-            rcube::Center* tmp = viewpoint[{affectedAxis[i], -1}];
-            viewpoint[{affectedAxis[i], -1}] = viewpoint[{affectedAxis[i], 1}];
-            viewpoint[{affectedAxis[i], 1}] = tmp;
+            edges[i].stickers[k].orientation.rotate(move.axis, move.direction);
         }
-    }
-    else
-    {
-        for (int i = 0; i < 4; ++i)
+
+        if (i >= 8) continue;
+
+        corners[i].location.rotate(move.axis, move.direction);
+        for (int k = 0; k < 3; ++k)
         {
-            // at each iteration, swap the faces between different axis at
-            // the same/oppposite directions according to move.direction
-
-            int dir = (i % 2) * 2 - 1;
-            int a = i % 3;
-            if (a != 0) a = 1;
-
-            rcube::Center* tmp = viewpoint[{affectedAxis[a], dir}];
-            viewpoint[{affectedAxis[a], dir}] =
-                viewpoint[{affectedAxis[(a + 1) % 2], move.direction * dir}];
-            viewpoint[{affectedAxis[(a + 1) % 2], move.direction * dir}] = tmp;
+            corners[i].stickers[k].orientation.rotate(move.axis, move.direction);
         }
+
+        if (i >= 6) continue;
+        centers[i].location.rotate(move.axis, move.direction);
+        centers[i].orientation.rotate(move.axis, move.direction);
     }
 }
 
@@ -247,8 +215,6 @@ void rcube::Cube::rotateLayer(const rcube::Move& move)
                 if (edges[i].stickers[k].orientation == o) continue;
 
                 edges[i].stickers[k].orientation.rotate(o.axis, step);
-                edges[i].stickers[k].face =
-                    viewpoint[edges[i].stickers[k].orientation];
             }
         }
 
@@ -262,8 +228,6 @@ void rcube::Cube::rotateLayer(const rcube::Move& move)
                 if (corners[i].stickers[k].orientation == o) continue; 
 
                 corners[i].stickers[k].orientation.rotate(o.axis, step);
-                corners[i].stickers[k].face =
-                    viewpoint[corners[i].stickers[k].orientation];
             }
         }
     }
@@ -279,22 +243,21 @@ rcube::Net rcube::Cube::netRender()
 {
     rcube::Net net; // to return
 
-    std::map<rcube::Center*, int> faceMapping; // face: index in net.faces
-    for (int a = 0, d = 1; a < 3; d *= -1)
+    for (int i = 0; i < 6; ++i)
     {
-        rcube::Orientation o = {static_cast<Axis>(a), d};
-        rcube::Center* center = viewpoint[o];
-        int index = faceMapping.size();
+        rcube::Orientation orient = centers[i].orientation;
 
-        faceMapping[center] = index;
-
-        // insert center
-        net.faces[index].stickers.insert(pairCoords2DColor(
-            rcube::Coordinates2D(rcube::Coordinates(o), o),
-            center->color
+        // initialize face
+        net.faces.insert(std::pair<rcube::Orientation, rcube::Face>(
+            orient,
+            (rcube::Face){}
         ));
 
-        if (d == -1) a++;
+        // insert center
+        net.faces[orient].stickers.insert(pairCoords2DColor(
+            rcube::Coordinates2D(centers[i].location, orient),
+            centers[i].color
+        ));
     }
 
     for (int i = 0; i < 12; ++i)
@@ -304,11 +267,10 @@ rcube::Net rcube::Cube::netRender()
 
         for (int k = 0; k < 2; ++k) // iterate through stickers
         {
-            int index = faceMapping[edges[i].stickers[k].face];
-            rcube::Orientation o = edges[i].stickers[k].orientation;
+            rcube::Orientation orient = edges[i].stickers[k].orientation;
 
-            net.faces[index].stickers.insert(pairCoords2DColor(
-                rcube::Coordinates2D(coords3D, o),
+            net.faces[orient].stickers.insert(pairCoords2DColor(
+                rcube::Coordinates2D(coords3D, orient),
                 edges[i].stickers[k].color
             ));
         }
@@ -320,11 +282,10 @@ rcube::Net rcube::Cube::netRender()
 
         for (int k = 0; k < 3; ++k) // iterate through stickers
         {
-            int index = faceMapping[corners[i].stickers[k].face];
-            rcube::Orientation o = corners[i].stickers[k].orientation;
+            rcube::Orientation orient = corners[i].stickers[k].orientation;
 
-            net.faces[index].stickers.insert(pairCoords2DColor(
-                rcube::Coordinates2D(coords3D, o),
+            net.faces[orient].stickers.insert(pairCoords2DColor(
+                rcube::Coordinates2D(coords3D, orient),
                 corners[i].stickers[k].color
             ));
         }
@@ -339,18 +300,15 @@ rcube::BlockArray rcube::Cube::blockRender()
     
     int patternIndex = 0;
 
-    for (int a = 0, d = -1; a < 3; d *= -1) // centers
+    for (int i = 0; i < 6; ++i)
     {
-        rcube::Orientation o {static_cast<Axis>(a), d};
-        pattern.blocks[patternIndex] = rcube::Block {rcube::Coordinates(o), {}};
-
+        rcube::Orientation orient = centers[i].orientation;
+        pattern.blocks[patternIndex] = {rcube::Coordinates(orient), {}};
         pattern.blocks[patternIndex].stickers.insert(pairOrientColor(
-            o,
-            viewpoint[o]->color
+            orient,
+            centers[i].color
         ));
-        
         patternIndex++;
-        if (d == 1) a++;
     }
 
     for (int i = 0; i < 12; ++i)

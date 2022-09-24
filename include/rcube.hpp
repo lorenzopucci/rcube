@@ -24,6 +24,11 @@ namespace rcube
         * @param step: the number of 90° rotations to apply (clockwise relatively
         * to someone looking at the origin from the positive side of the axis)
         */
+
+       static std::vector<rcube::Orientation> iterate();
+       /*
+       * Returns a vector containing all 6 possible orientations
+       */
     };
 
     struct Coordinates // used to store the position of a corner/edge
@@ -36,6 +41,8 @@ namespace rcube
             const rcube::Orientation& o3); // constructor for corners
         
         int coords[3];
+
+        bool operator==(const rcube::Coordinates &a) const;
 
         void rotate(const Axis& axis, int step);
         /*
@@ -64,24 +71,31 @@ namespace rcube
         int coords[2];
     };
 
-    struct Center {
-        Color color;
-    };
 
-    struct Sticker {
+    struct Sticker
+    {
         Color color;
-        rcube::Center* face;
         rcube::Orientation orientation;
     };
-
-    struct Edge {
-        rcube::Sticker stickers[2];
+    struct PieceTemplate
+    {
         rcube::Coordinates location = rcube::Coordinates(0, 0, 0);
     };
 
-    struct Corner {
+    struct Center : PieceTemplate, Sticker
+    {
+        Center() = default;
+        Center(const Color &color, const rcube::Orientation &o);
+    };
+
+    struct Edge : PieceTemplate
+    {
+        rcube::Sticker stickers[2];
+    };
+
+    struct Corner : PieceTemplate
+    {
         rcube::Sticker stickers[3];
-        rcube::Coordinates location = rcube::Coordinates(0, 0, 0);
     };
 
     struct AdjacentCenters {
@@ -104,7 +118,7 @@ namespace rcube
     };
     struct Net
     {
-        rcube::Face faces[6];
+        std::map<rcube::Orientation, rcube::Face> faces;
     };
 
     class Move {
@@ -215,12 +229,10 @@ namespace rcube
         rcube::Center centers[6];
         rcube::Edge edges[12];
         rcube::Corner corners[8];
-        std::map<Orientation, rcube::Center*> viewpoint;
-        std::map<rcube::Center*, rcube::AdjacentCenters> adjacentCentersPtr;
         void changeViewpoint (const rcube::Move& move);
         void rotateLayer (const rcube::Move& move);
-	    int getCenterIndex (const Color& color);
-        rcube::Center* getCenterPtr (const Color& color);
+        rcube::Center* getCenterFrom(const Color &color);
+        rcube::Center* getCenterFrom(const rcube::Coordinates &coords);
     };
 };
 

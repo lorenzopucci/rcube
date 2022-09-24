@@ -1,3 +1,5 @@
+#include <vector>
+
 #include <rcube.hpp>
 #include <utility.hpp>
 
@@ -53,6 +55,17 @@ void rcube::Orientation::rotate(const Axis& rotAxis, int step)
     }
 }
 
+std::vector<rcube::Orientation> rcube::Orientation::iterate()
+{
+    std::vector<rcube::Orientation> vec;
+    for (int a = 0, d = -1; a < 3; d *= -1)
+    {
+        vec.push_back({static_cast<Axis>(a), d});
+        if (d == 1) a++;
+    }
+    return vec;
+}
+
 rcube::Coordinates::Coordinates(const rcube::Orientation& o1)
 {
     coords[o1.axis] = o1.direction;
@@ -87,6 +100,14 @@ rcube::Coordinates::Coordinates(const rcube::Orientation& o1,
     coords[o3.axis] = o3.direction;
 }
 
+bool rcube::Coordinates::operator==(const rcube::Coordinates &a) const
+{
+    for (int i = 0; i < 3; ++i)
+    {
+        if (coords[i] != a.coords[i]) return false;
+    }
+    return true;
+}
 
 void rcube::Coordinates::rotate (const Axis& axis, int step)
 {
@@ -100,21 +121,21 @@ void rcube::Coordinates::rotate (const Axis& axis, int step)
         case Axis::X:
         {
             int y0 = coords[Axis::Y];
-            coords[Axis::Y] = coords[Axis::Y] * cos - coords[Axis::Z] * sin;
+            coords[Axis::Y] = y0 * cos - coords[Axis::Z] * sin;
             coords[Axis::Z] = y0 * sin + coords[Axis::Z] * cos;
             break;
         }
         case Axis::Y:
         {
             int x0 = coords[Axis::X];
-            coords[Axis::X] = coords[Axis::X] * cos + coords[Axis::Z] * sin;
-            coords[Axis::Z] = coords[Axis::Y] * cos - x0 * sin;
+            coords[Axis::X] =  x0 * cos + coords[Axis::Z] * sin;
+            coords[Axis::Z] = -x0 * sin + coords[Axis::Z] * cos;
             break;
         }
         case Axis::Z:
         {
             int x0 = coords[Axis::X];
-            coords[Axis::X] = coords[Axis::X] * cos - coords[Axis::Y] * sin;
+            coords[Axis::X] = x0 * cos - coords[Axis::Y] * sin;
             coords[Axis::Y] = x0 * sin + coords[Axis::Y] * cos;
             break;
         }
@@ -149,4 +170,11 @@ bool rcube::Coordinates2D::operator<(const rcube::Coordinates2D& a) const
 bool rcube::Coordinates2D::operator==(const rcube::Coordinates2D& a) const
 {
     return (coords[X] == a.coords[X]) && (coords[Y] == a.coords[Y]);
+}
+
+rcube::Center::Center(const Color &color, const rcube::Orientation &o)
+{
+    this->color = color;
+    this->orientation = o;
+    this->location = rcube::Coordinates(o);
 }

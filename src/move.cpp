@@ -1,4 +1,5 @@
 #include <string>
+#include <sstream>
 
 #include <rcube.hpp>
 #include <utility.hpp>
@@ -10,15 +11,15 @@ Axis getAxis(const MoveFace& face)
     case LEFT:
     case RIGHT:
     case ROTATE_X:
-      return Axis::X; break;
+      return Axis::X;
     case UP:
     case DOWN:
     case ROTATE_Y:
-      return Axis::Y; break;
+      return Axis::Y;
     case FRONT:
     case BACK:
     case ROTATE_Z:
-      return Axis::Z; break;
+      return Axis::Z;
   }
 }
 
@@ -38,15 +39,15 @@ rcube::Move::Move(char face, int direction)
 
 std::string rcube::Move::to_string() const
 {
-  std::string result;
-  result.push_back((char) face);
+  std::stringstream ss;
+  ss << (char) face;
   switch (direction)
   {
     case CW: break;
-    case CCW: result.push_back('\''); break;
-    case DOUBLE: result.push_back('2'); break;
+    case CCW: ss << '\''; break;
+    case DOUBLE: ss << '2'; break;
   }
-  return result;
+  return ss.str();
 }
 
 rcube::Orientation rcube::Move::getAffectedFace() const

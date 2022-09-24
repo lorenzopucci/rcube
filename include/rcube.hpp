@@ -11,8 +11,14 @@ namespace rcube
 {
     struct Orientation
     {
+        /*
+        * This struct represents an orientation, which consists of an axis
+        * (X, Y or Z) and a sign (+1 or -1). Orientations are used to identify
+        * faces (for instance, the top face has the orientation +Y) and thus
+        * understand which face a sticker belongs to.
+        */
         Axis axis;
-        int direction;
+        int direction; // +1 or -1
 
         bool operator<(const rcube::Orientation& a) const;
         bool operator==(const rcube::Orientation& a) const;
@@ -27,20 +33,49 @@ namespace rcube
 
        static std::vector<rcube::Orientation> iterate();
        /*
-       * Returns a vector containing all 6 possible orientations
+       * Returns a vector containing all 6 possible orientations in the following
+       * order: -X, +X, -Y, +Y, -Z, +Z
+       * This is used for iteration through objects like rcube::Net
        */
     };
 
-    struct Coordinates // used to store the position of a corner/edge
+    struct Coordinates
     {
+        /*
+        * This struct is used to represent the 3D coordinates of the cube's
+        * blocks. Therefore, each coordinate is only meant to be -1, 0 or 1.
+        */
+
         Coordinates(const int& x, const int& y, const int& z);
-        Coordinates(const rcube::Orientation& o1); // constructor for centers
-        Coordinates(const rcube::Orientation& o1,
-            const rcube::Orientation& o2); // constructor for edges
+        /*
+        * Default constructor: the values are directly assigned to coords
+        */
+
+        Coordinates(const rcube::Orientation& o1);
+        /*
+        * Constructor for centers: the resulting coordinates are the ones of the
+        * center of the face at orientation o1
+        */
+
+        Coordinates(const rcube::Orientation& o1, const rcube::Orientation& o2);
+        /*
+        * Constructor for edges: the resulting coordinates are the ones of the
+        * edge that sits between the two faces at orientation o1 and o2
+        */
+
         Coordinates(const rcube::Orientation& o1, const rcube::Orientation& o2,
-            const rcube::Orientation& o3); // constructor for corners
+            const rcube::Orientation& o3);
+        /*
+        * Constructor for corners: the resulting coordinates are the ones of the
+        * corner that sits between the three faces at orientation o1, o2 and o3
+        */
         
         int coords[3];
+        /*
+        * The values are stored like this to make it easier to iterate through
+        * them. They can be accessed using the corresponding int values of the
+        * axes (see the Axis enum in include/utility.hpp) like coords[Axis::X]
+        */
 
         bool operator==(const rcube::Coordinates &a) const;
 
@@ -55,25 +90,42 @@ namespace rcube
 
     struct Coordinates2D
     {
-        Coordinates2D();
+        /*
+        * This struct is used the represent the 2D coordinates of a sticker
+        * relatively to its face. It is only used for net renderings
+        * (see rcube::Face).
+        */
+
+        Coordinates2D() = default;
 
         Coordinates2D(const int& x, const int& y);
+        /*
+        * Default constructor: the values are directly assigned to coords
+        */
         
-        // get the coordinates of the sticker with orientation o belonging to
-        // the block at coordinates coords3D relatively to its face
         Coordinates2D(const rcube::Coordinates& coords3D,
             const rcube::Orientation& o);
-
-        bool operator<(const rcube::Coordinates2D& a) const;
-
-        bool operator==(const rcube::Coordinates2D& a) const;
+        /*
+        * The resulting coordinates are the ones of the sticker with orientation
+        * o belonging to the block placed coords3D in the 3D space.
+        * There is no control over where the 2D axes will end up being: the
+        * resulting face may not be rotated to the most intuitive position.
+        */
 
         int coords[2];
+        /*
+        * The coordinates are stored as in rcube::Coordinates
+        */
+
+        bool operator<(const rcube::Coordinates2D& a) const;
+        bool operator==(const rcube::Coordinates2D& a) const;
     };
 
 
+    // the following structs are meant for internal use only
     struct Sticker
     {
+        // A single colored tile of the cube
         Color color;
         rcube::Orientation orientation;
     };
@@ -82,79 +134,141 @@ namespace rcube
         rcube::Coordinates location = rcube::Coordinates(0, 0, 0);
     };
 
+    // Center, Edge and Corner are the three type of blocks the cube is made of
     struct Center : PieceTemplate, Sticker
     {
         Center() = default;
         Center(const Color &color, const rcube::Orientation &o);
+        // the coordinates are worked out by one of the constructors of
+        // rcube::Coordinates
     };
-
     struct Edge : PieceTemplate
     {
         rcube::Sticker stickers[2];
     };
-
     struct Corner : PieceTemplate
     {
         rcube::Sticker stickers[3];
     };
 
-    struct AdjacentCenters {
-        rcube::Center* centers[4];
-    };
 
+    // the following structs are the results of the various renderings
     struct Block
     {
+        /*
+        * This struct represents an unspecified block of the cube (center, edge
+        * or corner). It is used for each block of rcube::BlockArray
+        */
+
         rcube::Coordinates position = rcube::Coordinates(0, 0, 0);
+
         std::map<rcube::Orientation, Color> stickers;
+        /*
+        * The stickers are stored in a map along with their orientation. The
+        * map does not contain all the possibile orientations but only the ones
+        * where a sticker is.
+        */
     };
     struct BlockArray
     {
+        /*
+        * This struct represent a full cube divided into single blocks. All the
+        * 26 blocks are stored as a rcube::Block. This is the result of
+        * rcube::Cube::blockRender().
+        */
         rcube::Block blocks[26];
     };
 
     struct Face
     {
+        /*
+        * This struct represent a single face of the cube. Each of the 9 stickers
+        * is stored in a map along with its 2D coordinates. It is used for each
+        * face of rcube::Net
+        */
         std::map<rcube::Coordinates2D, Color> stickers;
     };
     struct Net
     {
+        /*
+        * This struct represents the 2D net of the cube. Each of the 6 faces is
+        * stored as a rcube::Face in a map along with its orientation. This is
+        * the result of rcube::Cube::netRender()
+        */
         std::map<rcube::Orientation, rcube::Face> faces;
     };
 
+
     class Move {
+        /*
+        * This class represent a single cube's move, which can either be:
+        * - the rotation of a layer (R, L, U, D, F, B, M, E or S)
+        * - the rotation of the whole cube in the 3D space (x, y or z)
+        * Each of these moves can be performed clockwise, conterclockwise or
+        * twice. This property is also a class member.
+        * 
+        * To apply a move, use it as the argument of rcube::Cube::performMove().
+        */
     public:
+
         Move(MoveFace face, MoveDirection direction);
+        /*
+        * The values provided are directly assigned to this->face and
+        * this->direction
+        * @param face: the move to perform (see the MoveFace enum in
+        * include/utility.hpp)
+        * @param direction: the rotation direction (see the MoveDirection enum
+        * in include/utility.hpp)
+        * 
+        * If you want to use the standard notation (like "U'" for rotating the top
+        * face conterclockwise), use the rcube::Algorithm class instead.
+        */
+
 	    Move(char face, int direction);
         /*
-        * This class represents a single rotation of a cube's face.
-        * @param face: the face to rotate
-        * @param direction: the direction of the rotation
+        * This constructor is the same as the one before, but the values are
+        * first provided as a char and an int, then converted into MoveFace and
+        * MoveDirection.
         */
 
         ~Move() = default;
 
         std::string to_string() const;
+        /*
+        * Returns the move as a string in the standard notation (like "F'"
+        * or "U2").
+        */
 
         rcube::Orientation getAffectedFace() const;
+        /*
+        * Returns the orientation of the face that the move applies on. This can
+        * only be used for the folllowing moves: R, L, U, D, F, B
+        */
 
-	    MoveFace face; // the face to rotate
+	    MoveFace face; // the kind of move to perform
         MoveDirection direction; // the direction of the rotation
         Axis axis; // the rotation axis
     };
 
     class Algorithm {
+        /*
+        * This class represents an ordered set of moves.
+        */
 
     public:
         Algorithm (const std::string& fromString);
         /*
-        * This class represents a set of rotations of a cube's face.
-        * @param fromString: the algorithm expressed as string e.g. "RUR'U'"
+        * The algorithm is generated from a string in the default notation (like
+        * "RUR'U'"). Characters '(', ')', '[', ']', spaces and tabs are also
+        * allowed (they will be ignored).
+        * 
+        * NOTE: this constructor may throw a std::invalid_argument exception
+        * if the string contains an invalid character.
         */
 
         Algorithm (const std::vector<rcube::Move>& fromVector);
         /*
-        * This class represents a set of rotations of a cube's face.
-        * @param fromVector: the algorithm expressed as vector of moves
+        * The algorithm is provided from a std::vector of rcube::Move.
         */
 
         ~Algorithm() = default;
@@ -163,76 +277,100 @@ namespace rcube
         /*
         * Multiplies the algorithm by a factor. The algorithm is NOT repeated
         * factor times, but all the directions of the moves are multiplied by it.
-        * @param factor: the multiplication factor
         * NOTE: only designed and tested for factor = {-1, 1, 2}
         */
 
        rcube::Algorithm operator+(const rcube::Algorithm a);
         /*
         * Concatenates two algorithms
-        * @param a: the second addend
         */
 
         std::string to_string() const;
         /*
-        * Returns string in the standard notation (e.g. "RUR'U'").
+        * Returns the algorithm as a string in the standard notation
+        * (e.g. "RUR'U'").
         */
 
         std::vector<rcube::Move> algorithm;
+        // the algorithm is stored as a std::vector of rcube::Move
     };
 
     class Cube {
+        /*
+        * This class represents a 3*3*3 Rubik's cube. After the cube is
+        * initialized, the functions performMove and performAlgorithm are used to
+        * apply moves and algorithm. The current status of the cube can then be
+        * retrieved by rendering either a rcube::Net or a rcube::BlockArray
+        */
     public:
+
         Cube (const Color& topColor = Color::White,
             const Color& frontColor = Color::Green);
         /*
-         * Initializes a solved cube with the yellow face on top and the green
-         * one in front.
+        * Initializes a solved cube with the <topColor> face on top and the
+        * <frontColor> one in front.
+        * 
+        * NOTE: this constructor may result in a program crash (for assertion
+        * failure) if topColor and fronColor are not two adjacent colors (for
+        * example when one is white and the other is yellow)
         */
+
         ~Cube() = default;
 
         void performMove (const rcube::Move& move);
         /*
-         * Performs either a rotation of a cube's face or changes the
-         * viewpoint.
-         * @param move: the move to perform (refer to the Move class above)
+         * Applies a rcube::Move
         */
 
         void performAlgorithm (const rcube::Algorithm& algorithm);
         /*
-         * Performs an algorithm (set of moves).
-         * @param algorithm: the algorithm to perform (refer to the Algorithm
-         * class above)
+         * Applies a rcube::Algorithm
         */
 
         void scramble (int lenght = 12, rcube::Algorithm* dest = nullptr);
         /*
          * Performs a randomly generated algorithm.
          * @param length: the number of moves in the algorithm (default=12)
-         * @param dest: pointer to an empty algorithm that will received the
+         * @param dest: pointer to an empty algorithm that will receive the
          * generated algorithm (default=nullptr)
         */
 
         rcube::Net netRender();
         /*
-         * Renders the cube as a 2D array (see rcube::Net)
+         * Renders the cube as an array of faces (see rcube::Net).
         */
 
         rcube::BlockArray blockRender();
         /*
-         * Renders the cube as an array of Blocks.
+         * Renders the cube as an array of blocks (see rcube::Blockarray).
         */
 
         void display ();
+        /*
+        * Prints the cube to stdout. This output is quite rough (mostly used for
+        * debugging purposes): each face is printed individually as a 3*3 grid
+        * of characters indicating the color (with the corresponging color in the
+        * background).
+        */
 
     private:
+        // internally, the cube is abstracted as an array of 6 rcube::Center, 12
+        // rcube::Edge and 8 rcube::Corner
         rcube::Center centers[6];
         rcube::Edge edges[12];
         rcube::Corner corners[8];
+
         void changeViewpoint (const rcube::Move& move);
+        // handle the moves x, y and z
+
         void rotateLayer (const rcube::Move& move);
+        // handle the moves R, L, U, D, F, B
+
         rcube::Center* getCenterFrom(const Color &color);
+        // get a pointer to the <color> center
+
         rcube::Center* getCenterFrom(const rcube::Coordinates &coords);
+        // get a pointer to the center placed at <coords>
     };
 };
 

@@ -10,26 +10,6 @@ enum class Color : char
     Orange = 'o'
 };
 
-enum class CenterId : int // indices within rcube::Cube::centers
-{
-    White = 0,
-    Yellow = 1,
-    Green = 2,
-    Blue = 3,
-    Red = 4,
-    Orange = 5
-};
-/*
-enum ViewpointIndices // within rcube::Cube::viewpoint
-{
-    TOP_FACE = 0,
-    LEFT_FACE = 1,
-    FRONT_FACE = 2,
-    RIGHT_FACE = 3,
-    BACK_FACE = 4,
-    BOTTOM_FACE = 5
-};*/
-
 enum MoveFace
 {
     RIGHT = 'R',

@@ -239,6 +239,13 @@ void rcube::Cube::performAlgorithm (const rcube::Algorithm& algorithm)
         performMove(move);
 }
 
+void rcube::Cube::scramble(const int &length, rcube::Algorithm* dest)
+{
+    rcube::Algorithm scramble = rcube::Algorithm::generateScramble(length);
+    this->performAlgorithm(scramble);
+    *dest = scramble;
+}
+
 rcube::Net rcube::Cube::netRender()
 {
     rcube::Net net; // to return

@@ -256,6 +256,8 @@ namespace rcube
         */
 
     public:
+        Algorithm() = default;
+
         Algorithm (const std::string& fromString);
         /*
         * The algorithm is generated from a string in the default notation (like
@@ -285,11 +287,26 @@ namespace rcube
         * Concatenates two algorithms
         */
 
+       void push(const rcube::Move &m);
+        /*
+        * Appends a rcube::Move to the algorithm
+        */
+
+       static rcube::Algorithm generateScramble(const int &length = 12);
+       /*
+       * Generates a random algorithm of given length (default=12)
+       */
+
         std::string to_string() const;
         /*
         * Returns the algorithm as a string in the standard notation
         * (e.g. "RUR'U'").
         */
+
+       int length() const;
+       /*
+       * Returns the length of the algorithm (number of moves).
+       */
 
         std::vector<rcube::Move> algorithm;
         // the algorithm is stored as a std::vector of rcube::Move
@@ -327,7 +344,7 @@ namespace rcube
          * Applies a rcube::Algorithm
         */
 
-        void scramble (int lenght = 12, rcube::Algorithm* dest = nullptr);
+        void scramble(const int &length = 12, rcube::Algorithm* dest = nullptr);
         /*
          * Performs a randomly generated algorithm.
          * @param length: the number of moves in the algorithm (default=12)

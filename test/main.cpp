@@ -24,15 +24,12 @@ void printBlocks(const rcube::BlockArray& blocks)
 int main()
 {
   Cube cube = Cube();
+
+  Algorithm scramble;
+  cube.scramble(12, &scramble);
+  std::cout << "Scramble used: " << scramble.to_string() << std::endl;
+
   cube.display();
 
-  printBlocks(cube.blockRender());
-  
-
-  //Move move = Move('R', 1);
-  //cube.performMove(move);
-  //cube.display();
-
-  //Algorithm algo = Algorithm("RUR'U'");
-  //cube.performAlgorithm(algo);
+  //printBlocks(cube.blockRender());
 }

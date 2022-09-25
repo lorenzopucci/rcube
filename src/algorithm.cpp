@@ -61,26 +61,6 @@ rcube::Algorithm::Algorithm(const std::string& fromString)
    }
  }
 
-
-std::string rcube::Algorithm::to_string() const
-{
-  std::stringstream ss;
-
-  for (rcube::Move move : algorithm)
-  {
-    ss << (char) move.face;
-
-    switch (move.direction)
-    {
-      case 1: break;
-      case -1: ss << '\''; break;
-      case 2: ss << '2'; break;
-    }
-  }
-  return ss.str();
-}
-
-
 rcube::Algorithm::Algorithm(const std::vector<rcube::Move>& fromVector)
 {
   this->algorithm = fromVector;
@@ -106,4 +86,57 @@ rcube::Algorithm rcube::Algorithm::operator+(const rcube::Algorithm a)
   std::vector<rcube::Move> dest = algorithm;
   dest.insert(dest.end(), a.algorithm.begin(), a.algorithm.end());
   return rcube::Algorithm(dest);
+}
+
+void rcube::Algorithm::push(const rcube::Move &m)
+{
+  algorithm.push_back(m);
+}
+
+rcube::Algorithm rcube::Algorithm::generateScramble(const int &length)
+{
+  rcube::Algorithm scramble;
+  srand(time(0));
+
+  MoveFace moves[6] = {RIGHT, LEFT, UP, DOWN, FRONT, BACK};
+  MoveFace prev;
+
+  while (scramble.length() <= length)
+  {
+    MoveFace move = moves[rand() % 6];
+    while (move == prev)
+    {
+      move = moves[rand() % 6];
+    }
+
+    int dir = rand() % 3; // {0, 1, 2}
+    if (dir == 0) dir = -1; // {-1, 1, 2}
+
+    scramble.push(rcube::Move(move, static_cast<MoveDirection>(dir)));
+    prev = move;
+  }
+  return scramble;
+}
+
+std::string rcube::Algorithm::to_string() const
+{
+  std::stringstream ss;
+
+  for (rcube::Move move : algorithm)
+  {
+    ss << (char) move.face;
+
+    switch (move.direction)
+    {
+      case 1: break;
+      case -1: ss << '\''; break;
+      case 2: ss << '2'; break;
+    }
+  }
+  return ss.str();
+}
+
+int rcube::Algorithm::length() const
+{
+  return algorithm.size();
 }

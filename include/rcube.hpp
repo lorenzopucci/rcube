@@ -96,7 +96,7 @@ namespace rcube
         * (see rcube::Face).
         */
 
-        Coordinates2D() = default;
+        Coordinates2D();
 
         Coordinates2D(const int& x, const int& y);
         /*

@@ -54,6 +54,12 @@ void mainloop (GLFWwindow* window, rcube::Cube* cube)
             shader.setUniformMat4f("MVP", camera->getMVP());
             camera->updated = true;
         }
+        while (!camera->movesQueue.empty())
+        {
+            cube->performMove(camera->movesQueue.front());
+            camera->movesQueue.pop();
+            cube3d.update(cube->blockRender());
+        }
 
         cube3d.draw(&va, &shader, camera);
 

@@ -1,10 +1,11 @@
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
-#include <GL/glew.h>
 #include <glm/gtc/matrix_transform.hpp>
 
 #include <math.h>
 #include <algorithm>
+
+#include <rcube.hpp>
 
 #include "camera.hpp"
 
@@ -126,10 +127,53 @@ void EventHandler::onClick(GLFWwindow* window, int button, int action,
 void EventHandler::onKey(GLFWwindow* window, int key, int scancode, int action,
     int mods)
 {
-    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+    Camera* camera = static_cast<Camera*>(glfwGetWindowUserPointer(window));
+
+    char newMove = '\0';
+
+    switch (key)
     {
-        glfwSetWindowShouldClose(window, true);
+        case GLFW_KEY_ESCAPE:
+            if (action == GLFW_PRESS) glfwSetWindowShouldClose(window, true);
+            break;
+
+        case GLFW_KEY_LEFT_SHIFT:
+        case GLFW_KEY_RIGHT_SHIFT:
+            camera->pressingShift = action == GLFW_PRESS;
+            break;
+        
+        case GLFW_KEY_R:
+            newMove = 'R'; break;
+        case GLFW_KEY_L:
+            newMove = 'L'; break;
+        case GLFW_KEY_U:
+            newMove = 'U'; break;
+        case GLFW_KEY_D:
+            newMove = 'D'; break;
+        case GLFW_KEY_F:
+            newMove = 'F'; break;
+        case GLFW_KEY_B:
+            newMove = 'B'; break;
+        
+        case GLFW_KEY_M:
+            newMove = 'M'; break;
+        case GLFW_KEY_S:
+            newMove = 'S'; break;
+        case GLFW_KEY_E:
+            newMove = 'E'; break;
+        
+        case GLFW_KEY_X:
+            newMove = 'x'; break;
+        case GLFW_KEY_Y:
+            newMove = 'y'; break;
+        case GLFW_KEY_Z:
+            newMove = 'z'; break;
     }
+
+    if (newMove == '\0' || action == GLFW_RELEASE) return;
+
+    camera->movesQueue.push(rcube::Move(newMove,
+        1 - (camera->pressingShift * 2)));
 }
 
 void EventHandler::onDrag(GLFWwindow* window, double xpos, double ypos)

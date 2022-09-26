@@ -3,6 +3,10 @@
 #include <glm/glm.hpp>
 #include <GLFW/glfw3.h>
 
+#include <queue>
+
+#include <rcube.hpp>
+
 #define MOUSE_SPEED 0.5f
 #define SPEED 3.0f
 #define INITIAL_FOV 75.0f
@@ -60,6 +64,9 @@ public:
 
     double lastTime;
     Arcball arcball;
+
+    bool pressingShift = false;
+    std::queue<rcube::Move> movesQueue;
 };
 
 namespace EventHandler

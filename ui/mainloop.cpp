@@ -1,5 +1,5 @@
 #include <map>
-#include <functional>
+#include <iostream>
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -18,26 +18,26 @@
 #include "renderer.hpp"
 #include "camera.hpp"
 
-/*Camera *camera;
-
-// this is terrible, but necessary since glfw does not accept member functions
-// as callbacks (std::bind does not work either)
-void scrollCallback(GLFWwindow* window, double deltaX, double deltaY)
-{
-    camera->scrollCallback(window, deltaY);
-}
-*/
 
 void mainloop (GLFWwindow* window, rcube::Cube* cube)
 {
     VertexArray va;
 
     Camera *camera = new Camera(window);
-    //glfwSetScrollCallback(window, scrollCallback);
+
+    glfwSetWindowUserPointer(window, camera);
+    glfwSetScrollCallback(window, EventHandler::onScroll);
+    glfwSetMouseButtonCallback(window, EventHandler::onClick);
+    glfwSetKeyCallback(window, EventHandler::onKey);
+    glfwSetCursorPosCallback(window, EventHandler::onDrag);
+    glfwSetWindowSizeCallback(window, EventHandler::onResize);
 
     Shader shader(VERTEX_SHADER, FRAGMENT_SHADER);
+    shader.bind();
 
-    //cube->performMove(rcube::Move('R', 1));
+    rcube::Algorithm dest;
+    cube->scramble(12, &dest);
+    std::cout << dest.to_string() << std::endl;
     Cube cube3d(cube->blockRender());
 
     VertexBuffer vb(vertices, 8 * 3 * sizeof(float));
@@ -49,9 +49,11 @@ void mainloop (GLFWwindow* window, rcube::Cube* cube)
     {
     	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        shader.bind();
-        camera->computeFromInput(window);
-        shader.setUniformMat4f("MVP", camera->getMVP());
+        if (!camera->updated)
+        {
+            shader.setUniformMat4f("MVP", camera->getMVP());
+            camera->updated = true;
+        }
 
         cube3d.draw(&va, &shader, camera);
 

@@ -13,6 +13,12 @@ struct MouseCoordinates
     double y;
 };
 
+struct WindowSize
+{
+    int w;
+    int h;
+};
+
 struct Rotation
 {
     float angle;
@@ -24,8 +30,7 @@ struct Arcball
     MouseCoordinates currMouseCoords = {0, 0};
     MouseCoordinates prevMouseCoords = {0, 0};
 
-    float screenWidth = 640;
-    float screenHeight = 480;
+    WindowSize windowSize = {640, 480};
 
     bool on;
 
@@ -42,20 +47,26 @@ public:
     void arrangeBlock(int* coords);
     void scale(const float &factor);
     void resetTransformations();
-
-    void computeFromInput(GLFWwindow* window);
     glm::mat4 getMVP();
 
-    void scrollCallback(GLFWwindow *window, double deltaY);
-
-private:
     glm::mat4 viewMatrix;
     glm::mat4 projectionMatrix;
     glm::mat4 modelMatrix;
+    bool updated = false; // false when MPV needs to be sent to the GPU
 
     float FoV = INITIAL_FOV;
     MouseCoordinates getMouseCoordinates(GLFWwindow* window);
+    WindowSize windowSize = {640, 480};
 
     double lastTime;
     Arcball arcball;
+};
+
+namespace EventHandler
+{
+    void onScroll(GLFWwindow* window, double deltaX, double deltaY);
+    void onClick(GLFWwindow* window, int button, int action, int mods);
+    void onKey(GLFWwindow* window, int key, int scancode, int action, int mods);
+    void onDrag(GLFWwindow* window, double xpos, double ypos);
+    void onResize(GLFWwindow* window, int width, int height);
 };

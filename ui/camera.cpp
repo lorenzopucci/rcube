@@ -1,5 +1,6 @@
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
+#include <GL/glew.h>
 #include <glm/gtc/matrix_transform.hpp>
 
 #include <math.h>
@@ -25,8 +26,8 @@ Rotation Arcball::update(const MouseCoordinates &current)
 glm::vec3 Arcball::getVector(const double &x, const double &y)
 {
     glm::vec3 vector = glm::vec3(
-        2 * x / screenWidth - 1.0f,
-        -2 * y / screenHeight + 1.0f,
+        2 * x / windowSize.w - 1.0f,
+        -2 * y / windowSize.h + 1.0f,
         0.0f
     );
 
@@ -42,11 +43,8 @@ Camera::Camera(GLFWwindow* window)
 {
     lastTime = static_cast<float>(glfwGetTime());
 
-    int width, height;
-    glfwGetWindowSize(window, &width, & height);
-
     projectionMatrix = glm::perspective(glm::radians(FoV),
-        float(width)/float(height), 0.1f, 100.0f);
+        float(windowSize.w)/float(windowSize.h), 0.1f, 100.0f);
 
     viewMatrix = glm::lookAt(
         glm::vec3(0.0f, 0.0f, 5.0f), // camera position
@@ -62,38 +60,6 @@ MouseCoordinates Camera::getMouseCoordinates(GLFWwindow* window)
     double x, y;
     glfwGetCursorPos(window, &x, &y);
     return (MouseCoordinates){x, y};
-}
-
-void Camera::computeFromInput(GLFWwindow* window)
-{
-    double currTime = static_cast<float>(glfwGetTime());
-    float deltaTime = float(currTime - lastTime);
-    lastTime = currTime;
-    
-
-    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
-    {
-        if (arcball.on)
-        {
-            Rotation rot = arcball.update(getMouseCoordinates(window));
-
-            if (rot.axis.x != 0.0f || rot.axis.y != 0.0f || rot.axis.z != 0.0f)
-            {
-                glm::vec3 axis = glm::inverse(glm::mat3(viewMatrix)) * rot.axis;
-                viewMatrix = glm::rotate(viewMatrix, rot.angle, axis);
-            }
-        }
-        else
-        {
-            arcball.on = true;
-            arcball.currMouseCoords = getMouseCoordinates(window);
-        }
-    }
-    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_RELEASE)
-        arcball.on = false;
-    
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-        glfwSetWindowShouldClose(window, true);
 }
 
 void Camera::arrangeBlock(int* coords)
@@ -122,18 +88,81 @@ glm::mat4 Camera::getMVP()
     return projectionMatrix * viewMatrix *  modelMatrix;
 }
 
-void Camera::scrollCallback(GLFWwindow *window, double deltaY)
+void EventHandler::onScroll(GLFWwindow* window, double deltaX, double deltaY)
 {
-    FoV -= deltaY;
-    if (FoV < 2.0f || FoV > 80.0f)
+    Camera* camera = static_cast<Camera*>(glfwGetWindowUserPointer(window));
+
+    camera->FoV -= deltaY;
+    if (camera->FoV < 2.0f || camera->FoV > 100.0f)
     {
-        FoV += deltaY;
+        camera->FoV += deltaY;
         return;
     }
 
-    int width, height;
-    glfwGetWindowSize(window, &width, &height);
+    camera->projectionMatrix = glm::perspective(glm::radians(camera->FoV),
+        float(camera->windowSize.w)/float(camera->windowSize.h), 0.1f, 100.0f);
 
-    projectionMatrix = glm::perspective(glm::radians(FoV),
-        float(width)/float(height), 0.1f, 100.0f);
+    camera->updated = false;
+}
+
+void EventHandler::onClick(GLFWwindow* window, int button, int action,
+    int mods)
+{
+    Camera* camera = static_cast<Camera*>(glfwGetWindowUserPointer(window));
+
+    if (button != GLFW_MOUSE_BUTTON_LEFT) return;
+    
+    if (action == GLFW_PRESS)
+    {
+        camera->arcball.on = true;
+        camera->arcball.currMouseCoords = camera->getMouseCoordinates(window);
+    }
+    else if (action == GLFW_RELEASE)
+    {
+        camera->arcball.on = false;
+    }
+}
+
+void EventHandler::onKey(GLFWwindow* window, int key, int scancode, int action,
+    int mods)
+{
+    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+    {
+        glfwSetWindowShouldClose(window, true);
+    }
+}
+
+void EventHandler::onDrag(GLFWwindow* window, double xpos, double ypos)
+{
+    Camera* camera = static_cast<Camera*>(glfwGetWindowUserPointer(window));
+
+    if (!camera->arcball.on) return;
+
+    double currTime = static_cast<float>(glfwGetTime());
+    float deltaTime = float(currTime - camera->lastTime);
+    camera->lastTime = currTime;
+    
+    Rotation rot = camera->arcball.update({xpos, ypos});
+
+    if (rot.axis.x != 0.0f || rot.axis.y != 0.0f || rot.axis.z != 0.0f)
+    {
+        glm::vec3 axis = glm::inverse(glm::mat3(camera->viewMatrix)) * rot.axis;
+        camera->viewMatrix = glm::rotate(camera->viewMatrix, rot.angle, axis);
+
+        camera->updated = false;
+    }
+}
+
+void EventHandler::onResize(GLFWwindow* window, int width, int height)
+{
+    Camera* camera = static_cast<Camera*>(glfwGetWindowUserPointer(window));
+
+    camera->windowSize = {width, height};
+    camera->arcball.windowSize = {width, height};
+    camera->projectionMatrix = glm::perspective(glm::radians(camera->FoV),
+        float(camera->windowSize.w)/float(camera->windowSize.h), 0.1f, 100.0f);
+    
+    glViewport(0, 0, width, height);
+
+    camera->updated = false;
 }

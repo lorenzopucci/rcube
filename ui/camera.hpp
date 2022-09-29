@@ -51,12 +51,12 @@ public:
     void arrangeBlock(int* coords);
     void scale(const float &factor);
     void resetTransformations();
+    void centerView();
     glm::mat4 getMVP();
 
     glm::mat4 viewMatrix;
     glm::mat4 projectionMatrix;
     glm::mat4 modelMatrix;
-    bool updated = false; // false when MPV needs to be sent to the GPU
 
     float FoV = INITIAL_FOV;
     MouseCoordinates getMouseCoordinates(GLFWwindow* window);
@@ -66,7 +66,7 @@ public:
     Arcball arcball;
 
     bool pressingShift = false;
-    std::queue<rcube::Move> movesQueue;
+    bool pressingCtrl = false;
 };
 
 namespace EventHandler
@@ -76,4 +76,13 @@ namespace EventHandler
     void onKey(GLFWwindow* window, int key, int scancode, int action, int mods);
     void onDrag(GLFWwindow* window, double xpos, double ypos);
     void onResize(GLFWwindow* window, int width, int height);
+};
+
+struct GlfwUserPtrData
+{
+    Camera *camera;
+    rcube::Cube *cube;
+    
+    bool MVPupdated = false; // false when MPV needs to be sent to the GPU
+    bool cubeUpdated = false; // false when the cube needs to be re-rendered
 };

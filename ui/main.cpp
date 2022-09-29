@@ -61,7 +61,10 @@ int main ()
     glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
 
     Camera *camera = new Camera(window);
-    glfwSetWindowUserPointer(window, camera);
+    rcube::Cube cube = rcube::Cube();
+    GlfwUserPtrData *userPtr = new GlfwUserPtrData {camera, &cube};
+
+    glfwSetWindowUserPointer(window, userPtr);
     glfwSetScrollCallback(window, EventHandler::onScroll);
     glfwSetMouseButtonCallback(window, EventHandler::onClick);
     glfwSetKeyCallback(window, EventHandler::onKey);
@@ -71,10 +74,14 @@ int main ()
     Shader shader(VERTEX_SHADER, FRAGMENT_SHADER);
     shader.bind();
 
-    rcube::Cube cube = rcube::Cube();
-    rcube::Algorithm dest;
-    cube.scramble(12, &dest);
-    std::cout << dest.to_string() << std::endl;
+
+    std::cout << "RCUBE testing interface\n"
+        "Copyright (c) 2022 Lorenzo Pucci\n"
+        "License: MIT <https://mit-license.org>\n\n"
+        "Use your keyboard to apply moves by pressing keys such as R, U, F etc."
+        " Holding\nshift will reverse the direction of the moves. "
+        "Press ctrl+R to center the view\nand ctrl+S to scramble the cube.\n\n";
+
     Cube cube3d(cube.blockRender());
     
     VertexArray va;
@@ -87,16 +94,15 @@ int main ()
     {
     	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        if (!camera->updated)
+        if (!userPtr->MVPupdated)
         {
             shader.setUniformMat4f("MVP", camera->getMVP());
-            camera->updated = true;
+            userPtr->MVPupdated = true;
         }
-        while (!camera->movesQueue.empty())
+        if (!userPtr->cubeUpdated)
         {
-            cube.performMove(camera->movesQueue.front());
-            camera->movesQueue.pop();
             cube3d.update(cube.blockRender());
+            userPtr->cubeUpdated = true;
         }
 
         cube3d.draw(&va, &shader, camera);

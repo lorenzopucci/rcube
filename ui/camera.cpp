@@ -4,6 +4,7 @@
 
 #include <math.h>
 #include <algorithm>
+#include <iostream>
 
 #include <rcube.hpp>
 
@@ -84,6 +85,15 @@ void Camera::resetTransformations()
     modelMatrix = glm::mat4(1.0f);
 }
 
+void Camera::centerView()
+{
+    viewMatrix = glm::lookAt(
+        glm::vec3(0.0f, 0.0f, 5.0f),
+        glm::vec3(0.0f, 0.0f, 0.0f),
+        glm::vec3(0.0f, 1.0f, 0.0f)
+    );
+}
+
 glm::mat4 Camera::getMVP()
 {
     return projectionMatrix * viewMatrix *  modelMatrix;
@@ -91,7 +101,9 @@ glm::mat4 Camera::getMVP()
 
 void EventHandler::onScroll(GLFWwindow* window, double deltaX, double deltaY)
 {
-    Camera* camera = static_cast<Camera*>(glfwGetWindowUserPointer(window));
+    GlfwUserPtrData* userPtr = static_cast<GlfwUserPtrData*>(
+        glfwGetWindowUserPointer(window));
+    Camera *camera = userPtr->camera;
 
     camera->FoV -= deltaY;
     if (camera->FoV < 2.0f || camera->FoV > 100.0f)
@@ -103,13 +115,14 @@ void EventHandler::onScroll(GLFWwindow* window, double deltaX, double deltaY)
     camera->projectionMatrix = glm::perspective(glm::radians(camera->FoV),
         float(camera->windowSize.w)/float(camera->windowSize.h), 0.1f, 100.0f);
 
-    camera->updated = false;
+    userPtr->MVPupdated = false;
 }
 
 void EventHandler::onClick(GLFWwindow* window, int button, int action,
     int mods)
 {
-    Camera* camera = static_cast<Camera*>(glfwGetWindowUserPointer(window));
+    Camera* camera = static_cast<GlfwUserPtrData*>(
+        glfwGetWindowUserPointer(window))->camera;
 
     if (button != GLFW_MOUSE_BUTTON_LEFT) return;
     
@@ -127,7 +140,9 @@ void EventHandler::onClick(GLFWwindow* window, int button, int action,
 void EventHandler::onKey(GLFWwindow* window, int key, int scancode, int action,
     int mods)
 {
-    Camera* camera = static_cast<Camera*>(glfwGetWindowUserPointer(window));
+    GlfwUserPtrData* userPtr = static_cast<GlfwUserPtrData*>(
+        glfwGetWindowUserPointer(window));
+    Camera *camera = userPtr->camera;
 
     char newMove = '\0';
 
@@ -141,9 +156,25 @@ void EventHandler::onKey(GLFWwindow* window, int key, int scancode, int action,
         case GLFW_KEY_RIGHT_SHIFT:
             camera->pressingShift = action == GLFW_PRESS;
             break;
+
+        case GLFW_KEY_LEFT_CONTROL:
+        case GLFW_KEY_RIGHT_CONTROL:
+            camera->pressingCtrl = action == GLFW_PRESS;
+            break;
         
         case GLFW_KEY_R:
-            newMove = 'R'; break;
+        {
+            if (camera->pressingCtrl && action == GLFW_PRESS)
+            {
+                camera->centerView();
+                userPtr->MVPupdated = false;
+                break;
+            }
+            else
+            {
+                newMove = 'R'; break;
+            }
+        }
         case GLFW_KEY_L:
             newMove = 'L'; break;
         case GLFW_KEY_U:
@@ -158,7 +189,20 @@ void EventHandler::onKey(GLFWwindow* window, int key, int scancode, int action,
         case GLFW_KEY_M:
             newMove = 'M'; break;
         case GLFW_KEY_S:
-            newMove = 'S'; break;
+        {
+            if (camera->pressingCtrl && action == GLFW_PRESS)
+            {
+                rcube::Algorithm dest;
+                userPtr->cube->scramble(12, &dest);
+                std::cout << "Scramble: " << dest.to_string() << std::endl;
+                userPtr->cubeUpdated = false;
+                break;
+            }
+            else
+            {
+                newMove = 'S'; break;
+            }
+        }
         case GLFW_KEY_E:
             newMove = 'E'; break;
         
@@ -172,13 +216,16 @@ void EventHandler::onKey(GLFWwindow* window, int key, int scancode, int action,
 
     if (newMove == '\0' || action == GLFW_RELEASE) return;
 
-    camera->movesQueue.push(rcube::Move(newMove,
+    userPtr->cube->performMove(rcube::Move(newMove,
         1 - (camera->pressingShift * 2)));
+    userPtr->cubeUpdated = false;
 }
 
 void EventHandler::onDrag(GLFWwindow* window, double xpos, double ypos)
 {
-    Camera* camera = static_cast<Camera*>(glfwGetWindowUserPointer(window));
+    GlfwUserPtrData* userPtr = static_cast<GlfwUserPtrData*>(
+        glfwGetWindowUserPointer(window));
+    Camera *camera = userPtr->camera;
 
     if (!camera->arcball.on) return;
 
@@ -193,13 +240,15 @@ void EventHandler::onDrag(GLFWwindow* window, double xpos, double ypos)
         glm::vec3 axis = glm::inverse(glm::mat3(camera->viewMatrix)) * rot.axis;
         camera->viewMatrix = glm::rotate(camera->viewMatrix, rot.angle, axis);
 
-        camera->updated = false;
+        userPtr->MVPupdated = false;
     }
 }
 
 void EventHandler::onResize(GLFWwindow* window, int width, int height)
 {
-    Camera* camera = static_cast<Camera*>(glfwGetWindowUserPointer(window));
+    GlfwUserPtrData* userPtr = static_cast<GlfwUserPtrData*>(
+        glfwGetWindowUserPointer(window));
+    Camera *camera = userPtr->camera;
 
     camera->windowSize = {width, height};
     camera->arcball.windowSize = {width, height};
@@ -208,5 +257,5 @@ void EventHandler::onResize(GLFWwindow* window, int width, int height)
     
     glViewport(0, 0, width, height);
 
-    camera->updated = false;
+    userPtr->MVPupdated = false;
 }

@@ -2,8 +2,9 @@
 
 #include <glm/glm.hpp>
 #include <GLFW/glfw3.h>
+#include <glm/gtc/matrix_transform.hpp>
 
-#include <queue>
+#include "text.hpp"
 
 #include <rcube.hpp>
 
@@ -82,6 +83,7 @@ struct GlfwUserPtrData
 {
     Camera *camera;
     rcube::Cube *cube;
+    Text *text;
     
     bool MVPupdated = false; // false when MPV needs to be sent to the GPU
     bool cubeUpdated = false; // false when the cube needs to be re-rendered

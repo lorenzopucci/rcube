@@ -1,7 +1,3 @@
-#include <GLFW/glfw3.h>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-
 #include <math.h>
 #include <algorithm>
 #include <iostream>
@@ -258,4 +254,6 @@ void EventHandler::onResize(GLFWwindow* window, int width, int height)
     glViewport(0, 0, width, height);
 
     userPtr->MVPupdated = false;
+
+    userPtr->text->onResize(width, height);
 }

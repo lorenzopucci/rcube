@@ -4,14 +4,11 @@
 
 #include <glm/glm.hpp>
 
-#define VERTEX_SHADER "ui/res/shaders/vertex.shader"
-#define FRAGMENT_SHADER "ui/res/shaders/fragment.shader"
+#define STD_VS "ui/res/shaders/standard.vs"
+#define STD_FS "ui/res/shaders/standard.fs"
 
-/*
-unsigned int createShader (
-	const std::string& vsPath,
-	const std::string& fsPath);
-*/
+#define TXT_VS "ui/res/shaders/text.vs"
+#define TXT_FS "ui/res/shaders/text.fs"
 
 class Shader
 {
@@ -22,6 +19,7 @@ public:
 	void bind() const;
 	void unbind() const;
 
+	void setUniform1i(const std::string &name, int data);
 	void setUniform4f(const std::string& name,
 		float r, float g, float b, float a);
 	void setUniformMat4f(const std::string& name, const glm::mat4& mat);

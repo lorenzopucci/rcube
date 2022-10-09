@@ -37,6 +37,7 @@ void Cube::update(const rcube::BlockArray &blocks)
 void Cube::draw(VertexArray* va, Shader* shader, Camera* camera)
 {
     // render black inner cube
+    shader->bind();
     camera->scale(3.19f);
     shader->setUniformMat4f("MVP", camera->getMVP());
     shader->setUniform4f("u_color", 0.0f, 0.0f, 0.0f, 1.0f);

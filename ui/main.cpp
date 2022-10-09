@@ -16,6 +16,7 @@
 #include "shader.hpp"
 #include "renderer.hpp"
 #include "camera.hpp"
+#include "text.hpp"
 
 #define WINDOW_WIDTH 640
 #define WINDOW_HEIGHT 480
@@ -62,7 +63,11 @@ int main ()
 
     Camera *camera = new Camera(window);
     rcube::Cube cube = rcube::Cube();
-    GlfwUserPtrData *userPtr = new GlfwUserPtrData {camera, &cube};
+    Text text = Text(WINDOW_WIDTH, WINDOW_HEIGHT);
+
+    GlfwUserPtrData *userPtr = new GlfwUserPtrData {camera, &cube, &text};
+
+    Cube cube3d(cube.blockRender());
 
     glfwSetWindowUserPointer(window, userPtr);
     glfwSetScrollCallback(window, EventHandler::onScroll);
@@ -71,7 +76,7 @@ int main ()
     glfwSetCursorPosCallback(window, EventHandler::onDrag);
     glfwSetWindowSizeCallback(window, EventHandler::onResize);
 
-    Shader shader(VERTEX_SHADER, FRAGMENT_SHADER);
+    Shader shader(STD_VS, STD_FS);
     shader.bind();
 
 
@@ -81,8 +86,6 @@ int main ()
         "Use your keyboard to apply moves by pressing keys such as R, U, F etc."
         " Holding\nshift will reverse the direction of the moves. "
         "Press ctrl+R to center the view\nand ctrl+S to scramble the cube.\n\n";
-
-    Cube cube3d(cube.blockRender());
     
     VertexArray va;
     VertexBuffer vb(vertices, 8 * 3 * sizeof(float));
@@ -106,6 +109,7 @@ int main ()
         }
 
         cube3d.draw(&va, &shader, camera);
+        text.draw();
 
         glfwSwapBuffers(window);
         glfwPollEvents();

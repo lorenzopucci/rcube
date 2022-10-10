@@ -25,15 +25,22 @@ void String::computeBuffers(Font *font, int sW, int sH)
     float vBuffer[content.length() * 16];
     unsigned int iBuffer[content.length() * 6];
 
-    int currX = 0;
+    int currX = 0, currY = 0;
 
 	for (unsigned int i = 0 ; i < content.length(); ++i)
     {
+        if (content[i] == '\n')
+        {
+            currY += font->charHeight + LINE_SPACING;
+            currX = 0;
+            continue;
+        }
+
         glm::vec2 vertices[4] = {
-            {currX, font->charHeight},
-            {currX, 0.0f},
-            {currX + font->charWidth, font->charHeight},
-            {currX + font->charWidth, 0.0f}
+            {currX, currY + font->charHeight},
+            {currX, currY},
+            {currX + font->charWidth, currY + font->charHeight},
+            {currX + font->charWidth, currY}
         };
 
         float charX = float(font->vOffset * (content[i] % 16));
@@ -96,11 +103,11 @@ Text::Text(const int &sW, const int &sH, const Font &_font)
 }
 
 unsigned int Text::addString(const std::string &_data, const int &_x,
-    const int &_y)
+    const int &_y, const int &_stickTime)
 {
     lastIndex++;
 
-    String str = {_data, _x, _y, lastIndex};
+    String str = {_data, _x, _y, lastIndex, _stickTime, time(NULL)};
     str.computeBuffers(&font, width, height);
     strings.push_back(str);
     
@@ -151,9 +158,15 @@ void Text::draw()
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    for (String str : strings)
+    for (auto it = strings.begin(); it < strings.end(); ++it)
     {
-        render(str.va, str.ib, shader);
+        if (it->stickTime != -1 && time(NULL) - it->startTime >= it->stickTime)
+        {
+            strings.erase(it);
+            continue;
+        }
+
+        render(it->va, it->ib, shader);
     }
 
     glDisable(GL_BLEND);

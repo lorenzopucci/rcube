@@ -11,12 +11,15 @@
 
 #include <string>
 #include <vector>
+#include <ctime>
 
 #include "shader.hpp"
 #include "texture.hpp"
 #include "vertexBuffer.hpp"
 #include "indexBuffer.hpp"
 #include "vertexArray.hpp"
+
+#define LINE_SPACING 5
 
 struct Font
 {
@@ -32,6 +35,9 @@ struct String
   int x, y; // position on screen
 
   unsigned int id;
+
+  int stickTime;
+  time_t startTime;
 
   VertexArray *va;
   VertexBuffer *vb;
@@ -49,7 +55,8 @@ public:
       {UBUNTU_PATH, 512, 512, 16, 32, 1.0f/32.0f, 1.0f/16.0f});
 
     unsigned int addString(const std::string &_data, const int &_x,
-      const int &_y);
+      const int &_y, const int &_stickTime = -1);
+    // _sticktime is in seconds. -1 disables this feature
 
     void removeString(unsigned int _id);
 
@@ -61,7 +68,7 @@ public:
     void onResize(const int &_w, const int &_h);
 
     void draw();
-    
+
 private:
     Font font;
     Texture *texture;

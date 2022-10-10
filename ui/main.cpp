@@ -102,6 +102,8 @@ int main ()
     layout.push<float>(3);
     va.addBuffer(vb, layout);
 
+    //text.addString("Hello world!", 10, 10, 5);
+
     while (!glfwWindowShouldClose(window))
     {
     	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

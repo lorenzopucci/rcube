@@ -96,4 +96,5 @@ struct GlfwUserPtrData
     
     bool MVPupdated = false; // false when MPV needs to be sent to the GPU
     bool cubeUpdated = false; // false when the cube needs to be re-rendered
+    bool hasBeenScrambled = false;
 };

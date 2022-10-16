@@ -40,6 +40,15 @@ rcube::Center* rcube::Cube::getCenterFrom(const rcube::Coordinates &coords)
     assert(false);
 }
 
+rcube::Center* rcube::Cube::getCenterFrom(const rcube::Orientation &orient)
+{
+    for (int i = 0; i < 6; ++i)
+    {
+        if (centers[i].orientation == orient) return centers + i;
+    }
+    assert(false);
+}
+
 std::string colorize (const char& color)
 {
     switch (color)
@@ -253,6 +262,33 @@ void rcube::Cube::scramble(const int &length, rcube::Algorithm* dest)
     rcube::Algorithm scramble = rcube::Algorithm::generateScramble(length);
     this->performAlgorithm(scramble);
     *dest = scramble;
+}
+
+bool rcube::Cube::isSolved()
+{
+    for (int i = 0; i < 12; ++i)
+    {
+        for (int k = 0; k < 2; ++k)
+        {
+            if (edges[i].stickers[k].color !=
+                getCenterFrom(edges[i].stickers[k].orientation)->color)
+            {
+                return false;
+            }
+        }
+
+        if (i >= 8) continue;
+
+        for (int k = 0; k < 3; ++k)
+        {
+            if (corners[i].stickers[k].color !=
+                getCenterFrom(corners[i].stickers[k].orientation)->color)
+            {
+                return false;
+            }
+        }
+    }
+    return true;
 }
 
 rcube::Net rcube::Cube::netRender()

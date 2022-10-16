@@ -361,6 +361,12 @@ namespace rcube
          * generated algorithm (default=nullptr)
         */
 
+       bool isSolved();
+       /*
+       * Returns true when the cube is solved (all the blocks are in the right
+       * place).
+       */
+
         rcube::Net netRender();
         /*
          * Renders the cube as an array of faces (see rcube::Net).
@@ -396,6 +402,9 @@ namespace rcube
         // get a pointer to the <color> center
 
         rcube::Center* getCenterFrom(const rcube::Coordinates &coords);
+        // get a pointer to the center placed at <coords>
+
+        rcube::Center* getCenterFrom(const rcube::Orientation &orient);
         // get a pointer to the center placed at <coords>
     };
 };

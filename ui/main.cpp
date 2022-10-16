@@ -118,6 +118,11 @@ int main ()
             cube3d.update(cube.blockRender());
             userPtr->cubeUpdated = true;
         }
+        if (userPtr->hasBeenScrambled && cube.isSolved())
+        {
+            text.addString("Solved!", 10, 10, 5);
+            userPtr->hasBeenScrambled = false;
+        }
 
         cube3d.draw(&va, &shader, camera);
         text.draw();

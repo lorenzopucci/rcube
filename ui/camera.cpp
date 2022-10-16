@@ -201,6 +201,7 @@ void EventHandler::onKey(GLFWwindow* window, int key, int scancode, int action,
                 userPtr->cube->scramble(12, &dest);
                 std::cout << "Scramble: " << dest.to_string() << std::endl;
                 userPtr->cubeUpdated = false;
+                userPtr->hasBeenScrambled = true;
                 break;
             }
             else

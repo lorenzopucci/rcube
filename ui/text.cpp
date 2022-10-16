@@ -9,6 +9,7 @@
 
 #include <vector>
 #include <assert.h>
+#include <algorithm>
 
 #include <GL/glew.h>
 #include <glm/glm.hpp>
@@ -24,6 +25,32 @@ void String::computeBuffers(Font *font, int sW, int sH)
 {
     float vBuffer[content.length() * 16];
     unsigned int iBuffer[content.length() * 6];
+
+    int xPos = x, yPos = y;
+
+    if (x < 0)
+    {
+        int maxLineSize = 0, currLineSize = 0;
+        for (int i = 0; i < content.length(); ++i)
+        {
+            if (content[i] == '\n')
+            {
+                if (currLineSize > maxLineSize) maxLineSize = currLineSize;
+                currLineSize = 0;
+                continue;
+            }
+            currLineSize++;
+        }
+        if (currLineSize > maxLineSize) maxLineSize = currLineSize;
+
+        xPos = sW + x - (maxLineSize * font->charWidth);
+    }
+    if (y < 0)
+    {
+        int linesNum = 1 + std::count(content.begin(), content.end(), '\n');
+        yPos = sH + y - (linesNum * font->charHeight) -
+            ((linesNum - 1) * LINE_SPACING);
+    }
 
     int currX = 0, currY = 0;
 
@@ -56,9 +83,10 @@ void String::computeBuffers(Font *font, int sW, int sH)
 
         for (int k = 0; k < 4; ++k)
         {
-            vBuffer[(i * 16) + (k * 4)] = Text::toGlCoords(vertices[k].x+x, sW);
-            vBuffer[(i * 16) + (k * 4) + 1] = Text::toGlCoords(sH -
-                (vertices[k].y + y), sH);
+            vBuffer[(i * 16) + (k * 4)] = Text::toGlCoords(
+                vertices[k].x + xPos, sW);
+            vBuffer[(i * 16) + (k * 4) + 1] = Text::toGlCoords(
+                sH - (vertices[k].y + yPos), sH);
             vBuffer[(i * 16) + (k * 4) + 2] = UVs[k].x;
             vBuffer[(i * 16) + (k * 4) + 3] = UVs[k].y;
         }

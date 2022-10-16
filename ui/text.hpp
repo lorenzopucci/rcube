@@ -57,6 +57,8 @@ public:
     unsigned int addString(const std::string &_data, const int &_x,
       const int &_y, const int &_stickTime = -1);
     // _sticktime is in seconds. -1 disables this feature
+    // negative values for _x and _y will cause the string to be printed with
+    // offset _x and _y from the OPPOSITE side of the window (right or bottom)
 
     void removeString(unsigned int _id);
 

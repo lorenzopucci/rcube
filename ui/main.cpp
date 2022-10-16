@@ -73,8 +73,10 @@ int main ()
     Camera *camera = new Camera(window);
     rcube::Cube cube = rcube::Cube();
     Text text = Text(WINDOW_WIDTH, WINDOW_HEIGHT);
+    Timer timer(&text, 10, 10);
 
-    GlfwUserPtrData *userPtr = new GlfwUserPtrData {camera, &cube, &text};
+    GlfwUserPtrData *userPtr = new GlfwUserPtrData {camera, &cube, &text,
+        &timer};
 
     Cube cube3d(cube.blockRender());
 
@@ -102,8 +104,6 @@ int main ()
     layout.push<float>(3);
     va.addBuffer(vb, layout);
 
-    //text.addString("Hello world!", 10, 10, 5);
-
     while (!glfwWindowShouldClose(window))
     {
     	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -120,11 +120,13 @@ int main ()
         }
         if (userPtr->hasBeenScrambled && cube.isSolved())
         {
-            text.addString("Solved!", 10, 10, 5);
+            text.addString("Solved!", -10, 10, 5);
             userPtr->hasBeenScrambled = false;
+            timer.stop();
         }
 
         cube3d.draw(&va, &shader, camera);
+        timer.refresh();
         text.draw();
 
         glfwSwapBuffers(window);

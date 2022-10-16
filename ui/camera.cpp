@@ -200,8 +200,12 @@ void EventHandler::onKey(GLFWwindow* window, int key, int scancode, int action,
                 rcube::Algorithm dest;
                 userPtr->cube->scramble(12, &dest);
                 std::cout << "Scramble: " << dest.to_string() << std::endl;
+                
                 userPtr->cubeUpdated = false;
                 userPtr->hasBeenScrambled = true;
+
+                userPtr->timer->resume();
+                userPtr->timer->start();
                 break;
             }
             else

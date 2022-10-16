@@ -200,3 +200,48 @@ void Text::draw()
     glDisable(GL_BLEND);
 }
 
+
+Timer::Timer(Text *text, int x, int y)
+{
+    _text = text;
+    _strId = _text->addString("", x, y);
+}
+
+Timer::~Timer()
+{
+    _text->removeString(_strId);
+}
+
+void Timer::start()
+{
+    _started = true;
+    _startTime = time(NULL);
+    _text->editString(_strId, "0:0");
+}
+
+void Timer::stop()
+{
+    _started = false;
+    _currTime = time(NULL) - _startTime;
+}
+
+void Timer::resume()
+{
+    _started = false;
+    _currTime = 0;
+    _startTime = 0;
+}
+
+void Timer::refresh()
+{
+    if (!_started) return;
+
+    time_t newTime = time(NULL) - _startTime;
+
+    if (newTime == _currTime) return;
+    _currTime = newTime;
+
+    std::string strData = std::to_string(newTime / 60) + ":" +
+        std::to_string(newTime % 60);
+    _text->editString(_strId, strData);
+}

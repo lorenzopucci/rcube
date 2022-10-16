@@ -81,3 +81,22 @@ private:
     std::vector<String> strings;
     unsigned int lastIndex = 0;
 };
+
+class Timer
+{
+public:
+  Timer(Text *text, int x, int y);
+  ~Timer();
+
+  void start();
+  void stop();
+  void resume();
+  void refresh();
+
+private:
+  unsigned int _strId;
+  Text  *_text;
+  time_t _startTime = 0;
+  time_t _currTime = 0;
+  bool _started = false;
+};

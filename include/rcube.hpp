@@ -385,6 +385,14 @@ namespace rcube
         * background).
         */
 
+       int runScript(const std::string &path);
+       /*
+       * Runs a Lua script. All the C++ functions that have been ported to Lua
+       * are listed in the documentation.
+       * @param path: the path to the file.
+       * @return: 1 on success, 0 on failure
+       */
+
     private:
         // internally, the cube is abstracted as an array of 6 rcube::Center, 12
         // rcube::Edge and 8 rcube::Corner

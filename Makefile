@@ -30,16 +30,20 @@ TEST_OBJECTS := $(patsubst $(TEST_DIR)/%.cpp,$(BIN_DIR)/test_%.o,$(TEST_FILES))
 UI_FILES := $(wildcard $(UI_DIR)/*.cpp)
 UI_OBJECTS := $(patsubst $(UI_DIR)/%.cpp,$(BIN_DIR)/ui_%.o,$(UI_FILES))
 
+RCUBE_LD_LIBS := lua
+RCUBE_CFLAGS := $(shell pkg-config --cflags $(RCUBE_LD_LIBS))
+RCUBE_LD_FLAGS := $(shell pkg-config --libs $(RCUBE_LD_LIBS))
+
 # only used to compile the UI
 UI_LD_LIBS := glew glfw3 glm
-UI_CFLAGS := $(shell pkg-config --cflags $(UI_LD_LIBS))
-UI_LD_FLAGS := $(shell pkg-config --libs $(UI_LD_LIBS))
+UI_CFLAGS := $(shell pkg-config --cflags $(UI_LD_LIBS)) $(RCUBE_CFLAGS)
+UI_LD_FLAGS := $(shell pkg-config --libs $(UI_LD_LIBS)) $(RCUBE_LD_FLAGS)
 
 # create directories if they don't exist
 $(shell if [ ! -d "${BIN_DIR}" ]; then mkdir -p ${BIN_DIR}; fi;)
 
 $(TEST_TARGET): $(OBJECTS) $(TEST_OBJECTS)
-	$(CC) $(CFLAGS) -o $@ $^
+	$(CC) $(CFLAGS) -o $@ $^ $(RCUBE_CFLAGS) $(RCUBE_LD_FLAGS)
 
 $(UI_TARGET): $(OBJECTS) $(UI_OBJECTS)
 	$(CC) $(CFLAGS) -o $@ $^ $(UI_CFLAGS) $(UI_LD_FLAGS)

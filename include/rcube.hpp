@@ -31,6 +31,7 @@ namespace rcube
 
         bool operator<(const rcube::Orientation& a) const;
         bool operator==(const rcube::Orientation& a) const;
+        bool operator!=(const rcube::Orientation& a) const;
 
         void rotate(const Axis& axis, int step);
         /*
@@ -106,6 +107,7 @@ namespace rcube
         */
 
         Coordinates2D();
+        ~Coordinates2D() = default;
 
         Coordinates2D(const int& x, const int& y);
         /*
@@ -128,6 +130,13 @@ namespace rcube
 
         bool operator<(const rcube::Coordinates2D& a) const;
         bool operator==(const rcube::Coordinates2D& a) const;
+
+        void rotate(int step);
+        /*
+        * Rotates around (0;0) of step * 90°
+        * @param step: the number of 90° rotations to apply (positive =
+        * anticlockwise)
+        */
     };
 
 
@@ -361,11 +370,27 @@ namespace rcube
          * generated algorithm (default=nullptr)
         */
 
-       bool isSolved();
-       /*
-       * Returns true when the cube is solved (all the blocks are in the right
-       * place).
-       */
+        bool isSolved();
+        /*
+        * Returns true when the cube is solved (all the blocks are in the right
+        * place).
+        */
+
+        bool matches(const rcube::Orientation &face, const std::string &expr);
+        /*
+        * Checks if a face matches a pattern. This is one of the most powerful
+        * tools of this library, please refer to the documentation for a thorough
+        * understanding.
+        * @param face: the face to check
+        * @param expr: the pattern (its syntax is explained in the documentation)
+        */
+
+        //bool matches(const MatchingLayer &layer, const std::string &expr);
+        /*
+        * Checks if a layer matches a pattern.
+        * @param layer: the layer to check (see include/utility.hpp)
+        * @param expr: the pattern (its syntax is explained in the documentation)
+        */
 
         rcube::Net netRender();
         /*

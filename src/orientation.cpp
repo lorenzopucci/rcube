@@ -20,6 +20,11 @@ bool rcube::Orientation::operator==(const rcube::Orientation& a) const
     return (axis == a.axis) && (direction == a.direction);
 }
 
+bool rcube::Orientation::operator!=(const rcube::Orientation& a) const
+{
+    return (axis != a.axis) || (direction != a.direction);
+}
+
 void rcube::Orientation::rotate(const Axis& rotAxis, int step)
 {
     // reduce input to {-2, -1, 0, 1, 2}

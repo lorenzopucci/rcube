@@ -34,11 +34,5 @@ int main()
 {
   Cube cube = Cube();
 
-  Algorithm scramble;
-  cube.scramble(12, &scramble);
-  std::cout << "Scramble used: " << scramble.to_string() << std::endl;
-
-  cube.display();
-
-  //printBlocks(cube.blockRender());
+  cube.runScript("test/main.lua");
 }

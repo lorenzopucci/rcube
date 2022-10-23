@@ -25,7 +25,7 @@ rcube::Coordinates2D::Coordinates2D(const int& x, const int& y)
 rcube::Coordinates2D::Coordinates2D(const rcube::Coordinates& coords3D,
     const rcube::Orientation& o)
 {
-    coords[Axis::X] = coords3D.coords[(o.axis + 1) % 3];
+    coords[Axis::X] = coords3D.coords[(o.axis + 1) % 3] * o.direction;
     coords[Axis::Y] = coords3D.coords[(o.axis + 2) % 3];
 }
 

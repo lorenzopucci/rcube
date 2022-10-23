@@ -8,6 +8,7 @@
 */
 
 #include <rcube.hpp>
+#include <iostream>
 
 bool handleLetters(Color color, char given, char otherCase,
     std::map<char, Color> *letterMapping)
@@ -49,10 +50,11 @@ bool handleLetters(Color color, char given, char otherCase,
 bool stickerMatches(const Color &color, const char &match,
     std::map<char, Color> *letterMapping = {})
 {
-    if (match == '*') return true;
-    
     switch (match)
     {
+        case '*':
+            return true;
+
         case 'W':
         case 'Y':
         case 'G':
@@ -139,6 +141,11 @@ bool rcube::Cube::matches(const rcube::Orientation &face,
 
     for (int rot = 0; rot < 4; ++rot)
     {
+        letterMapping.clear();
+        // if the center is a letter, it must be reincluded in the map
+        stickerMatches(getCenterFrom(face)->color, expr[4], &letterMapping);
+
+
         for (int i = 0; i < 12; ++i)
         {
             for (int k = 0; k < 2; ++k)

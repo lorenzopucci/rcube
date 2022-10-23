@@ -35,16 +35,12 @@ typedef int (RcubeLua::*memberFunc)(lua_State *L);
 template <memberFunc func>
 int runFunction(lua_State *L) {
     RcubeLua *instance = *static_cast<RcubeLua**>(lua_getextraspace(L));
-    return ((*instance).*func)(L);
+    return (instance->*func)(L);
 }
 
-int rcube::Cube::runScript(const std::string &path)
+void initLua(lua_State *L)
 {
-    lua_State *L = luaL_newstate();
     luaL_openlibs(L);
-
-    RcubeLua instance(this);
-    *static_cast<RcubeLua**>(lua_getextraspace(L)) = &instance;
 
     lua_register(L, "scramble", &runFunction<&RcubeLua::scramble>);
     lua_register(L, "performMove", &runFunction<&RcubeLua::performMove>);
@@ -52,8 +48,32 @@ int rcube::Cube::runScript(const std::string &path)
         &runFunction<&RcubeLua::performAlgorithm>);
     lua_register(L, "isSolved", &runFunction<&RcubeLua::isSolved>);
     lua_register(L, "display", &runFunction<&RcubeLua::display>);
+    lua_register(L, "matches", &runFunction<&RcubeLua::matches>);
+}
 
-    int status = checkStatus(L, luaL_dofile(L, "scripts/test.lua"));
+int rcube::Cube::runScript(const std::string &path)
+{
+    lua_State *L = luaL_newstate();
+    initLua(L);
+
+    RcubeLua instance(this);
+    *static_cast<RcubeLua**>(lua_getextraspace(L)) = &instance;
+
+    int status = checkStatus(L, luaL_dofile(L, path.c_str()));
+
+    lua_close(L);
+    return status;
+}
+
+int rcube::Cube::runCommand(const std::string &cmd)
+{
+    lua_State *L = luaL_newstate();
+    initLua(L);
+
+    RcubeLua instance(this);
+    *static_cast<RcubeLua**>(lua_getextraspace(L)) = &instance;
+
+    int status = checkStatus(L, luaL_dostring(L, cmd.c_str()));
 
     lua_close(L);
     return status;

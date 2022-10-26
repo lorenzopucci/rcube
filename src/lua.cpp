@@ -48,7 +48,8 @@ void initLua(lua_State *L)
         &runFunction<&RcubeLua::performAlgorithm>);
     lua_register(L, "isSolved", &runFunction<&RcubeLua::isSolved>);
     lua_register(L, "display", &runFunction<&RcubeLua::display>);
-    lua_register(L, "matches", &runFunction<&RcubeLua::matches>);
+    lua_register(L, "faceMatches", &runFunction<&RcubeLua::faceMatches>);
+    lua_register(L, "layerMatches", &runFunction<&RcubeLua::layerMatches>);
 }
 
 int rcube::Cube::runScript(const std::string &path)

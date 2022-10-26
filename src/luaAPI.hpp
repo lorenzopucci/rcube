@@ -29,7 +29,9 @@ public:
 
     int display(lua_State *L);
 
-    int matches(lua_State *L);
+    int faceMatches(lua_State *L);
+
+    int layerMatches(lua_State *L);
 
     rcube::Cube *_cube;
 };

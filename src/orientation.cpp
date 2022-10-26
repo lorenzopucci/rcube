@@ -41,15 +41,9 @@ void rcube::Orientation::rotate(const Axis& rotAxis, int step)
         return;
     }
 
-    for (int i = 0; i < 3; ++i)
-    {
-        // new axis is neither rotation nor current
-        if (i != rotAxis && i != axis)
-        {
-            axis = static_cast<Axis>(i);
-            break;
-        }
-    }
+    // new axis is neither rotAxis nor old axis
+    axis = static_cast<Axis>(3 - (rotAxis + axis));
+
 
     if (step == 1)
     {
@@ -64,6 +58,15 @@ void rcube::Orientation::rotate(const Axis& rotAxis, int step)
         // indices of axis and lastAxis is -1
         if ((axis - lastAxis + 3) % 3 == 2) direction *= -1;
     }
+}
+
+rcube::Orientation rcube::Orientation::getRotated(const Axis& rotAxis,
+    int step) const
+{
+    rcube::Orientation newOrient = {axis, direction};
+    newOrient.rotate(rotAxis, step);
+    
+    return newOrient;
 }
 
 std::vector<rcube::Orientation> rcube::Orientation::iterate()

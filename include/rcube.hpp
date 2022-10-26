@@ -41,6 +41,12 @@ namespace rcube
         * to someone looking at the origin from the positive side of the axis)
         */
 
+       rcube::Orientation getRotated(const Axis &axis, int step) const;
+       /*
+        * The same as Orientation::rotate, but the new orientation is returned
+        * rather than applied to the current instance.
+        */
+
        static std::vector<rcube::Orientation> iterate();
        /*
        * Returns a vector containing all 6 possible orientations in the following
@@ -55,6 +61,8 @@ namespace rcube
         * This struct is used to represent the 3D coordinates of the cube's
         * blocks. Therefore, each coordinate is only meant to be -1, 0 or 1.
         */
+
+        Coordinates();
 
         Coordinates(const int& x, const int& y, const int& z);
         /*
@@ -376,7 +384,8 @@ namespace rcube
         * place).
         */
 
-        bool matches(const rcube::Orientation &face, const std::string &expr);
+        bool faceMatches(const rcube::Orientation &face,
+            const std::string &expr);
         /*
         * Checks if a face matches a pattern. This is one of the most powerful
         * tools of this library, please refer to the documentation for a thorough
@@ -385,10 +394,14 @@ namespace rcube
         * @param expr: the pattern (its syntax is explained in the documentation)
         */
 
-        //bool matches(const MatchingLayer &layer, const std::string &expr);
+        bool layerMatches(const rcube::Orientation &layer,
+            const std::string &expr);
         /*
-        * Checks if a layer matches a pattern.
-        * @param layer: the layer to check (see include/utility.hpp)
+        * Checks if a layer (the 12 stickers adjacent to the same face) matches
+        * a pattern.
+        * @param layer: the layer to check (expressed as the orientation of the
+        * adjacent face). Use Orientation::axis=0 for central layers (for example
+        * {X, 0} is the layer that is rotated by a M move).
         * @param expr: the pattern (its syntax is explained in the documentation)
         */
 

@@ -11,6 +11,16 @@ cube. The headers are in `/include` and the source files are in `/src`.
 `/ui`.
 - A set of test programs for the library for debugging purposes (in `/test`).
 
+## Features
+- [*] Basic interaction with a `3*3*3` cube;
+- [*] Rendering in multiple formats;
+- [*] Expandibility with Lua scripts (most of the C++ API is also available
+in Lua);
+- [*] Cube status retrieval in multiple and advanced ways (such as regual
+expressions);
+- [ ] Solving algorithms;
+- [ ] Interaction with cubes of different sizes (`2*2*2`, `4*4*4`...);
+
 ## Using the library
 The library's main header file is `/include/rcube.hpp`. It is a long file,
 including some internal stuff as well. Nevertheless, everything you should
@@ -19,21 +29,18 @@ care about are only three classes:
 - `rcube::Move` to apply rotations to the cube
 - `rcube::Algorithm` to apply sets of moves to the cube
 
-Use the test scripts as examples.
-
-## Using the frontend
-To use the frontend, simply run `make ui`. This will compile the frontend as
-well as the backend. Make sure you have all the necessary dependencies: `glew`,
-`glfw3` and `glm`.
+[Continue reading](doc/README.md)
 
 ## Make targets
 - `lib`: compiles all the files in `/src` without linking them to a main
-function.
+function. The only dependency required is `lua`.
 - `test`: compiles the library and the test files and links them together.
-- `ui`: compiles the library and the frontend and links them together.
+- `ui`: compiles the library and the frontend and links them together. The
+dependencies required here are `glew`, `glfw3` and `glm`.
 
 All the binaries produced will be put in `/bin`. Use `make clean` to empty
 that folder.
 
 <br>
+
 *A work in progress by Lorenzo Pucci*

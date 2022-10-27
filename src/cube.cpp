@@ -138,26 +138,7 @@ rcube::Cube::Cube(const Color& topColor, const Color& frontColor)
         if (d1 == 1) a1++;
     }
 
-    // rotate the cube to the desired position
-    if (getCenterFrom(topColor)->location.coords[Axis::X] != 0)
-        this->performMove(rcube::Move(MoveFace::ROTATE_Z, MoveDirection::CW));
-
-    for (int i = 0; i < 4; ++i)
-    {
-        if (getCenterFrom(rcube::Coordinates(0, 1, 0))->color == topColor)
-            break;
-        this->performMove(rcube::Move(MoveFace::ROTATE_X, MoveDirection::CW));
-    }
-
-    for (int i = 0; i < 4; ++i)
-    {
-        if (getCenterFrom(rcube::Coordinates(0, 0, 1))->color == frontColor)
-            break;
-        this->performMove(rcube::Move(MoveFace::ROTATE_Y, MoveDirection::CW));
-    }
-
-    assert(getCenterFrom(rcube::Coordinates(0, 0, 1))->color == frontColor
-        && getCenterFrom(rcube::Coordinates(0, 1, 0))->color == topColor);
+    rotateTo(topColor, frontColor);
 }
 
 void rcube::Cube::performMove (const rcube::Move& move)
@@ -289,6 +270,33 @@ bool rcube::Cube::isSolved()
         }
     }
     return true;
+}
+
+void rcube::Cube::rotateTo(const Color &topColor, const Color &frontColor)
+{
+    if (getCenterFrom(topColor)->location.coords[Axis::X] != 0)
+        this->performMove(rcube::Move(MoveFace::ROTATE_Z, MoveDirection::CW));
+
+    for (int i = 0; i < 4; ++i)
+    {
+        if (getCenterFrom(rcube::Coordinates(0, 1, 0))->color == topColor)
+            break;
+        this->performMove(rcube::Move(MoveFace::ROTATE_X, MoveDirection::CW));
+    }
+
+    for (int i = 0; i < 4; ++i)
+    {
+        if (getCenterFrom(rcube::Coordinates(0, 0, 1))->color == frontColor)
+            break;
+        this->performMove(rcube::Move(MoveFace::ROTATE_Y, MoveDirection::CW));
+    }
+
+    if (getCenterFrom(rcube::Coordinates(0, 0, 1))->color != frontColor
+        || getCenterFrom(rcube::Coordinates(0, 1, 0))->color != topColor)
+    {
+        throw std::invalid_argument("topColor and frontColor are not two "
+            "adjacent colors");
+    }
 }
 
 rcube::Net rcube::Cube::netRender()

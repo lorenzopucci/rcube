@@ -366,9 +366,8 @@ namespace rcube
         * Initializes a solved cube with the <topColor> face on top and the
         * <frontColor> one in front.
         * 
-        * NOTE: this constructor may result in a program crash (for assertion
-        * failure) if topColor and fronColor are not two adjacent colors (for
-        * example when one is white and the other is yellow)
+        * NOTE: this function may throw a `std::invalid_argument` exception if
+        * topColor and frontColor are not two adjacent colors.
         */
 
         ~Cube() = default;
@@ -395,6 +394,15 @@ namespace rcube
         /*
         * Returns true when the cube is solved (all the blocks are in the right
         * place).
+        */
+
+        void rotateTo(const Color& topColor, const Color& frontColor);
+        /*
+        * Rotates the cube so as topColor and frontColor become the colors of
+        * the top and front center respectively.
+        * 
+        * NOTE: this function may throw a `std::invalid_argument` exception if
+        * topColor and frontColor are not two adjacent colors.
         */
 
         bool faceMatches(const rcube::Orientation &face,

@@ -1,6 +1,8 @@
 # `rcube::Cube`
 This class represents a $3\times3\times3$ Rubik's cube.
 
+<br>
+
 ### `rcube::Cube::Cube(const Color& topColor = Color::White, const Color& frontColor = Color::Green)`
 
 - `topColor`: the color of the top face (default: `Color::White`)
@@ -9,10 +11,10 @@ This class represents a $3\times3\times3$ Rubik's cube.
 This is the default and only constructor. It initializes a solved cube with the
 orientation specified by `topColor` and `frontColor`.
 
-NOTE: this constructor may result in a program crash (for assertion failure) if
-`topColor` and `fronColor` are not two adjacent colors (for example when one is
-white and the other is yellow).
+NOTE: this function may throw a `std::invalid_argument` exception if `topColor`
+and `frontColor` are not two adjacent colors.
 
+<br>
 
 ### `void rcube::Cube::performMove(const rcube::Move &move)`
 
@@ -21,6 +23,7 @@ white and the other is yellow).
 Applies a move to the cube. A move can be the rotation of a layer or the
 rotation of the cube itself (change of viewpoint).
 
+<br>
 
 ### `void rcube::Cube::performAlgorithm (const rcube::Algorithm& algorithm)`
 
@@ -28,10 +31,25 @@ rotation of the cube itself (change of viewpoint).
 
 Applies an algorithm (set of moves) to the cube.
 
+<br>
 
 ### `bool rcube::Cube::isSolved()`
 Returns `true` when the cube is solved (all the blocks are in the right place).
 
+<br>
+
+### `void rcube::Cube::rotateTo(const Color& topColor, const Color& frontColor)`
+
+- `topColor`: the color that the top center will have
+- `frontColor`: the color that the front center will have
+
+Rotates the cube until `topColor` and `frontColor` become the colors of the
+top and front center respectively.
+
+NOTE: this function may throw a `std::invalid_argument` exception if `topColor`
+and `frontColor` are not two adjacent colors.
+
+<br>
 
 ### `void rcube::Cube::scramble(const int &length = 12, rcube::Algorithm* dest = nullptr)`
 
@@ -42,6 +60,7 @@ stored (default: `nullptr`);
 Applies a randomly generated algorithm of the given size. The algorithm can be
 retrieved by specifying a valid pointer.
 
+<br>
 
 ### `rcube::Cube::faceMatches(const rcube::Orientation &face, const std::string &expr)`
 
@@ -72,6 +91,7 @@ For example, a cross is `*A*AAA*A*`
 
 Note: the string MUST be 9 characters long, otherwise it will not be accepted.
 
+<br>
 
 ### `rcube::Cube::layerMatches(const rcube::Orientation &layer, const std::string &expr)`
 
@@ -87,6 +107,7 @@ the middle layers (the ones to which the moves `M`, `S` and `E` are applied).
 The regualr expession's syntax is the same as in `rcube::cube::faceMatches`
 but instead of 9, it must be 12 characters long.
 
+<br>
 
 ### `rcube::Net rcube::Cube::netRender()`
 
@@ -94,6 +115,8 @@ Returns a 2D representation of the cube (basically a
 `rcube::Orientation → rcube::Face` map, where each face is a
 `rcube::Coordinates2D → Color` map). For more details, see
 `rcube::Net` [here](others.md).
+
+<br>
 
 ### `rcube::BlockArray rcube::Cube::blockRender()`
 
@@ -105,6 +128,7 @@ A `rcube::BlockArray` is basically an array of 26 `rcube::Blocks`. Each block
 contains its position (in `rcube::Coordinates`) and a
 `rcube::Orientation → Color` map for its stickers.
 
+<br>
 
 ### `void rcube::Cube::display()`
 
@@ -113,6 +137,7 @@ debugging purposes): each face is printed individually as a 3*3 grid of
 characters indicating the color (with the corresponging color in the
 background).
 
+<br>
 
 ### `int rcube::Cube::runScript(const std::string &path)`
 
@@ -122,6 +147,7 @@ Runs a Lua script from a file. Returns 1 on success, 0 on failure. Most of the
 C++ API has been ported to Lua, for more details about the functions available
 [read this](lua.md).
 
+<br>
 
 ### `int rcube::Cube::runCommand(const std::string &cmd)`
 

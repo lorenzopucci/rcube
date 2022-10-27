@@ -7,6 +7,7 @@ following functions:
 
 This file contains a list of all the Lua functions available.
 
+<br>
 
 ### `<string> scramble(<number> length)`
 
@@ -15,6 +16,7 @@ This file contains a list of all the Lua functions available.
 Equivalent to `rcube::Cube::scramble`. The generated algorithm is returned as
 a string.
 
+<br>
 
 ### `performMove(<string> move, <number> direction)`
 
@@ -23,6 +25,7 @@ a string.
 
 Equivalent to `rcube::Cube::performMove`. Does not return anything.
 
+<br>
 
 ### `performAlgorithm(<string> algorithm)`
 
@@ -30,11 +33,13 @@ Equivalent to `rcube::Cube::performMove`. Does not return anything.
 
 Equivalent to `rcube::Cube::performAlgorithm`. Does not return anything.
 
+<br>
 
 ### `<boolean> isSolved()`
 
 Equivalent to `rcube::Cube::isSolved`. Returns `true` when the cube is solved.
 
+<br>
 
 ### `<boolean> faceMatches(<number> axis, <number> direction, <string> expr)`
 
@@ -46,6 +51,7 @@ Equivalent to `rcube::Cube::isSolved`. Returns `true` when the cube is solved.
 
 Equivalent to `rcube::Cube::faceMatches`.
 
+<br>
 
 ### `<boolean> layerMatches(<number> axis, <number> direction, <string> expr)`
 

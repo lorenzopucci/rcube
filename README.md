@@ -12,11 +12,11 @@ cube. The headers are in `/include` and the source files are in `/src`.
 - A set of test programs for the library for debugging purposes (in `/test`).
 
 ## Features
-- [*] Basic interaction with a `3*3*3` cube;
-- [*] Rendering in multiple formats;
-- [*] Expandibility with Lua scripts (most of the C++ API is also available
+- [x] Basic interaction with a `3*3*3` cube;
+- [x] Rendering in multiple formats;
+- [x] Expandibility with Lua scripts (most of the C++ API is also available
 in Lua);
-- [*] Cube status retrieval in multiple and advanced ways (such as regual
+- [x] Cube status retrieval in multiple and advanced ways (such as regual
 expressions);
 - [ ] Solving algorithms;
 - [ ] Interaction with cubes of different sizes (`2*2*2`, `4*4*4`...);

@@ -27,9 +27,18 @@ enum MoveFace
     DOWN = 'D',
     FRONT = 'F',
     BACK = 'B',
+
+    RIGHT_W = 'r',
+    LEFT_W = 'l',
+    UP_W = 'u',
+    DOWN_W = 'd',
+    FRONT_W = 'f',
+    BACK_W = 'b',
+
     MIDDLE = 'M',
     EQUATOR = 'E',
     SIDE = 'S',
+    
     ROTATE_X = 'x',
     ROTATE_Y = 'y',
     ROTATE_Z = 'z'

@@ -326,7 +326,7 @@ namespace rcube
         * Concatenates two algorithms
         */
 
-       void push(const rcube::Move &m);
+       inline void push(const rcube::Move &m);
         /*
         * Appends a rcube::Move to the algorithm
         */
@@ -342,7 +342,7 @@ namespace rcube
         * (e.g. "RUR'U'").
         */
 
-       int length() const;
+       inline int length() const;
        /*
        * Returns the length of the algorithm (number of moves).
        */

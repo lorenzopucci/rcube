@@ -13,6 +13,7 @@
 
 #include <rcube.hpp>
 #include <utility.hpp>
+#include "algoList.hpp"
 
 rcube::Algorithm::Algorithm(const std::string& fromString)
 {
@@ -25,9 +26,18 @@ rcube::Algorithm::Algorithm(const std::string& fromString)
       case LEFT:
       case DOWN:
       case BACK:
+
+      case UP_W:
+      case FRONT_W:
+      case RIGHT_W:
+      case LEFT_W:
+      case DOWN_W:
+      case BACK_W:
+
       case MIDDLE:
       case EQUATOR:
       case SIDE:
+
       case ROTATE_X:
       case ROTATE_Y:
       case ROTATE_Z:
@@ -35,17 +45,17 @@ rcube::Algorithm::Algorithm(const std::string& fromString)
         switch (fromString[i+1])
         {
           case '\'':
-            this->algorithm.push_back(Move(fromString[i], CCW));
+            push(Move(fromString[i], CCW));
             ++i;
             break;
 
           case '2':
-            this->algorithm.push_back(Move(fromString[i], DOUBLE));
+            push(Move(fromString[i], DOUBLE));
             ++i;
             break;
 
           default:
-            this->algorithm.push_back(Move(fromString[i], CW));
+            push(Move(fromString[i], CW));
             break;
         }
         break;
@@ -58,6 +68,37 @@ rcube::Algorithm::Algorithm(const std::string& fromString)
       case ']':
       case '\t':
       {
+        break;
+      }
+
+      case '$':
+      {
+        if (fromString[i+1] != '(')
+        {
+          throw std::invalid_argument("Invalid algorithm");
+          delete this;
+        }
+
+        i += 2;
+        std::stringstream ss;
+
+        while (fromString[i] != ')')
+        {
+          ss << fromString[i];
+          i++;
+        }
+        if (algoDb.find(ss.str()) == algoDb.end())
+        {
+          throw std::invalid_argument("Cannot find algorithm: " + ss.str());
+          delete this;
+        }
+
+        for (rcube::Move move : rcube::Algorithm(algoDb[ss.str()]).algorithm)
+        {
+          push(move);
+        }
+
+        i++;
         break;
       }
 
@@ -97,7 +138,7 @@ rcube::Algorithm rcube::Algorithm::operator+(const rcube::Algorithm a)
   return rcube::Algorithm(dest);
 }
 
-void rcube::Algorithm::push(const rcube::Move &m)
+inline void rcube::Algorithm::push(const rcube::Move &m)
 {
   algorithm.push_back(m);
 }
@@ -145,7 +186,7 @@ std::string rcube::Algorithm::to_string() const
   return ss.str();
 }
 
-int rcube::Algorithm::length() const
+inline int rcube::Algorithm::length() const
 {
   return algorithm.size();
 }

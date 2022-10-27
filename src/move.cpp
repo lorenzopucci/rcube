@@ -21,10 +21,12 @@ Axis getAxis(const MoveFace& face)
     case RIGHT:
     case ROTATE_X:
       return Axis::X;
+
     case UP:
     case DOWN:
     case ROTATE_Y:
       return Axis::Y;
+
     case FRONT:
     case BACK:
     case ROTATE_Z:

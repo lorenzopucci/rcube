@@ -153,6 +153,27 @@ void rcube::Cube::performMove (const rcube::Move& move)
         case BACK:
             rotateLayer(move); return;
 
+        case UP_W:
+        case FRONT_W:
+        case RIGHT_W:
+        case LEFT_W:
+        case DOWN_W:
+        case BACK_W:
+        {
+            std::map<MoveFace, std::string> algos = {
+                {UP_W, "Dy"},
+                {FRONT_W, "Bz"},
+                {RIGHT_W, "Lx"},
+                {LEFT_W, "Rx'"},
+                {DOWN_W, "Uy'"},
+                {BACK_W, "Fz'"}
+            };
+
+            rcube::Algorithm algo(algos[move.face]);
+            performAlgorithm(algo * move.direction);
+            return;
+        }
+
         case ROTATE_X:
         case ROTATE_Y:
         case ROTATE_Z:

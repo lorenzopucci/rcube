@@ -29,6 +29,16 @@ rcube::Coordinates2D::Coordinates2D(const rcube::Coordinates& coords3D,
     coords[Axis::Y] = coords3D.coords[(o.axis + 2) % 3];
 }
 
+inline int rcube::Coordinates2D::x() const
+{
+    return coords[Axis::X];
+}
+
+inline int rcube::Coordinates2D::y() const
+{
+    return coords[Axis::Y];
+}
+
 bool rcube::Coordinates2D::operator<(const rcube::Coordinates2D& a) const
 {
     return (coords[X] < a.coords[X]) ||

@@ -95,6 +95,13 @@ namespace rcube
         * axes (see the Axis enum in include/utility.hpp) like coords[Axis::X]
         */
 
+        inline int x() const;
+        inline int y() const;
+        inline int z() const;
+        /*
+        * These three functions return the x, y or z values.
+        */
+
         bool operator==(const rcube::Coordinates &a) const;
 
         void rotate(const Axis& axis, int step);
@@ -134,6 +141,12 @@ namespace rcube
         int coords[2];
         /*
         * The coordinates are stored as in rcube::Coordinates
+        */
+
+        inline int x() const;
+        inline int y() const;
+        /*
+        * These three functions return the x or y values.
         */
 
         bool operator<(const rcube::Coordinates2D& a) const;

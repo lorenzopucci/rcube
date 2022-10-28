@@ -66,7 +66,11 @@ public:
 
         void update(const rcube::BlockArray &blocks);
 
-        void draw(VertexArray* va, Shader* shader, Camera* camera);
+        void draw(Camera* camera, Shader *shader);
+
 private:
         rcube::BlockArray blocks;
+
+        VertexArray *va = new VertexArray();
+        VertexBuffer *vb;
 };

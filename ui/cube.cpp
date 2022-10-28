@@ -36,6 +36,12 @@ std::map<Color, RGBA> colors
 Cube::Cube(const rcube::BlockArray &blocks)
 {
     this->update(blocks);
+
+    vb = new VertexBuffer(vertices, 8 * 3 * sizeof(float));
+
+    VertexBufferLayout layout;
+    layout.push<float>(3);
+    va->addBuffer(*vb, layout);
 }
 
 void Cube::update(const rcube::BlockArray &blocks)
@@ -43,7 +49,7 @@ void Cube::update(const rcube::BlockArray &blocks)
     this->blocks = blocks;
 }
 
-void Cube::draw(VertexArray* va, Shader* shader, Camera* camera)
+void Cube::draw(Camera* camera, Shader *shader)
 {
     // render black inner cube
     shader->bind();

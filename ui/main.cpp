@@ -87,9 +87,6 @@ int main ()
     glfwSetCursorPosCallback(window, EventHandler::onDrag);
     glfwSetWindowSizeCallback(window, EventHandler::onResize);
 
-    Shader shader(STD_VS, STD_FS);
-    shader.bind();
-
 
     std::cout << "RCUBE testing interface\n"
         "Copyright (c) 2022 Lorenzo Pucci\n"
@@ -98,11 +95,7 @@ int main ()
         " Holding\nshift will reverse the direction of the moves. "
         "Press ctrl+R to center the view\nand ctrl+S to scramble the cube.\n\n";
     
-    VertexArray va;
-    VertexBuffer vb(vertices, 8 * 3 * sizeof(float));
-    VertexBufferLayout layout;
-    layout.push<float>(3);
-    va.addBuffer(vb, layout);
+    Shader shader(STD_VS, STD_FS);
 
     while (!glfwWindowShouldClose(window))
     {
@@ -125,7 +118,7 @@ int main ()
             timer.stop();
         }
 
-        cube3d.draw(&va, &shader, camera);
+        cube3d.draw(camera, &shader);
         timer.refresh();
         text.draw();
 

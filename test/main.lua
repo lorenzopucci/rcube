@@ -92,6 +92,15 @@ testList(find("y"), {x= 0, y= 1, z= 0})
 io.write("Find: edge ... ")
 testList(find("yg"), {x= 1, y= 0, z= -1})
 
+io.write("Get orientation: corner ... ")
+testList(getStickerOrientation({x=1, y=1, z=-1}, "w"), {axis=2, direction=-1})
+
+io.write("Get orientation: edge ... ")
+testList(getStickerOrientation({x=1, y=-1, z=0}, "r"), {axis=0, direction=1})
+
+io.write("Get orientation: center ... ")
+testList(getStickerOrientation({x=0, y=-1, z=0}, "w"), {axis=1, direction=-1})
+
 
 print("\n~~~ Restoring the cube ~~~")
 performAlgorithm("R'U'M2")

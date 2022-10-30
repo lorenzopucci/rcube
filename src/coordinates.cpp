@@ -53,6 +53,17 @@ bool rcube::Coordinates::operator==(const rcube::Coordinates &a) const
     return true;
 }
 
+bool rcube::Coordinates::operator!=(const rcube::Coordinates &a) const
+{
+    return (x() != a.x() || y() != a.y() || z() != a.z());
+}
+
+std::string rcube::Coordinates::to_string() const
+{
+    return "(" + std::to_string(x()) + ", " + std::to_string(y()) + ", " +
+        std::to_string(z()) + ")";
+}
+
 void rcube::Coordinates::rotate (const Axis& axis, int step)
 {
     step = ((-step % 4) + 4) % 4; // sanitize input

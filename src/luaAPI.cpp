@@ -18,7 +18,7 @@ extern "C"
 #include "luaAPI.hpp"
 
 
-void returnList(lua_State *L, const std::map<std::string, int> &data)
+void pushTable(lua_State *L, const std::map<std::string, int> &data)
 {
     lua_createtable(L, data.size(), 0);
     int newTable = lua_gettop(L);
@@ -28,6 +28,20 @@ void returnList(lua_State *L, const std::map<std::string, int> &data)
         lua_pushnumber(L, it->second);
         lua_setfield(L, -2, it->first.c_str());
     }
+}
+
+void loadTable(lua_State *L, std::map<std::string, int> *data)
+{
+    if (!lua_istable(L, 1)) return;
+
+    for (auto it = data->begin(); it != data->end(); ++it)
+    {
+        lua_pushstring(L, it->first.c_str());
+        lua_gettable(L, 1);
+        it->second = lua_tointeger(L, -1);
+        lua_pop(L, 1);
+    }
+    return;
 }
 
 RcubeLua::RcubeLua(rcube::Cube *cube)
@@ -106,8 +120,26 @@ int RcubeLua::find(lua_State *L)
     std::map<std::string, int> toReturn = {{"x", result.x()},
         {"y", result.y()}, {"z", result.z()}};
 
-    returnList(L, toReturn);
+    pushTable(L, toReturn);
     return 1; 
+}
+
+int RcubeLua::getStickerOrientation(lua_State *L)
+{
+    std::map<std::string, int> coords = {{"x", 0}, {"y", 0}, {"z", 0}};
+    loadTable(L, &coords);
+    rcube::Coordinates coordinates(coords["x"], coords["y"], coords["z"]);
+
+    Color color = static_cast<Color>((lua_tostring(L, 2))[0]);
+
+    rcube::Orientation orient = _cube->getStickerOrientation(coordinates,
+        color);
+
+    std::map<std::string, int> toReturn = {{"axis", orient.axis},
+        {"direction", orient.direction}};
+    pushTable(L, toReturn);
+    
+    return 1;
 }
 
 int RcubeLua::display(lua_State *L)

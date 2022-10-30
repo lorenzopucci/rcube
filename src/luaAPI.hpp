@@ -31,6 +31,8 @@ public:
 
     int find(lua_State *L);
 
+    int getStickerOrientation(lua_State *L);
+
     int display(lua_State *L);
 
     int faceMatches(lua_State *L);

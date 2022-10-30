@@ -54,3 +54,51 @@ rcube::Coordinates rcube::Cube::find(const Color& c1, const Color &c2,
         std::to_string((char)c1) + ", " + std::to_string((char)c2) + ", " +
         std::to_string((char)c3) + ")");
 }
+
+rcube::Orientation rcube::Cube::getStickerOrientation(const rcube::Coordinates
+    &coords, const Color &color)
+{
+    int blockType = abs(coords.x()) + abs(coords.y()) + abs(coords.z());
+
+    if (blockType == 3) // corner
+    {
+        for (int i = 0; i < 8; ++i)
+        {
+            if (corners[i].location != coords) continue;
+
+            for (int k = 0; k < 3; ++k)
+            {
+                if (corners[i].stickers[k].color == color)
+                    return corners[i].stickers[k].orientation;
+            }
+
+            break;
+        }
+    }
+    else if (blockType == 2) // edge
+    {
+        for (int i = 0; i < 12; ++i)
+        {
+            if (edges[i].location != coords) continue;
+
+            for (int k = 0; k < 2; ++k)
+            {
+                if (edges[i].stickers[k].color == color)
+                    return edges[i].stickers[k].orientation;
+            }
+
+            break;
+        }
+    }
+    else if (blockType == 1) // center
+    {
+        for (int i = 0; i < 6; ++i)
+        {
+            if (centers[i].location == coords && centers[i].color == color)
+                return centers[i].orientation;
+        }
+    }
+
+    throw std::invalid_argument("Cannot find a " + std::to_string((char)color)
+        + " sticker at " + coords.to_string());
+}

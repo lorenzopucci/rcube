@@ -103,6 +103,9 @@ namespace rcube
         */
 
         bool operator==(const rcube::Coordinates &a) const;
+        bool operator!=(const rcube::Coordinates &a) const;
+
+        std::string to_string() const;
 
         void rotate(const Axis& axis, int step);
         /*
@@ -425,6 +428,16 @@ namespace rcube
         *
         * NOTE: this function may throw a std::invalid_argument exception if
         * the three colors cannot form a corner.
+        */
+
+        rcube::Orientation getStickerOrientation(const rcube::Coordinates
+            &coords, const Color &color);
+        /*
+        * Returns the orientation of the sticker of a given color belonging to
+        * the block at given coordinates.
+        * 
+        * NOTE: this function may throw a std::invalid_argument exception if
+        * there is no sticker of such color in the block.
         */
 
         bool faceMatches(const rcube::Orientation &face,

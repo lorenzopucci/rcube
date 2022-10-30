@@ -7,6 +7,8 @@
 * not, see: <https://mit-license.org>.
 */
 
+#include <iostream>
+
 extern "C"
 {
     #include <lua.hpp>
@@ -14,6 +16,19 @@ extern "C"
 
 #include <rcube.hpp>
 #include "luaAPI.hpp"
+
+
+void returnList(lua_State *L, const std::map<std::string, int> &data)
+{
+    lua_createtable(L, data.size(), 0);
+    int newTable = lua_gettop(L);
+
+    for (auto it = data.begin(); it != data.end(); ++it)
+    {
+        lua_pushnumber(L, it->second);
+        lua_setfield(L, -2, it->first.c_str());
+    }
+}
 
 RcubeLua::RcubeLua(rcube::Cube *cube)
 {
@@ -52,6 +67,47 @@ int RcubeLua::isSolved(lua_State *L)
 {
     lua_pushboolean(L, _cube->isSolved());
     return 1;
+}
+
+int RcubeLua::rotateTo(lua_State *L)
+{
+    std::string tc = lua_tostring(L, 1);
+    std::string fc = lua_tostring(L, 2);
+
+    try
+    {
+        _cube->rotateTo(static_cast<Color>(tc[0]), static_cast<Color>(fc[0]));
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+    }
+}
+
+int RcubeLua::find(lua_State *L)
+{
+    std::string stks = lua_tostring(L, 1);
+
+    rcube::Coordinates result;
+
+    switch (stks.length())
+    {
+        case 1:
+            result = _cube->find(static_cast<Color>(stks[0])); break;
+        case 2:
+            result = _cube->find(static_cast<Color>(stks[0]),
+                static_cast<Color>(stks[1])); break;
+        case 3:
+            result = _cube->find(static_cast<Color>(stks[0]),
+                static_cast<Color>(stks[1]),
+                static_cast<Color>(stks[2])); break;
+    }
+
+    std::map<std::string, int> toReturn = {{"x", result.x()},
+        {"y", result.y()}, {"z", result.z()}};
+
+    returnList(L, toReturn);
+    return 1; 
 }
 
 int RcubeLua::display(lua_State *L)

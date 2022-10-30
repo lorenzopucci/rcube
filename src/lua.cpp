@@ -47,6 +47,8 @@ void initLua(lua_State *L)
     lua_register(L, "performAlgorithm",
         &runFunction<&RcubeLua::performAlgorithm>);
     lua_register(L, "isSolved", &runFunction<&RcubeLua::isSolved>);
+    lua_register(L, "rotateTo", &runFunction<&RcubeLua::rotateTo>);
+    lua_register(L, "find", &runFunction<&RcubeLua::find>);
     lua_register(L, "display", &runFunction<&RcubeLua::display>);
     lua_register(L, "faceMatches", &runFunction<&RcubeLua::faceMatches>);
     lua_register(L, "layerMatches", &runFunction<&RcubeLua::layerMatches>);

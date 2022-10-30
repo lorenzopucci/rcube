@@ -44,21 +44,6 @@ rcube::Coordinates::Coordinates(const rcube::Orientation& o1,
     coords[o3.axis] = o3.direction;
 }
 
-inline int rcube::Coordinates::x() const
-{
-    return coords[Axis::X];
-}
-
-inline int rcube::Coordinates::y() const
-{
-    return coords[Axis::Y];
-}
-
-inline int rcube::Coordinates::z() const
-{
-    return coords[Axis::Z];
-}
-
 bool rcube::Coordinates::operator==(const rcube::Coordinates &a) const
 {
     for (int i = 0; i < 3; ++i)

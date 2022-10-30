@@ -62,7 +62,7 @@ namespace rcube
         * blocks. Therefore, each coordinate is only meant to be -1, 0 or 1.
         */
 
-        Coordinates();
+        Coordinates() = default;
 
         Coordinates(const int& x, const int& y, const int& z);
         /*
@@ -95,9 +95,9 @@ namespace rcube
         * axes (see the Axis enum in include/utility.hpp) like coords[Axis::X]
         */
 
-        inline int x() const;
-        inline int y() const;
-        inline int z() const;
+        inline int x() const { return coords[Axis::X]; }
+        inline int y() const { return coords[Axis::Y]; }
+        inline int z() const { return coords[Axis::Z]; }
         /*
         * These three functions return the x, y or z values.
         */
@@ -143,8 +143,8 @@ namespace rcube
         * The coordinates are stored as in rcube::Coordinates
         */
 
-        inline int x() const;
-        inline int y() const;
+        inline int x() const { return coords[Axis::X]; }
+        inline int y() const { return coords[Axis::Y]; }
         /*
         * These three functions return the x or y values.
         */
@@ -403,6 +403,28 @@ namespace rcube
         * 
         * NOTE: this function may throw a `std::invalid_argument` exception if
         * topColor and frontColor are not two adjacent colors.
+        */
+
+       rcube::Coordinates find(const Color& c1);
+        /*
+        * Returns the coordinates of a center given its color.
+        */
+
+        rcube::Coordinates find(const Color& c1, const Color &c2);
+        /*
+        * Returns the coordinates of an edge given the colors of its stickers.
+        *
+        * NOTE: this function may throw a std::invalid_argument exception if
+        * the two colors are not adjacent.
+        */
+
+        rcube::Coordinates find(const Color& c1, const Color &c2,
+            const Color &c3);
+        /*
+        * Returns the coordinates of a corner given the colors of its stickers.
+        *
+        * NOTE: this function may throw a std::invalid_argument exception if
+        * the three colors cannot form a corner.
         */
 
         bool faceMatches(const rcube::Orientation &face,

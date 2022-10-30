@@ -27,6 +27,10 @@ public:
 
     int isSolved(lua_State *L);
 
+    int rotateTo(lua_State *L);
+
+    int find(lua_State *L);
+
     int display(lua_State *L);
 
     int faceMatches(lua_State *L);

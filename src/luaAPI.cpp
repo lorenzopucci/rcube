@@ -150,13 +150,14 @@ int RcubeLua::display(lua_State *L)
 
 int RcubeLua::faceMatches(lua_State *L)
 {
-    int axis = lua_tonumber(L, 1);
-    int direction = lua_tonumber(L, 2);
-    std::string expr = lua_tostring(L, 3);
+    std::map<std::string, int> orient = {{"axis", 0}, {"direction", 0}};
+    loadTable(L, &orient);
+    rcube::Orientation orientation = {(Axis)orient["axis"],
+        orient["direction"]};
 
-    rcube::Orientation orient = {static_cast<Axis>(axis), direction};
+    std::string expr = lua_tostring(L, 2);
 
-    bool result = _cube->faceMatches(orient, expr);
+    bool result = _cube->faceMatches(orientation, expr);
 
     lua_pushboolean(L, result);
     return 1;
@@ -164,13 +165,14 @@ int RcubeLua::faceMatches(lua_State *L)
 
 int RcubeLua::layerMatches(lua_State *L)
 {
-    int axis = lua_tonumber(L, 1);
-    int direction = lua_tonumber(L, 2);
-    std::string expr = lua_tostring(L, 3);
+    std::map<std::string, int> orient = {{"axis", 0}, {"direction", 0}};
+    loadTable(L, &orient);
+    rcube::Orientation orientation = {(Axis)orient["axis"],
+        orient["direction"]};
 
-    rcube::Orientation orient = {static_cast<Axis>(axis), direction};
+    std::string expr = lua_tostring(L, 2);
 
-    bool result = _cube->layerMatches(orient, expr);
+    bool result = _cube->layerMatches(orientation, expr);
 
     lua_pushboolean(L, result);
     return 1;

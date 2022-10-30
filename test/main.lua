@@ -47,19 +47,19 @@ print("\n~~~ Performing M2E2S2 ~~~")
 performAlgorithm("M2E2S2")
 
 io.write("Face match: stars ... ")
-test(faceMatches(0, 1, "*********"), true)
+test(faceMatches({axis=0, direction=1}, "*********"), true)
 
 io.write("Face match: colors ... ")
-test(faceMatches(1, 1, "WYWYWYWYW"), true)
+test(faceMatches({axis=1, direction=1}, "WYWYWYWYW"), true)
 
 io.write("Face match: not colors ... ")
-test(faceMatches(0, -1, "rowyORroy"), true)
+test(faceMatches({axis=0, direction=-1}, "rowyORroy"), true)
 
 io.write("Layer match: colors in central layer ... ")
-test(layerMatches(2, 0, "YWYOROWYWROR"), true)
+test(layerMatches({axis=2, direction=0}, "YWYOROWYWROR"), true)
 
 io.write("Layer match: colors in lateral layer ... ")
-test(layerMatches(0, -1, "YWYGBGroygoy"), true)
+test(layerMatches({axis=0, direction=-1}, "YWYGBGroygoy"), true)
 
 io.write("Find: corner ... ")
 testList(find("wbo"), {x= -1, y= 1, z= -1})
@@ -69,22 +69,22 @@ print("\n~~~ Performing M2UR ~~~")
 performAlgorithm("M2E2S2 M2UR")
 
 io.write("Face match: letters ... ")
-test(faceMatches(1, 1, "AACaaDAAD"), true)
+test(faceMatches({axis=1, direction=1}, "AACaaDAAD"), true)
 
 io.write("Face match: mixture 1 ... ")
-test(faceMatches(2, -1, "AOOaGrA**"), true)
+test(faceMatches({axis=2, direction=-1}, "AOOaGrA**"), true)
 
 io.write("Face match: mixture 2 ... ")
-test(faceMatches(2, 1, "**wGBAaBC"), false)
+test(faceMatches({axis=2, direction=1}, "**wGBAaBC"), false)
 
 io.write("Layer match: letters ... ")
-test(layerMatches(1, 1, "AACAADcaadDd"), true)
+test(layerMatches({axis=1, direction=1}, "AACAADcaadDd"), true)
 
 io.write("Layer match: mixture 1 ... ")
-test(layerMatches(1, -1, "AADW*dywOGrZ"), false)
+test(layerMatches({axis=1, direction=-1}, "AADW*dywOGrZ"), false)
 
 io.write("Layer match: mixture 2 ... ")
-test(layerMatches(0, 0, "AaAR*gAAyGGr"), true)
+test(layerMatches({axis=0, direction=0}, "AaAR*gAAyGGr"), true)
 
 io.write("Find: center ... ")
 testList(find("y"), {x= 0, y= 1, z= 0})

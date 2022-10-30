@@ -41,11 +41,44 @@ Equivalent to `rcube::Cube::isSolved`. Returns `true` when the cube is solved.
 
 <br>
 
-### `<boolean> faceMatches(<number> axis, <number> direction, <string> expr)`
+### `rotateTo(<string> topColor, <string> frontColor)`
 
-- `axis`: along with `direction` determines the face to check. Use `0` for `X`,
- `1` for `Y` and `2` for `Z`;
-- `direction` along with `axis` determines the face to check;
+- `topColor`: the color that the top center will have
+- `frontColor`: the color that the front center will have
+
+Equivalent to `rcube::Cube::rotateTo`.
+
+<br>
+
+### `<table> find(<string> stickers)`
+
+- `stickers`: string containing a character for each sticker in the block to
+find (e.g. `gw` for the green-white edge);
+
+Equivalent to `rcube::Cube::find`. The coordinates are returned in a table:
+`{x=#, y=#, z=#}`.
+
+<br>
+
+### `<table> getStickerOrientation(<table> position, <string> color)`
+
+- `position`: the coordinates of the block to find (`{x=#, y=#, z=#}`);
+- `color`: the color of the sticker to find;
+
+Equivalent to `rcube::Cube::getStickerOrientation`. The orientation is returned
+in a table: `{axis=#, direction=#}`.
+
+<br>
+
+### `display()`
+
+Equivalent to `rcube::Cube::display`.
+
+<br>
+
+### `<boolean> faceMatches(<table> orientation, <string> expr)`
+
+- `orientation`: the orientation of the face to check (`{axis=#, direction=#}`);
 - `expr`: the regular expression to compare with the face. For its syntax
 [read here](cube.md)
 
@@ -53,11 +86,9 @@ Equivalent to `rcube::Cube::faceMatches`.
 
 <br>
 
-### `<boolean> layerMatches(<number> axis, <number> direction, <string> expr)`
+### `<boolean> layerMatches(<table> orientation, <string> expr)`
 
-- `axis`: along with `direction` determines the layer to check. Use `0` for `X`,
- `1` for `Y` and `2` for `Z`;
-- `direction` along with `axis` determines the layer to check;
+- `orientation`: the orientation of the layer to check (`{axis=#, direction=#}`);
 - `expr`: the regular expression to compare with the face. For its syntax
 [read here](cube.md)
 

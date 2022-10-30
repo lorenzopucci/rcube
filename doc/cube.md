@@ -33,6 +33,17 @@ Applies an algorithm (set of moves) to the cube.
 
 <br>
 
+### `void rcube::Cube::scramble(const int &length = 12, rcube::Algorithm* dest = nullptr)`
+
+- `length`: the scramble's length (number of random moves, default: `12`);
+- `dest`: a pointer to an algorithm where the generated algorithm will be
+stored (default: `nullptr`);
+
+Applies a randomly generated algorithm of the given size. The algorithm can be
+retrieved by specifying a valid pointer.
+
+<br>
+
 ### `bool rcube::Cube::isSolved()`
 Returns `true` when the cube is solved (all the blocks are in the right place).
 
@@ -40,8 +51,8 @@ Returns `true` when the cube is solved (all the blocks are in the right place).
 
 ### `void rcube::Cube::rotateTo(const Color& topColor, const Color& frontColor)`
 
-- `topColor`: the color that the top center will have
-- `frontColor`: the color that the front center will have
+- `topColor`: the color that the top center will have;
+- `frontColor`: the color that the front center will have;
 
 Rotates the cube until `topColor` and `frontColor` become the colors of the
 top and front center respectively.
@@ -51,14 +62,47 @@ and `frontColor` are not two adjacent colors.
 
 <br>
 
-### `void rcube::Cube::scramble(const int &length = 12, rcube::Algorithm* dest = nullptr)`
+### `rcube::Coordinates rcube::Cube::find(const Color& c1)`
 
-- `length`: the scramble's length (number of random moves, default: `12`);
-- `dest`: a pointer to an algorithm where the generated algorithm will be
-stored (default: `nullptr`);
+- `c1`: the color of the center to find;
 
-Applies a randomly generated algorithm of the given size. The algorithm can be
-retrieved by specifying a valid pointer.
+Returns the coordinates of a center given its color.
+
+<br>
+
+### `rcube::Coordinates rcube::Cube::find(const Color& c1, const Color &c2)`
+
+- `c1` and `c2`: the colors of the stickers belonging to the edge to find;
+
+Returns the coordinates of an edge given the colors of its stickers.
+
+NOTE: this function may throw a `std::invalid_argument` exception if the two
+colors are not adjacent.
+
+<br>
+
+### `rcube::Coordinates rcube::Cube::find(const Color& c1, const Color &c2, const Color &c3)`
+
+- `c1`, `c2` and `c3`: the colors of the stickers belonging to the corner to
+find;
+
+Returns the coordinates of a corner given the colors of its stickers.
+
+NOTE: this function may throw a `std::invalid_argument` exception if the three
+colors cannot form a corner.
+
+<br>
+
+### `rcube::Orientation rcube::Cube::getStickerOrientation(const rcube::Coordinates &coords, const Color &color)`
+
+- `coords`: the coordinates of the block the sticker belongs to;
+- `color`: the sticker's color;
+
+Returns the orientation of the sticker of a given color belonging to the block
+at some given coordinates.
+ 
+NOTE: this function may throw a `std::invalid_argument` exception if there is
+no sticker of such color in the block or if the coordinates are not valid.
 
 <br>
 

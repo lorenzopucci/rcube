@@ -51,6 +51,7 @@ void initLua(lua_State *L)
     lua_register(L, "find", &runFunction<&RcubeLua::find>);
     lua_register(L, "getStickerOrientation",
         &runFunction<&RcubeLua::getStickerOrientation>);
+    lua_register(L, "getFaceColor", &runFunction<&RcubeLua::getFaceColor>);
     lua_register(L, "display", &runFunction<&RcubeLua::display>);
     lua_register(L, "faceMatches", &runFunction<&RcubeLua::faceMatches>);
     lua_register(L, "layerMatches", &runFunction<&RcubeLua::layerMatches>);

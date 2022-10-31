@@ -106,6 +106,14 @@ no sticker of such color in the block or if the coordinates are not valid.
 
 <br>
 
+### `Color rcube::Cube::getFaceColor(const rcube::Orientation &face)`
+
+- `face`: the face (as a `rcube::Orientation`);
+
+Returns the color of the center of a given face.
+
+<br>
+
 ### `rcube::Cube::faceMatches(const rcube::Orientation &face, const std::string &expr)`
 
 - `face`: the face to check (expressed with its orientation);

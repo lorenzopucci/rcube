@@ -8,6 +8,8 @@
 */
 
 #include <iostream>
+#include <string>
+#include <map>
 
 extern "C"
 {
@@ -139,6 +141,18 @@ int RcubeLua::getStickerOrientation(lua_State *L)
         {"direction", orient.direction}};
     pushTable(L, toReturn);
     
+    return 1;
+}
+
+int RcubeLua::getFaceColor(lua_State *L)
+{
+    std::map<std::string, int> orient = {{"axis", 0}, {"direction", 0}};
+    loadTable(L, &orient);
+    rcube::Orientation orientation = {(Axis)orient["axis"],
+        orient["direction"]};
+
+    char res[2] = {(char)_cube->getFaceColor(orientation), '\0'};
+    lua_pushstring(L, res);
     return 1;
 }
 

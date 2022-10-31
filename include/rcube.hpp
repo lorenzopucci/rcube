@@ -440,6 +440,11 @@ namespace rcube
         * there is no sticker of such color in the block.
         */
 
+       Color getFaceColor(const rcube::Orientation &face);
+       /*
+       * Returns the color of the face at the given orientation.
+       */
+
         bool faceMatches(const rcube::Orientation &face,
             const std::string &expr);
         /*

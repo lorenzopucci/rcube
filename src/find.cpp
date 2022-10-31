@@ -102,3 +102,8 @@ rcube::Orientation rcube::Cube::getStickerOrientation(const rcube::Coordinates
     throw std::invalid_argument("Cannot find a " + std::to_string((char)color)
         + " sticker at " + coords.to_string());
 }
+
+Color rcube::Cube::getFaceColor(const rcube::Orientation &face)
+{
+    return getCenterFrom(face)->color;
+}

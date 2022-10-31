@@ -2,8 +2,8 @@
 
 Most of the C++ API is also available for Lua. To run some Lua code, use the
 following functions:
-- [`int rcube::Cube::runScript(const std::string &path)`](cube.md)
-- [`int rcube::Cube::runCommand(const std::string &cmd)`](cube.md)
+- [`int rcube::Cube::runScript(const std::string &path)`](cube.md#int-rcubecuberunscriptconst-stdstring-path)
+- [`int rcube::Cube::runCommand(const std::string &cmd)`](cube.md#int-rcubecuberuncommandconst-stdstring-cmd)
 
 This file contains a list of all the Lua functions available.
 
@@ -70,6 +70,15 @@ in a table: `{axis=#, direction=#}`.
 
 <br>
 
+### `<string> getFaceColor(<table> face)`
+
+- `face`: the face (`{axis=#, direction=#}`);
+
+Equivalent to `rcube::Cube::getFaceColor`. The color is returned as a
+one-character string (e.g. `"w"` for white).
+
+<br>
+
 ### `display()`
 
 Equivalent to `rcube::Cube::display`.
@@ -80,7 +89,7 @@ Equivalent to `rcube::Cube::display`.
 
 - `orientation`: the orientation of the face to check (`{axis=#, direction=#}`);
 - `expr`: the regular expression to compare with the face. For its syntax
-[read here](cube.md)
+[read here](cube.md#rcubecubefacematchesconst-rcubeorientation-face-const-stdstring-expr)
 
 Equivalent to `rcube::Cube::faceMatches`.
 
@@ -90,6 +99,6 @@ Equivalent to `rcube::Cube::faceMatches`.
 
 - `orientation`: the orientation of the layer to check (`{axis=#, direction=#}`);
 - `expr`: the regular expression to compare with the face. For its syntax
-[read here](cube.md)
+[read here](cube.md#rcubecubefacematchesconst-rcubeorientation-face-const-stdstring-expr)
 
 Equivalent to `rcube::Cube::layerMatches`

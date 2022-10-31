@@ -339,6 +339,18 @@ namespace rcube
        * Generates a random algorithm of given length (default=12)
        */
 
+        void normalize();
+        /*
+        * Rewrites the algorithm by:
+        * - merging consecutive moves of the same layer (UU → U2)
+        */
+
+        rcube::Algorithm reverse() const;
+        /*
+        * Returns the algorithm obtained by reading this algorithm right-to-left
+        * and changing the moves' directions.
+        */
+
         std::string to_string() const;
         /*
         * Returns the algorithm as a string in the standard notation

@@ -102,3 +102,21 @@ Equivalent to `rcube::Cube::faceMatches`.
 [read here](cube.md#rcubecubefacematchesconst-rcubeorientation-face-const-stdstring-expr)
 
 Equivalent to `rcube::Cube::layerMatches`
+
+<br>
+
+### `<string> normalizeAlgo(<string> algo)`
+
+- `algo`: the algorithm to normalize;
+
+Equivalent to `rcube::Algorithm::normalize`. The normalized algorithm is
+returned as a string.
+
+<br>
+
+### `<string> reverseAlgo(<string> algo)`
+
+- `algo`: the algorithm to reverse;
+
+Equivalent to `rcube::Algorithm::reverse`. The reversed algorithm is
+returned as a string.

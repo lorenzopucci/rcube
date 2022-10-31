@@ -108,6 +108,22 @@ performAlgorithm("R'U'M2")
 io.write("Perform algorithm ... ")
 test(isSolved(), true)
 
+print("\n~~~ Algorithm operations ~~~")
+
+io.write("Normalize: 1 ... ")
+test(normalizeAlgo("RLUUUy"), "RLU'y")
+
+io.write("Normalize: 2 ... ")
+test(normalizeAlgo("RFF'BD2DD"), "RB")
+
+io.write("Normalize: 3 ... ")
+test(normalizeAlgo("BB'BBFRR2"), "B2FR'")
+
+io.write("Reverse: 1 ... ")
+test(reverseAlgo("R2URUR'U'R'U'R'UR'"), "RU'RURURU'R'U'R2")
+
+io.write("Reverse: 2 ... ")
+test(reverseAlgo("BDRUR'U'y2F'"), "Fy2URU'R'D'B'")
 
 if passed then
     print("\nAll tests passed")

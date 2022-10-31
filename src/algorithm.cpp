@@ -168,6 +168,46 @@ rcube::Algorithm rcube::Algorithm::generateScramble(const int &length)
   return scramble;
 }
 
+void rcube::Algorithm::normalize()
+{
+  for (auto it = algorithm.begin(); it < algorithm.end() - 1;)
+  {
+    if (it->face != (it + 1)->face)
+    {
+      ++it;
+      continue;
+    }
+
+    int newDir = (int)it->direction + (int)(it + 1)->direction;
+    newDir = (newDir + 4) % 4;
+    if (newDir == 3) newDir = -1;
+
+    it->direction = static_cast<MoveDirection>(newDir);
+    
+    algorithm.erase(it + 1);
+
+    if (newDir == 0)
+    {
+      algorithm.erase(it);
+    }
+  }
+}
+
+rcube::Algorithm rcube::Algorithm::reverse() const
+{
+  rcube::Algorithm newAlgo;
+
+  for (auto it = algorithm.end() - 1; it >= algorithm.begin(); --it)
+  {
+    int newDir = (int)it->direction;
+    if (abs(newDir) == 1) newDir *= -1;
+
+    newAlgo.push(rcube::Move(it->face, newDir));
+  }
+
+  return newAlgo;
+}
+
 std::string rcube::Algorithm::to_string() const
 {
   std::stringstream ss;

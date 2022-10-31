@@ -41,5 +41,9 @@ public:
 
     int layerMatches(lua_State *L);
 
+    int normalizeAlgo(lua_State *L);
+
+    int reverseAlgo(lua_State *L);
+
     rcube::Cube *_cube;
 };

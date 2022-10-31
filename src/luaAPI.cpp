@@ -191,3 +191,21 @@ int RcubeLua::layerMatches(lua_State *L)
     lua_pushboolean(L, result);
     return 1;
 }
+
+int RcubeLua::normalizeAlgo(lua_State *L)
+{
+    rcube::Algorithm algo(lua_tostring(L, 1));
+    algo.normalize();
+
+    lua_pushstring(L, algo.to_string().c_str());
+    return 1;
+}
+
+int RcubeLua::reverseAlgo(lua_State *L)
+{
+    rcube::Algorithm algo(lua_tostring(L, 1));
+    algo = algo.reverse();
+    
+    lua_pushstring(L, algo.to_string().c_str());
+    return 1;
+}

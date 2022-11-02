@@ -1,4 +1,3 @@
-
 -- Copyright (c) 2022 Lorenzo Pucci
 -- You may use, distribute and modify this code under the terms of the MIT
 -- license.
@@ -7,18 +6,11 @@
 -- not, see: <https://mit-license.org>.
 
 
+if IMP_COMMON == nil then dofile("scripts/common.lua") end
+
 ---------------------------------------------------------------------------------
 ------------------------------------- Cross -------------------------------------
 
-
-function compareTables(t1, t2)
-    for k, v in pairs(t1) do
-        if v ~= t2[k] then
-            return false
-        end
-    end
-    return true
-end
 
 function getCrossMove(pos)
     if pos["x"] ==  1 then  return "R" end
@@ -35,7 +27,7 @@ function placeCrossBlock(color, place)
     local moves = ""
 
     if compareTables(pos, place) and wOrient["axis"] == 1 then
-        return moves
+        return normalizeAlgo(moves)
     end
 
     if pos["y"] == -1 and wOrient["axis"] == 1 then -- case 1
@@ -79,7 +71,7 @@ function placeCrossBlock(color, place)
             performAlgorithm(mv1..direction)
             moves = moves..mv1..direction
 
-            return moves
+            return normalizeAlgo(moves)
         end
 
         algo = ""
@@ -107,7 +99,7 @@ function placeCrossBlock(color, place)
     
                 pos = find("w"..color)
             end
-            return moves
+            return normalizeAlgo(moves)
         end
 
         mv = 0
@@ -150,11 +142,11 @@ function placeCrossBlock(color, place)
         moves = moves..move.."2"
     end
 
-    return moves
+    return normalizeAlgo(moves)
 end
 
 function cross()
-    print("---- Cross ----")
+    print("\n---- Cross ----")
     print("Green edge: "  ..placeCrossBlock("g", {x=0, y=-1, z=1}))
     print("Blue edge: "   ..placeCrossBlock("b", {x=0, y=-1, z=-1}))
     print("Red edge: "    ..placeCrossBlock("r", {x=-1, y=-1, z=0}))
@@ -167,7 +159,7 @@ end
 --print("Scramble: "..scramble(12))
 --display()
 
-rotateTo("y", "g")
-cross()
+--rotateTo("y", "g")
+--cross()
 
 --display()

@@ -170,6 +170,8 @@ rcube::Algorithm rcube::Algorithm::generateScramble(const int &length)
 
 void rcube::Algorithm::normalize()
 {
+  if (algorithm.size() == 0) return;
+  
   for (auto it = algorithm.begin(); it < algorithm.end() - 1;)
   {
     if (it->face != (it + 1)->face)

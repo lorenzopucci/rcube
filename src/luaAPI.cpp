@@ -32,14 +32,14 @@ void pushTable(lua_State *L, const std::map<std::string, int> &data)
     }
 }
 
-void loadTable(lua_State *L, std::map<std::string, int> *data)
+void loadTable(lua_State *L, std::map<std::string, int> *data, int stackIdx = 1)
 {
-    if (!lua_istable(L, 1)) return;
+    if (!lua_istable(L, stackIdx)) return;
 
     for (auto it = data->begin(); it != data->end(); ++it)
     {
         lua_pushstring(L, it->first.c_str());
-        lua_gettable(L, 1);
+        lua_gettable(L, stackIdx);
         it->second = lua_tointeger(L, -1);
         lua_pop(L, 1);
     }
@@ -141,6 +141,22 @@ int RcubeLua::getStickerOrientation(lua_State *L)
         {"direction", orient.direction}};
     pushTable(L, toReturn);
     
+    return 1;
+}
+
+int RcubeLua::getStickerAt(lua_State *L)
+{
+    std::map<std::string, int> coords = {{"x", 0}, {"y", 0}, {"z", 0}};
+    loadTable(L, &coords, 1);
+    rcube::Coordinates coordinates(coords["x"], coords["y"], coords["z"]);
+
+    std::map<std::string, int> orient = {{"axis", 0}, {"direction", 0}};
+    loadTable(L, &orient, 2);
+    rcube::Orientation orientation = {(Axis)orient["axis"],
+        orient["direction"]};
+
+    char res[2] = {(char)_cube->getStickerAt(coordinates, orientation), '\0'};
+    lua_pushstring(L, res);
     return 1;
 }
 

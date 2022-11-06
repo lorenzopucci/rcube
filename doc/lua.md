@@ -79,6 +79,16 @@ one-character string (e.g. `"w"` for white).
 
 <br>
 
+### `<string> getStickerAt(<table> pos, <table> orient)`
+
+- `pos`: the coordinates of the block the sticker belongs to (`{x=#, y=#, z=#}`);
+- `orient`: the sticker's orientation (`{axis=#, direction=#}`);
+
+Equivalent to `rcube::Cube::getStickerAt`. The color is returned as a
+one-character string (e.g. `"w"` for white).
+
+<br>
+
 ### `display()`
 
 Equivalent to `rcube::Cube::display`.

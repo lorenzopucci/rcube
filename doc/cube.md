@@ -114,6 +114,19 @@ Returns the color of the center of a given face.
 
 <br>
 
+### `Color rcube::Cube::getStickerAt(const rcube::Coordinates &pos, const rcube::Orientation &orient)`
+
+- `pos`: the coordinates of the block the sticker belongs to;
+- `orient`: the sticker's orientation;
+
+Returns the color of the sticker at some given coordinates, with a given
+orientation.
+
+NOTE: this function may throw a `std::invalid_argument` exception if there is
+no such sticker in the block or if the coordinates are not valid.
+
+<br>
+
 ### `rcube::Cube::faceMatches(const rcube::Orientation &face, const std::string &expr)`
 
 - `face`: the face to check (expressed with its orientation);

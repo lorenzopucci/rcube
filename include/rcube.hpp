@@ -457,6 +457,13 @@ namespace rcube
        * Returns the color of the face at the given orientation.
        */
 
+      Color getStickerAt(const rcube::Coordinates &pos,
+        const rcube::Orientation &orient);
+      /*
+      * Returns the color of the sticker at some given coordinates, with a
+      * given orientation.
+      */
+
         bool faceMatches(const rcube::Orientation &face,
             const std::string &expr);
         /*

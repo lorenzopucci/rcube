@@ -33,6 +33,8 @@ public:
 
     int getStickerOrientation(lua_State *L);
 
+    int getStickerAt(lua_State *L);
+
     int getFaceColor(lua_State *L);
 
     int display(lua_State *L);

@@ -107,3 +107,48 @@ Color rcube::Cube::getFaceColor(const rcube::Orientation &face)
 {
     return getCenterFrom(face)->color;
 }
+
+Color rcube::Cube::getStickerAt(const rcube::Coordinates &coords,
+        const rcube::Orientation &orient)
+{
+    int blockType = abs(coords.x()) + abs(coords.y()) + abs(coords.z());
+
+    if (blockType == 3) // corner
+    {
+        for (int i = 0; i < 8; ++i)
+        {
+            if (corners[i].location != coords) continue;
+
+            for (int k = 0; k < 3; ++k)
+            {
+                if (corners[i].stickers[k].orientation == orient)
+                    return corners[i].stickers[k].color;
+            }
+
+            break;
+        }
+    }
+    else if (blockType == 2) // edge
+    {
+        for (int i = 0; i < 12; ++i)
+        {
+            if (edges[i].location != coords) continue;
+
+            for (int k = 0; k < 2; ++k)
+            {
+                if (edges[i].stickers[k].orientation == orient)
+                    return edges[i].stickers[k].color;
+            }
+
+            break;
+        }
+    }
+    else if (blockType == 1) // center
+    {
+        return getCenterFrom(orient)->color;
+    }
+
+    throw std::invalid_argument("Cannot find a sticker with orientation (" +
+        std::to_string((int)orient.axis) + ", " + std::to_string(
+        orient.direction) + ") at " + coords.to_string());
+}

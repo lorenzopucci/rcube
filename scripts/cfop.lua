@@ -10,15 +10,17 @@ if IMP_COMMON == nil then dofile("scripts/common.lua") end
 
 dofile("scripts/cross.lua")
 dofile("scripts/F2L.lua")
+dofile("scripts/OLL.lua")
 
 
 ---------------------------------------------------------------------------------
 --------------------------------- CFOP solution ---------------------------------
 
-print("Scramble: "..performAlgorithm("UF2U2L'B'RL'FR'B2DU'R'"))
+print("Scramble: "..scramble(12))
 rotateTo("y", "g")
 
 cross()
 F2L()
+OLL()
 
 display()

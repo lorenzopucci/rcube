@@ -95,21 +95,27 @@ Equivalent to `rcube::Cube::display`.
 
 <br>
 
-### `<boolean> faceMatches(<table> orientation, <string> expr)`
+### `<boolean> faceMatches(<table> orientation, <string> expr, [<table> dest])`
 
 - `orientation`: the orientation of the face to check (`{axis=#, direction=#}`);
 - `expr`: the regular expression to compare with the face. For its syntax
 [read here](cube.md#rcubecubefacematchesconst-rcubeorientation-face-const-stdstring-expr)
+- `dest`: the place to which the block corresponding to the first character of
+`expr` will be rotated (optional);
 
 Equivalent to `rcube::Cube::faceMatches`.
 
 <br>
 
-### `<boolean> layerMatches(<table> orientation, <string> expr)`
+### `<boolean> layerMatches(<table> orientation, <string> expr, [<table> dest, <table> orient])`
 
 - `orientation`: the orientation of the layer to check (`{axis=#, direction=#}`);
 - `expr`: the regular expression to compare with the face. For its syntax
 [read here](cube.md#rcubecubefacematchesconst-rcubeorientation-face-const-stdstring-expr)
+- `dest`: the place to which the block corresponding to the first character of
+`expr` will be rotated (optional);
+- `orient`: the orientation at which the sticker corresponding to the first
+character of `expr` will be placed;
 
 Equivalent to `rcube::Cube::layerMatches`
 

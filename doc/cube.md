@@ -127,10 +127,12 @@ no such sticker in the block or if the coordinates are not valid.
 
 <br>
 
-### `rcube::Cube::faceMatches(const rcube::Orientation &face, const std::string &expr)`
+### `rcube::Cube::faceMatches(const rcube::Orientation &face, const std::string &expr, const rcube::Coordinates &dest = rcube::Coordinates(0,0,0))`
 
 - `face`: the face to check (expressed with its orientation);
 - `expr`: the regualr expression;
+- `dest`: the place to which the block corresponding to the first character of
+`expr` will be rotated (see below);
 
 Returns `true` when the stickers of the given face match the given pattern.
 The pattern is a `std::string` with the following syntax:
@@ -156,14 +158,23 @@ For example, a cross is `*A*AAA*A*`
 
 Note: the string MUST be 9 characters long, otherwise it will not be accepted.
 
+If a match is found and `dest` is not `(0,0,0)`, the face will be rotated
+until the block corresponding to the first character of `expr` ends up at the
+given position.
+
 <br>
 
-### `rcube::Cube::layerMatches(const rcube::Orientation &layer, const std::string &expr)`
+### `rcube::Cube::layerMatches(const rcube::Orientation &layer, const std::string &expr, const rcube::Coordinates &dest = rcube::Coordinates(0,0,0), const rcube::Orientation &orient = {Axis::X, 0})`
 
 - `layer`: the layer to check (expressed with the orientation of its adjacent
 face. For middle layer, use `layer.direction=0` even though
 `rcube::Orientation` is not designed for that value);
 - `expr`: the regular expression;
+- `dest`: the place to which the block corresponding to the first character of
+`expr` will be rotated (see below);
+- `dest`: the place to which the block corresponding to the first character of
+`expr` will be rotated (see below);
+- `orient`: determines the position of the first sticker along with `dest`;
 
 Returns `true` when the stickers of the given layer match the given pattern.
 The term layer means the set of stickers adjacent to the same face or one of
@@ -171,6 +182,11 @@ the middle layers (the ones to which the moves `M`, `S` and `E` are applied).
 
 The regualr expession's syntax is the same as in `rcube::cube::faceMatches`
 but instead of 9, it must be 12 characters long.
+
+If a match is found and `dest` is not `(0,0,0)`, the layer will be rotated
+until the block corresponding to the first character of `expr` ends up at the
+given position. If `orient` is not `{X, 0}`, not only will the block be in the
+right place, but the right sticker will also be at the given orientation.
 
 <br>
 

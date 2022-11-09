@@ -273,6 +273,12 @@ namespace rcube
         * MoveDirection.
         */
 
+        Move(const rcube::Orientation &orient, int direction);
+        /*
+        * The move is constructed through the layer it is applied to. Use
+        * Orientation::direction=0 for middle layers (M, S, E).
+        */
+
         ~Move() = default;
 
         std::string to_string() const;
@@ -464,18 +470,22 @@ namespace rcube
       * given orientation.
       */
 
-        bool faceMatches(const rcube::Orientation &face,
-            const std::string &expr);
+        bool faceMatches(const rcube::Orientation &face, const std::string
+        &expr, const rcube::Coordinates &dest = rcube::Coordinates(0, 0, 0));
         /*
         * Checks if a face matches a pattern. This is one of the most powerful
         * tools of this library, please refer to the documentation for a thorough
         * understanding.
         * @param face: the face to check
         * @param expr: the pattern (its syntax is explained in the documentation)
+        * @param dest: if it is not (0,0,0), the face will be rotated so as the
+        * position of the block corresponding to the first character in expr
+        * will correspond to this location.
         */
 
-        bool layerMatches(const rcube::Orientation &layer,
-            const std::string &expr);
+        bool layerMatches(const rcube::Orientation &layer, const std::string
+        &expr, const rcube::Coordinates &dest = rcube::Coordinates(0, 0, 0),
+        const rcube::Orientation &orient = {Axis::X,0});
         /*
         * Checks if a layer (the 12 stickers adjacent to the same face) matches
         * a pattern.
@@ -483,6 +493,11 @@ namespace rcube
         * adjacent face). Use Orientation::axis=0 for central layers (for example
         * {X, 0} is the layer that is rotated by a M move).
         * @param expr: the pattern (its syntax is explained in the documentation)
+        * @param dest: if it is not (0,0,0), the layer will be rotated so as the
+        * position of the block corresponding to the first character in expr
+        * will correspond to this location.
+        * @param orient: determines the position of the first sticker along with
+        * dest
         */
 
         rcube::Net netRender();

@@ -48,6 +48,46 @@ rcube::Move::Move(char face, int direction)
   this->axis = getAxis(this->face);
 }
 
+rcube::Move::Move(const rcube::Orientation &orient, int direction)
+{
+  axis = orient.axis;
+  this->direction = (MoveDirection) direction;
+
+  switch (orient.axis)
+  {
+    case 0:
+      {
+        switch (orient.direction)
+        {
+          case  1: face = MoveFace::RIGHT; break;
+          case -1: face = MoveFace::LEFT; break;
+          case  0: face = MoveFace::MIDDLE; break;
+        }
+        break;
+      }
+    case 1:
+      {
+        switch (orient.direction)
+        {
+          case  1: face = MoveFace::UP; break;
+          case -1: face = MoveFace::DOWN; break;
+          case  0: face = MoveFace::EQUATOR; break;
+        }
+        break;
+      }
+    case 2:
+      {
+        switch (orient.direction)
+        {
+          case  1: face = MoveFace::FRONT; break;
+          case -1: face = MoveFace::BACK; break;
+          case  0: face = MoveFace::SIDE; break;
+        }
+        break;
+      }
+  }
+}
+
 std::string rcube::Move::to_string() const
 {
   std::stringstream ss;

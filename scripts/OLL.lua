@@ -42,9 +42,6 @@ function sevenCases()
         return "FRUR'U'RUR'U'RUR'U'F'"
 
     elseif layerMatches(TOP_ORIENT, "yyyyyyYyYyyy", BACK_LEFT, BACK_ORIENT) then
-        while getStickerAt({x=1, y=1, z=1}, {axis=2, direction=1}) ~= "y" do
-            performMove("U", 1)
-        end
         performAlgorithm("R2DR'U2RD'R'U2R'")
         return "R2DR'U2RD'R'U2R'"
 
@@ -62,10 +59,6 @@ function sevenCases()
         end
 
     elseif layerMatches(TOP_ORIENT, "yyYyyyYyyYyY", BACK_LEFT, BACK_ORIENT) then
-        while getStickerAt({x=-1, y=1, z=1}, {axis=2, direction=1}) == "y" or
-        getStickerAt({x=1, y=1, z=1}, {axis=2, direction=1}) ~= "y" do
-            performMove("U", 1)
-        end
         performAlgorithm("RU2R2U'R2U'R2U2R")
         return "RU2R2U'R2U'R2U2R"
 

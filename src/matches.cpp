@@ -303,14 +303,16 @@ bool rcube::Cube::layerMatches(const rcube::Orientation &layer, const
             if (centers[i].location.coords[layer.axis] != 0)
                 continue;
 
-            for (int x = 0; x < possiblePaths.size(); ++x)
+            for (int x = 0; x < possiblePaths.size();)
             {
                 if (!stickerMatches(centers[i].color, expr[possiblePaths[x]
                     .getBlockNum(centers[i].location, centers[i].orientation)],
                     &possiblePaths[x]._letterMapping))
                 {
                     possiblePaths.erase(possiblePaths.begin() + x);
+                    continue;
                 }
+                ++x;
             }
         }
         for (int i = 0; i < 12; ++i)
@@ -319,7 +321,7 @@ bool rcube::Cube::layerMatches(const rcube::Orientation &layer, const
 
             for (int k = 0; k < 2; ++k)
             {
-                for (int x = 0; x < possiblePaths.size(); ++x)
+                for (int x = 0; x < possiblePaths.size();)
                 {
                     if (!stickerMatches(edges[i].stickers[k].color, expr[
                         possiblePaths[x].getBlockNum(edges[i].location,
@@ -327,7 +329,9 @@ bool rcube::Cube::layerMatches(const rcube::Orientation &layer, const
                         &possiblePaths[x]._letterMapping))
                     {
                         possiblePaths.erase(possiblePaths.begin() + x);
+                        continue;
                     }
+                    ++x;
                 }
             }
         }
@@ -348,24 +352,24 @@ bool rcube::Cube::layerMatches(const rcube::Orientation &layer, const
             {
                 if (edges[i].location != path._startBlock) continue;
 
+                rcube::Sticker *startStk;
+                for (int x = 0; x < 2; ++x)
+                {
+                    if (edges[i].stickers[x].orientation ==
+                        path._facesOrder[0])
+                    {
+                        startStk = edges[i].stickers + x;
+                    }
+                }
+
                 for (int x = 0; x < 4; ++x)
                 {
-                    if (edges[i].location != dest)
-                    {
-                        performMove(mv);
-                        continue;
-                    }
+                    performMove(mv);
+                    if (edges[i].location != dest) continue;
 
-                    if (orient == (rcube::Orientation){Axis::X, 0}) return true;
-
-                    for (int k = 0; k < 2; ++k)
-                    {
-                        if (edges[i].stickers[k].orientation != orient)
-                            continue;
-
-                        if (stickerMatches(edges[i].stickers[k].color,
-                            expr[0], &path._letterMapping)) return true;
-                    }
+                    if (orient == (rcube::Orientation){Axis::X, 0})
+                        return true;
+                    if (startStk->orientation == orient) return true;
                 }
             }
         }
@@ -400,7 +404,7 @@ bool rcube::Cube::layerMatches(const rcube::Orientation &layer, const
             {
                 if (edges[i].stickers[k].orientation == layer) continue;
 
-                for (int x = 0; x < possiblePaths.size(); ++x)
+                for (int x = 0; x < possiblePaths.size();)
                 {
                     if (!stickerMatches(edges[i].stickers[k].color, expr[
                         possiblePaths[x].getBlockNum(edges[i].location,
@@ -408,7 +412,9 @@ bool rcube::Cube::layerMatches(const rcube::Orientation &layer, const
                         &possiblePaths[x]._letterMapping))
                     {
                         possiblePaths.erase(possiblePaths.begin() + x);
+                        continue;
                     }
+                    ++x;
                 }
             }
         }
@@ -422,7 +428,7 @@ bool rcube::Cube::layerMatches(const rcube::Orientation &layer, const
         {
             if (corners[i].stickers[k].orientation == layer) continue;
 
-            for (int x = 0; x < possiblePaths.size(); ++x)
+            for (int x = 0; x < possiblePaths.size();)
             {
                 if (!stickerMatches(corners[i].stickers[k].color, expr[
                     possiblePaths[x].getBlockNum(corners[i].location,
@@ -430,7 +436,9 @@ bool rcube::Cube::layerMatches(const rcube::Orientation &layer, const
                     &possiblePaths[x]._letterMapping))
                 {
                     possiblePaths.erase(possiblePaths.begin() + x);
+                    continue;
                 }
+                ++x;
             }
         }
     }
@@ -450,24 +458,22 @@ bool rcube::Cube::layerMatches(const rcube::Orientation &layer, const
         {
             if (corners[i].location != path._startBlock) continue;
 
+            rcube::Sticker *startStk;
+            for (int x = 0; x < 3; ++x)
+            {
+                if (corners[i].stickers[x].orientation == path._facesOrder[0])
+                {
+                    startStk = corners[i].stickers + x;
+                }
+            }
+
             for (int x = 0; x < 4; ++x)
             {
-                if (corners[i].location != dest)
-                {
-                    performMove(mv);
-                    continue;
-                }
+                performMove(mv);
+                if (corners[i].location != dest) continue;
 
                 if (orient == (rcube::Orientation){Axis::X, 0}) return true;
-
-                for (int k = 0; k < 3; ++k)
-                {
-                    if (corners[i].stickers[k].orientation != orient)
-                        continue;
-
-                    if (stickerMatches(corners[i].stickers[k].color,
-                        expr[0], &path._letterMapping)) return true;
-                }
+                if (startStk->orientation == orient) return true;
             }
         }
     }

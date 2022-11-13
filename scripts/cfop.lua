@@ -11,6 +11,7 @@ if IMP_COMMON == nil then dofile("scripts/common.lua") end
 dofile("scripts/cross.lua")
 dofile("scripts/F2L.lua")
 dofile("scripts/OLL.lua")
+dofile("scripts/PLL.lua")
 
 
 ---------------------------------------------------------------------------------
@@ -22,5 +23,6 @@ rotateTo("y", "g")
 cross()
 F2L()
 OLL()
+PLL()
 
 display()

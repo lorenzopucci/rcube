@@ -239,6 +239,14 @@ namespace rcube
         */
         std::map<rcube::Orientation, rcube::Face> faces;
     };
+    struct MixedFace
+    {
+        Color center;
+        Color stickers[8];
+        // starting with a corner and continuing the loop
+        rcube::Orientation adjacentFaces[4];
+        // these MUST be in the same order as the stickers
+    };
 
 
     class Move {
@@ -387,8 +395,17 @@ namespace rcube
         * Initializes a solved cube with the <topColor> face on top and the
         * <frontColor> one in front.
         * 
-        * NOTE: this function may throw a `std::invalid_argument` exception if
+        * NOTE: this function may throw a std::invalid_argument exception if
         * topColor and frontColor are not two adjacent colors.
+        */
+
+        Cube(const std::map<rcube::Orientation, rcube::MixedFace> &data);
+        /*
+        * Initializes a cube from an array of rcube::MixedFace. See that struct
+        * for more details.
+        * 
+        * NOTE: this function may throw a std::invalid_argument exception if the
+        * input is not vaild or does not represent a solvable cube.
         */
 
         ~Cube() = default;

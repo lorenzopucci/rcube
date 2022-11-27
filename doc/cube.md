@@ -8,11 +8,24 @@ This class represents a $3\times3\times3$ Rubik's cube.
 - `topColor`: the color of the top face (default: `Color::White`)
 - `frontColor`: the color of the front face (default: `Color::Green`)
 
-This is the default and only constructor. It initializes a solved cube with the
+This is the default constructor. It initializes a solved cube with the
 orientation specified by `topColor` and `frontColor`.
 
 NOTE: this function may throw a `std::invalid_argument` exception if `topColor`
 and `frontColor` are not two adjacent colors.
+
+<br>
+
+### `rcube::Cube::Cube(const std::map<rcube::Orientation, rcube::MixedFace> &data)`
+
+- `data`: the data used to initialize the cube. It is an array of
+`rcube::MixedFace` mapped to their orientation.
+
+It initializes a cube (solved or scrambled) from an array of faces, each
+containing an array of stickers. See `rcube::MixedFace` for more details.
+
+NOTE: this function may throw a `std::invalid_argument` exception if the input
+is not vaild or does not represent a solvable cube.
 
 <br>
 

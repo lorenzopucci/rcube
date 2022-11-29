@@ -62,6 +62,18 @@ Returns `true` when the cube is solved (all the blocks are in the right place).
 
 <br>
 
+### `bool rcube::Cube::isSolvable()`
+
+Returns `true` when the current status of the cube can be obtained by applying
+moves to a solved cube.
+
+A cube is not considered solvable when:
+- There are more or less than 9 stickers for each color
+- There are invalid or double blocks (like the corner `RGO`)
+- The centers are not placed correctly
+
+<br>
+
 ### `void rcube::Cube::rotateTo(const Color& topColor, const Color& frontColor)`
 
 - `topColor`: the color that the top center will have;

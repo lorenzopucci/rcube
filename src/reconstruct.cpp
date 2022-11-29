@@ -107,4 +107,9 @@ rcube::Cube::Cube(const std::map<rcube::Orientation, rcube::MixedFace> &data)
     {
         throw std::invalid_argument("Invalid input");
     }
+
+    if (!isSolvable())
+    {
+        throw std::invalid_argument("Invalid input: the cube in not solvable");
+    }
 }

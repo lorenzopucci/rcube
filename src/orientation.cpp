@@ -69,6 +69,11 @@ rcube::Orientation rcube::Orientation::getRotated(const Axis& rotAxis,
     return newOrient;
 }
 
+rcube::Orientation rcube::Orientation::getInv() const
+{
+    return rcube::Orientation{axis, -direction};
+}
+
 std::vector<rcube::Orientation> rcube::Orientation::iterate()
 {
     std::vector<rcube::Orientation> vec;

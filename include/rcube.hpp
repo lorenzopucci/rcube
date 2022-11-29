@@ -47,6 +47,11 @@ namespace rcube
         * rather than applied to the current instance.
         */
 
+       rcube::Orientation getInv() const;
+       /*
+       * Returns an orientation with the same axis but opposite direction
+       */
+
        static std::vector<rcube::Orientation> iterate();
        /*
        * Returns a vector containing all 6 possible orientations in the following
@@ -432,6 +437,13 @@ namespace rcube
         /*
         * Returns true when the cube is solved (all the blocks are in the right
         * place).
+        */
+
+        bool isSolvable();
+        /*
+        * A cube is not solvable when:
+        * - There are more or less than 9 stickers for each color
+        * - There are invalid or double blocks (like the corner RGO)
         */
 
         void rotateTo(const Color& topColor, const Color& frontColor);

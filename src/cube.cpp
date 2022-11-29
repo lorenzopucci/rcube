@@ -293,6 +293,58 @@ bool rcube::Cube::isSolved()
     return true;
 }
 
+bool areAdjacentColors(Color c1, Color c2)
+{
+    switch (c1)
+    {
+        case Color::White:
+        case Color::Yellow:
+            return c2 != Color::White && c2 != Color::Yellow;
+        case Color::Green:
+        case Color::Blue:
+            return c2 != Color::Green && c2 != Color::Blue;
+        case Color::Red:
+        case Color::Orange:
+            return c2 != Color::Red && c2 != Color::Orange;
+    }
+}
+
+bool rcube::Cube::isSolvable()
+{
+    try
+    {
+        if (getCenterFrom(Color::White)->orientation !=
+            getCenterFrom(Color::Yellow)->orientation.getInv() ||
+            getCenterFrom(Color::Green)->orientation !=
+            getCenterFrom(Color::Blue)->orientation.getInv() ||
+            getCenterFrom(Color::Red)->orientation !=
+            getCenterFrom(Color::Orange)->orientation.getInv())
+            return false;
+    }
+    catch(const std::exception& e)
+    {
+        return false;
+    }
+    
+
+    for (int i = 0; i < 12; ++i)
+    {
+        rcube::Edge *e = edges + i;
+        if (!areAdjacentColors(e->stickers[0].color, e->stickers[1].color) ||
+            e->location != find(e->stickers[0].color, e->stickers[1].color))
+            return false;
+        
+        if (i >= 8) continue;
+
+        rcube::Sticker *s = corners[i].stickers;
+        if (!areAdjacentColors(s[0].color, s[1].color) || !areAdjacentColors(
+            s[0].color, s[2].color) || !areAdjacentColors(s[1].color, s[2].color)
+            || corners[i].location != find(s[0].color, s[1].color, s[2].color))
+            return false;
+    }
+    return true;
+}
+
 void rcube::Cube::rotateTo(const Color &topColor, const Color &frontColor)
 {
     if (getCenterFrom(topColor)->location.coords[Axis::X] != 0)

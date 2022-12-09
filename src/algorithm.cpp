@@ -210,6 +210,89 @@ rcube::Algorithm rcube::Algorithm::reverse() const
   return newAlgo;
 }
 
+void editFaceMap(std::map<rcube::Orientation, rcube::Orientation> *faceMap,
+  Axis axis, int direction)
+{
+  for (auto it = faceMap->begin(); it != faceMap->end(); ++it)
+  {
+    it->second.rotate(axis, direction);
+  }
+}
+
+void removeRotationsUnit(const rcube::Algorithm &algo, rcube::Algorithm *newAlgo,
+  std::map<rcube::Orientation, rcube::Orientation> *faceMap)
+{
+  for (rcube::Move mv : algo.algorithm)
+  {
+    switch (mv.face)
+    {
+      case ROTATE_X:
+        editFaceMap(faceMap, Axis::X, mv.direction); break;
+      case ROTATE_Y:
+        editFaceMap(faceMap, Axis::Y, mv.direction); break;
+      case ROTATE_Z:
+        editFaceMap(faceMap, Axis::Z, mv.direction); break;
+
+      case MIDDLE:
+      case SIDE:
+      case EQUATOR:
+      {
+        std::map<MoveFace, std::string> algos = {
+          {MIDDLE, "RL'x'"},
+          {EQUATOR, "UD'y'"},
+          {SIDE, "F'Bz"}
+        };
+
+        rcube::Algorithm expansion(algos[mv.face]);
+        removeRotationsUnit(expansion * mv.direction, newAlgo, faceMap);
+      }
+
+      case UP_W:
+      case FRONT_W:
+      case RIGHT_W:
+      case LEFT_W:
+      case DOWN_W:
+      case BACK_W:
+      {
+        std::map<MoveFace, std::string> algos = {
+          {UP_W, "Dy"},
+          {FRONT_W, "Bz"},
+          {RIGHT_W, "Lx"},
+          {LEFT_W, "Rx'"},
+          {DOWN_W, "Uy'"},
+          {BACK_W, "Fz'"}
+        };
+
+        rcube::Algorithm expansion(algos[mv.face]);
+        removeRotationsUnit(expansion * mv.direction, newAlgo, faceMap);
+      }
+
+      default:
+        rcube::Orientation affFace = mv.getAffectedFace();
+        for (auto it = faceMap->begin(); it != faceMap->end(); ++it)
+        {
+          if (it->second == affFace)
+            newAlgo->push(rcube::Move(it->first, mv.direction));
+        }
+        break;
+    }
+  }
+}
+
+rcube::Algorithm rcube::Algorithm::removeRotations() const
+{
+  rcube::Algorithm newAlgo;
+  std::map<rcube::Orientation, rcube::Orientation> faceMap;
+
+  for (rcube::Orientation ort : rcube::Orientation::iterate())
+    faceMap.insert(std::pair<rcube::Orientation, rcube::Orientation>(ort, ort));
+
+  removeRotationsUnit(algorithm, &newAlgo, &faceMap);
+
+  newAlgo.normalize();
+  return newAlgo;
+}
+
 std::string rcube::Algorithm::to_string() const
 {
   std::stringstream ss;

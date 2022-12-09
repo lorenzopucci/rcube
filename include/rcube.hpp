@@ -370,6 +370,12 @@ namespace rcube
         * and changing the moves' directions.
         */
 
+        rcube::Algorithm removeRotations() const;
+        /*
+        * Returns an algorithm equivalent to the current instance but without
+        * rotations (x, y, z). For example, RyRF' become RBR'.
+        */
+
         std::string to_string() const;
         /*
         * Returns the algorithm as a string in the standard notation

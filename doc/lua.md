@@ -136,3 +136,10 @@ returned as a string.
 
 Equivalent to `rcube::Algorithm::reverse`. The reversed algorithm is
 returned as a string.
+
+### `<string> removeRotations(<string> algo)`
+
+- `algo`: the algorithm to remove rotations from;
+
+Equivalent to `rcube::Algorithm::removeRotations`. The new algorithm is
+returned as a string.

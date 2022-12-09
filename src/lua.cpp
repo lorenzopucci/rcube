@@ -58,6 +58,7 @@ void initLua(lua_State *L)
     lua_register(L, "layerMatches", &runFunction<&RcubeLua::layerMatches>);
     lua_register(L, "normalizeAlgo", &runFunction<&RcubeLua::normalizeAlgo>);
     lua_register(L, "reverseAlgo", &runFunction<&RcubeLua::reverseAlgo>);
+    lua_register(L, "removeRotations", &runFunction<&RcubeLua::removeRotations>);
 }
 
 int rcube::Cube::runScript(const std::string &path)

@@ -47,5 +47,7 @@ public:
 
     int reverseAlgo(lua_State *L);
 
+    int removeRotations(lua_State *L);
+
     rcube::Cube *_cube;
 };

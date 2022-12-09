@@ -125,6 +125,12 @@ test(reverseAlgo("R2URUR'U'R'U'R'UR'"), "RU'RURURU'R'U'R2")
 io.write("Reverse: 2 ... ")
 test(reverseAlgo("BDRUR'U'y2F'"), "Fy2URU'R'D'B'")
 
+io.write("Remove rotations: 1 ... ")
+test(removeRotations("RyRF'"), "RBR'")
+
+io.write("Remove rotations: 2 ... ")
+test(removeRotations("x2UR'y'LDzF2R"), "DR'FUL2D")
+
 if passed then
     print("\nAll tests passed")
 else

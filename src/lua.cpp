@@ -7,6 +7,8 @@
 * not, see: <https://mit-license.org>.
 */
 
+#ifdef COMPILE_LUA
+
 #include <iostream>
 #include <string>
 #include <functional>
@@ -88,3 +90,5 @@ int rcube::Cube::runCommand(const std::string &cmd)
     lua_close(L);
     return status;
 }
+
+#endif

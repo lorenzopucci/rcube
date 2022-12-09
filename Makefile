@@ -15,7 +15,7 @@ CC := g++
 CFLAGS := -I$(INCLUDE_DIR) -fpermissive
 
 ifeq ($(DEBUG),true)
-	CFLAGS := $(CFLAGS) -g
+	CFLAGS += -g
 endif
 
 TEST_TARGET := $(BIN_DIR)/test.o
@@ -30,9 +30,16 @@ TEST_OBJECTS := $(patsubst $(TEST_DIR)/%.cpp,$(BIN_DIR)/test_%.o,$(TEST_FILES))
 UI_FILES := $(wildcard $(UI_DIR)/*.cpp)
 UI_OBJECTS := $(patsubst $(UI_DIR)/%.cpp,$(BIN_DIR)/ui_%.o,$(UI_FILES))
 
-RCUBE_LD_LIBS := lua
-RCUBE_CFLAGS := $(shell pkg-config --cflags $(RCUBE_LD_LIBS))
-RCUBE_LD_FLAGS := $(shell pkg-config --libs $(RCUBE_LD_LIBS))
+RCUBE_CFLAGS :=
+RCUBE_LD_FLAGS :=
+
+ifneq ($(LUA),false)
+	RCUBE_LD_LIBS := lua
+	RCUBE_CFLAGS := $(shell pkg-config --cflags $(RCUBE_LD_LIBS))
+	RCUBE_LD_FLAGS := $(shell pkg-config --libs $(RCUBE_LD_LIBS))
+	
+	CFLAGS += -DCOMPILE_LUA
+endif
 
 # only used to compile the UI
 UI_LD_LIBS := glew glfw3 glm

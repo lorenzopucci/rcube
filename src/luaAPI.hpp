@@ -9,6 +9,8 @@
 
 #pragma once
 
+#ifdef COMPILE_LUA
+
 extern "C"
 {
     #include <lua.hpp>
@@ -51,3 +53,5 @@ public:
 
     rcube::Cube *_cube;
 };
+
+#endif

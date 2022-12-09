@@ -7,6 +7,8 @@
 * not, see: <https://mit-license.org>.
 */
 
+#ifdef COMPILE_LUA
+
 #include <iostream>
 #include <string>
 #include <map>
@@ -241,3 +243,5 @@ int RcubeLua::removeRotations(lua_State *L)
     lua_pushstring(L, algo.to_string().c_str());
     return 1;
 }
+
+#endif

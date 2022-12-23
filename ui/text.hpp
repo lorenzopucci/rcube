@@ -93,10 +93,11 @@ public:
   void resume();
   void refresh();
 
+  bool _started = false;
+
 private:
   unsigned int _strId;
   Text  *_text;
   time_t _startTime = 0;
   time_t _currTime = 0;
-  bool _started = false;
 };

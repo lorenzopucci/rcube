@@ -186,20 +186,18 @@ void EventHandler::onKey(GLFWwindow* window, int key, int scancode, int action,
             newMove = 'U'; break;
         case GLFW_KEY_D:
         {
-            if (!camera->pressingCtrl)
-            {
-                newMove = 'D'; break;
-            }
+            
+#ifndef IGNORE_LUA
 
-#ifdef COMPILE_LUA
-
-            if (action == GLFW_PRESS)
+            if (camera->pressingCtrl && action == GLFW_PRESS)
             {
                 userPtr->cube->runScript("scripts/cfop.lua");
                 userPtr->cubeUpdated = false;
                 break;
             }
 #endif
+
+            newMove = 'D'; break;
         }
 
     case GLFW_KEY_F:

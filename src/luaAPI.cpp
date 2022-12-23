@@ -7,7 +7,7 @@
 * not, see: <https://mit-license.org>.
 */
 
-#ifdef COMPILE_LUA
+#ifndef IGNORE_LUA
 
 #include <iostream>
 #include <string>

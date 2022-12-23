@@ -38,7 +38,8 @@ ifneq ($(LUA),false)
 	RCUBE_CFLAGS := $(shell pkg-config --cflags $(RCUBE_LD_LIBS))
 	RCUBE_LD_FLAGS := $(shell pkg-config --libs $(RCUBE_LD_LIBS))
 	
-	CFLAGS += -DCOMPILE_LUA
+else
+	CFLAGS += -DIGNORE_LUA
 endif
 
 # only used to compile the UI
@@ -58,15 +59,15 @@ $(UI_TARGET): $(OBJECTS) $(UI_OBJECTS)
 
 # rule valid for each file in ./src
 $(BIN_DIR)/%.o: $(SRC_DIR)/%.cpp
-	$(CC) -c $(CFLAGS) -c $^ -o $@
+	$(CC) -c $(CFLAGS) $^ -o $@
 
 # rule valid for each file in ./test
 $(BIN_DIR)/test_%.o: $(TEST_DIR)/%.cpp
-	$(CC) -c $(CFLAGS) -c $^ -o $@
+	$(CC) -c $(CFLAGS) $^ -o $@
 
 # rule valid for each file in ./ui
 $(BIN_DIR)/ui_%.o: $(UI_DIR)/%.cpp
-	$(CC) -c $(CFLAGS) -c $^ -o $@
+	$(CC) -c $(CFLAGS) $^ -o $@
 
 
 .PHONY: all clean clean-all test ui lib

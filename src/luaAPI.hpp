@@ -9,7 +9,7 @@
 
 #pragma once
 
-#ifdef COMPILE_LUA
+#ifndef IGNORE_LUA
 
 extern "C"
 {

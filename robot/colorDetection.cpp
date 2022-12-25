@@ -9,6 +9,7 @@
 
 #include <map>
 #include <iostream>
+#include <cmath>
 
 #include <opencv2/opencv.hpp>
 #include <raspicam/raspicam_cv.h>
@@ -23,7 +24,7 @@ std::map<char, cv::Scalar> defColors = {
 	{'w', {240, 240, 240}},
 	{'y', {0,   230, 230}},
 	{'g', {35,  205, 0}},
-	{'b', {250, 45,  0}},
+	{'b', {250, 140, 50}},
 	{'o', {0,   130, 250}},
 	{'r', {0,   0,   250}},
 	{'?', {75,  75,  75}}
@@ -51,36 +52,32 @@ Square Square::translate(int x, int y) const
 	return s;
 }
 
-bool approx(unsigned int v1, unsigned int v2, int gap = 50)
+int get3DdistanceSquared(const cv::Scalar &c1, const cv::Scalar &c2)
 {
-	return (v1 >= v2 - gap) && (v1 <= v2 + gap);
+	return pow((c1[0] - c2[0]), 2) + pow((c1[1] - c2[1]), 2) +
+		pow((c1[2] - c2[2]), 2);
 }
 
 char detectColor(const cv::Scalar &val)
 {
-	if (val[2] < 80 && val[1] < 80 && val[0] < 80)
+	if (val[2] < 70 && val[1] < 70 && val[0] < 70)
 		return '?';
 	
-	if (approx(val[0], val[1]) && approx(val[2], val[1])
-	&& approx(val[0], val[2]))
-		return 'w';
-
-	if (approx(val[2], val[1], 60) && 2 * val[0] < val[1] + val[2] + 160)
-		return 'y';
-
-	if (val[2] < 30 && val[1] > val[0])
-		return 'g';
-
-	if (val[2] < 30 && val[1] < val[0])
-		return 'b';
-
-	if (val[2] > 120 && val[1] < 30)
-		return 'r';
-
-	if (val[2] > 120 && val[1] > 30)
-		return 'o';
-
-	return '?';
+	char closestCol;
+	int lowestDist = 10000;
+	
+	for (auto it = defColors.begin(); it != defColors.end(); ++it)
+	{
+		int dist = get3DdistanceSquared(val, it->second);
+		
+		if (dist < lowestDist)
+		{
+			lowestDist = dist;
+			closestCol = it->first;
+		}
+	}
+	
+	return closestCol;
 }
 
 cv::Scalar sampleImage(const cv::Mat &img, const Square &square)

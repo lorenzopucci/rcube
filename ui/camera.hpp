@@ -17,6 +17,8 @@
 
 #include <rcube.hpp>
 
+#include <functional>
+
 #define MOUSE_SPEED 0.5f
 #define SPEED 3.0f
 #define INITIAL_FOV 75.0f
@@ -94,6 +96,8 @@ struct GlfwUserPtrData
     rcube::Cube *cube;
     Text *text;
     Timer *timer;
+
+    std::function<void(rcube::Move)> moveCallback = NULL;
     
     bool MVPupdated = false; // false when MPV needs to be sent to the GPU
     bool cubeUpdated = false; // false when the cube needs to be re-rendered

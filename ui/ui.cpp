@@ -31,7 +31,8 @@
 #define WINDOW_WIDTH 640
 #define WINDOW_HEIGHT 480
 
-int rcubeUI::runUI (rcube::Cube *cube)
+int rcubeUI::runUI (rcube::Cube *cube, std::function<void(rcube::Move)>
+    moveCallback)
 {
     glewExperimental = true;
     if(!glfwInit())
@@ -76,7 +77,7 @@ int rcubeUI::runUI (rcube::Cube *cube)
     Timer timer(&text, 10, 10);
 
     GlfwUserPtrData *userPtr = new GlfwUserPtrData {camera, cube, &text,
-        &timer};
+        &timer, moveCallback};
 
     Cube cube3d(cube->blockRender());
 

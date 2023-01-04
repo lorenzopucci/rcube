@@ -247,10 +247,10 @@ namespace rcube
     struct MixedFace
     {
         Color center;
-        Color stickers[8];
-        // starting with a corner and continuing the loop
         rcube::Orientation adjacentFaces[4];
         // these MUST be in the same order as the stickers
+        Color stickers[8];
+        // starting with a corner and continuing the loop
     };
 
 

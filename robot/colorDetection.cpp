@@ -21,10 +21,10 @@
 
 
 std::map<char, cv::Scalar> defColors = {
-	{'w', {240, 240, 240}},
+	{'w', {220, 220, 220}},
 	{'y', {0,   230, 230}},
 	{'g', {35,  205, 0}},
-	{'b', {250, 140, 50}},
+	{'b', {180, 80,  20}},
 	{'o', {0,   130, 250}},
 	{'r', {0,   0,   250}},
 	{'?', {75,  75,  75}}
@@ -64,7 +64,7 @@ char detectColor(const cv::Scalar &val)
 		return '?';
 	
 	char closestCol;
-	int lowestDist = 10000;
+	int lowestDist = 1000000;
 	
 	for (auto it = defColors.begin(); it != defColors.end(); ++it)
 	{
@@ -116,7 +116,7 @@ std::map<rcube::Orientation, rcube::MixedFace> scanCube()
 	if (!cap.isOpened())
 	{
 		std::cerr << "Cannot open the camera device" << std::endl;
-		return 1;
+		return std::map<rcube::Orientation, rcube::MixedFace>();
 	}
 
 	Square sCtr = {{0,0}, {0,0}};

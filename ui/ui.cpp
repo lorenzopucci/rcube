@@ -131,5 +131,10 @@ int rcubeUI::runUI (rcube::Cube *cube, std::function<void(rcube::Move)>
         glfwPollEvents();
     }
 
+    if (moveCallback != NULL)
+    {
+    	moveCallback(rcube::Move('U', 0));
+    }
+
     return 0;
 }

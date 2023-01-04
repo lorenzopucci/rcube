@@ -60,7 +60,7 @@ BOT_LD_LIBS = opencv
 BOT_CFLAGS = $(shell pkg-config --cflags $(BOT_LD_LIBS)) $(RCUBE_CFLAGS) \
 	$(UI_CFLAGS) -I/usr/local/include
 BOT_LD_FLAGS = $(shell pkg-config --libs $(BOT_LD_LIBS)) $(RCUBE_LD_FLAGS) \
-	$(UI_LD_FLAGS) -lraspicam -lraspicam_cv -lwiringPi -lWiringPiDev
+	$(UI_LD_FLAGS) -lraspicam -lraspicam_cv -lwiringPi -lpthread
 
 # create directories if they don't exist
 $(shell if [ ! -d "${BIN_DIR}" ]; then mkdir -p ${BIN_DIR}; fi;)
@@ -71,8 +71,8 @@ $(TEST_TARGET): $(OBJECTS) $(TEST_OBJECTS)
 $(UI_TARGET): $(OBJECTS) $(UI_OBJECTS)
 	$(CXX) $(CFLAGS) -o $@ $^ $(UI_CFLAGS) $(UI_LD_FLAGS)
 
-$(BOT_TARGET): $(OBJECTS) $(UI_OBJECTS) $(BOT_OBJECTS)
-
+$(BOT_TARGET): $(OBJECTS) $(filter-out bin/ui_main.o, $(UI_OBJECTS)) \
+	$(BOT_OBJECTS)
 	$(CXX) $(CFLAGS) -o $@ $^ $(BOT_CFLAGS) $(BOT_LD_FLAGS)
 
 

@@ -97,7 +97,7 @@ void handleStepper(char face, int step)
 	}
 	else if (face == 'B')
 	{
-		pins = BPins
+		pins = BPins;
 	}
 	else return;
 

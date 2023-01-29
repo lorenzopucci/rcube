@@ -306,6 +306,11 @@ namespace rcube
         * only be used for the folllowing moves: R, L, U, D, F, B
         */
 
+        rcube::Move getInverted() const;
+        /*
+        * Returns a move applied to the same face but with opposite direction.
+        */
+
 	    MoveFace face; // the kind of move to perform
         MoveDirection direction; // the direction of the rotation
         Axis axis; // the rotation axis
@@ -452,10 +457,11 @@ namespace rcube
         * - There are invalid or double blocks (like the corner RGO)
         */
 
-        void rotateTo(const Color& topColor, const Color& frontColor);
+        rcube::Algorithm rotateTo(const Color& topColor, const Color& frontColor);
         /*
         * Rotates the cube so as topColor and frontColor become the colors of
-        * the top and front center respectively.
+        * the top and front center respectively. Returns the algorithm used to
+        * do that.
         * 
         * NOTE: this function may throw a `std::invalid_argument` exception if
         * topColor and frontColor are not two adjacent colors.
@@ -497,6 +503,11 @@ namespace rcube
        /*
        * Returns the color of the face at the given orientation.
        */
+
+        rcube::Orientation getFaceOrientation(const Color &color);
+        /*
+        * Returns the orientation of the face of the given color.
+        */
 
       Color getStickerAt(const rcube::Coordinates &pos,
         const rcube::Orientation &orient);

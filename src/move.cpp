@@ -118,3 +118,8 @@ rcube::Orientation rcube::Move::getAffectedFace() const
     default: return {};
   }
 }
+
+rcube::Move rcube::Move::getInverted() const
+{
+  return rcube::Move(face, -direction);
+}

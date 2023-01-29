@@ -263,7 +263,7 @@ void rcube::Cube::scramble(const int &length, rcube::Algorithm* dest)
 {
     rcube::Algorithm scramble = rcube::Algorithm::generateScramble(length);
     this->performAlgorithm(scramble);
-    *dest = scramble;
+    if (dest != nullptr) *dest = scramble;
 }
 
 bool rcube::Cube::isSolved()
@@ -345,16 +345,23 @@ bool rcube::Cube::isSolvable()
     return true;
 }
 
-void rcube::Cube::rotateTo(const Color &topColor, const Color &frontColor)
+rcube::Algorithm rcube::Cube::rotateTo(const Color &topColor,
+    const Color &frontColor)
 {
-    if (getCenterFrom(topColor)->location.coords[Axis::X] != 0)
+    rcube::Algorithm algo;
+
+    if (getCenterFrom(topColor)->location.x() != 0)
+    {
         this->performMove(rcube::Move(MoveFace::ROTATE_Z, MoveDirection::CW));
+        algo.push(rcube::Move(MoveFace::ROTATE_Z, MoveDirection::CW));
+    }
 
     for (int i = 0; i < 4; ++i)
     {
         if (getCenterFrom(rcube::Coordinates(0, 1, 0))->color == topColor)
             break;
         this->performMove(rcube::Move(MoveFace::ROTATE_X, MoveDirection::CW));
+        algo.push(rcube::Move(MoveFace::ROTATE_X, MoveDirection::CW));
     }
 
     for (int i = 0; i < 4; ++i)
@@ -362,6 +369,7 @@ void rcube::Cube::rotateTo(const Color &topColor, const Color &frontColor)
         if (getCenterFrom(rcube::Coordinates(0, 0, 1))->color == frontColor)
             break;
         this->performMove(rcube::Move(MoveFace::ROTATE_Y, MoveDirection::CW));
+        algo.push(rcube::Move(MoveFace::ROTATE_Y, MoveDirection::CW));
     }
 
     if (getCenterFrom(rcube::Coordinates(0, 0, 1))->color != frontColor
@@ -370,6 +378,9 @@ void rcube::Cube::rotateTo(const Color &topColor, const Color &frontColor)
         throw std::invalid_argument("topColor and frontColor are not two "
             "adjacent colors");
     }
+
+    algo.normalize();
+    return algo;
 }
 
 rcube::Net rcube::Cube::netRender()

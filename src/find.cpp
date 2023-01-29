@@ -108,6 +108,11 @@ Color rcube::Cube::getFaceColor(const rcube::Orientation &face)
     return getCenterFrom(face)->color;
 }
 
+rcube::Orientation rcube::Cube::getFaceOrientation(const Color &color)
+{
+    return getCenterFrom(color)->orientation;
+}
+
 Color rcube::Cube::getStickerAt(const rcube::Coordinates &coords,
         const rcube::Orientation &orient)
 {

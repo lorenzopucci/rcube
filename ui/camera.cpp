@@ -256,9 +256,15 @@ void EventHandler::onKey(GLFWwindow* window, int key, int scancode, int action,
 
     if (newMove == '\0' || action == GLFW_RELEASE) return;
 
-    userPtr->cube->performMove(rcube::Move(newMove,
-        1 - (camera->pressingShift * 2)));
+
+    rcube::Move move(newMove, 1 - (camera->pressingShift * 2));
+    userPtr->cube->performMove(move);
     userPtr->cubeUpdated = false;
+
+    if (userPtr->moveCallback != NULL)
+    {
+        userPtr->moveCallback(move);
+    }
 }
 
 void EventHandler::onDrag(GLFWwindow* window, double xpos, double ypos)

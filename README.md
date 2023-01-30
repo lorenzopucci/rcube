@@ -4,6 +4,8 @@
 </div>
 C++ abstraction of a Rubik's cube.
 
+<br>
+
 This repository contains:
 - A C++ library that includes all the logic to interact with a virtual Rubik's
 cube. The headers are in `/include` and the source files are in `/src`.
@@ -11,6 +13,14 @@ cube. The headers are in `/include` and the source files are in `/src`.
 `/ui`.
 - A set of test programs for the library for debugging purposes (in `/test`).
 - A sketchy implementation of the library for a robot solver (in `/robot`).
+
+## References
+- [Library's documentation](doc/README.md)
+- [Building instructions](BUILDING.md)
+- [GUI details](ui/README.md)
+- [Robot details](robot/README.md)
+
+The following content of this file is only about the library.
 
 ## Features
 - [x] Basic interaction with a `3*3*3` cube;
@@ -22,48 +32,26 @@ expressions);
 - [ ] Solving algorithms;
 - [ ] Support of cubes of different sizes (`2*2*2`, `4*4*4`...);
 
-## Using the library
-The library's main header file is `/include/rcube.hpp`. It is a long file,
-including some internal stuff as well. Nevertheless, everything you should
-care about are only three classes:
-- `rcube::Cube` to interact with a cube
-- `rcube::Move` to apply rotations to the cube
-- `rcube::Algorithm` to apply sets of moves to the cube
-
-[Continue reading](doc/README.md)
-
-## Using the GUI
-As well as being a standalone executable, the GUI can be linked to other
-programs:
+## Example
+Here is a code snippet that shows a few of the library's capabilities:
 
 ```cpp
-#include "./include/rcube.hpp"
-#include "./ui/ui.hpp"
+#include <rcube.hpp>
 
-void moveCallback(rcube::Move move)
-{
-    // your code here
-}
 int main()
 {
     rcube::Cube cube();
-    rcubeUI::runUI(&cube, moveCallback);
+    rcube::Algorithm algo("F$(sexy-move)F'");
+
+    cube.performAlgorithm(algo);
+    cube.performAlgorithm(algo.reverse());
+    assert(cube.isSolved());
+
+    cube.scarmble(12);
+    cube.runScript("scripts/cfop.lua");
+    cube.display();
 }
 ```
-Remember to exclude `bin/ui_main.o` when linking the program, otherwise you
-will have two main functions!
 
-## Make targets
-- `lib`: compiles all the files in `/src` without linking them to a main
-function. The only dependency required is `lua` (if you do not want the lua
-port to be compiled, use `LUA=false`).
-- `test`: compiles the library and the test files and links them together.
-- `ui`: compiles the library and the frontend and links them together. The
-dependencies required here are `glew`, `glfw3` and `glm`.
-
-All the binaries produced will be put in `/bin`. Use `make clean` to empty
-that folder.
-
-<br>
-
-*A work in progress by Lorenzo Pucci*
+For a thorough knowledge of the library's features, read the
+[documentation](doc/README.md)

@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2022 Lorenzo Pucci
+* Copyright (c) 2023 Lorenzo Pucci
 * You may use, distribute and modify this code under the terms of the MIT
 * license.
 *
@@ -55,9 +55,8 @@ void robotWorker(std::queue<rcube::Move> *moveQueue)
 				{
 					rcube::Algorithm newAlgo = rotations;
 					newAlgo.push(move);
-					newAlgo.removeRotations();
+					newAlgo = newAlgo.removeRotations();
 					move = newAlgo.algorithm[0];
-					std::cout << "New face is " << (char)move.face << std::endl;
 				}
 
 				performMove((char)move.face, move.direction);
@@ -88,7 +87,8 @@ int main(int argc, char** argv)
 	std::thread robotThread(robotWorker, moveQueue);
 
 	MoveHandler handler {moveQueue};
-	auto callback = std::bind(&MoveHandler::onMove, &handler, std::placeholders::_1);
+	auto callback = std::bind(&MoveHandler::onMove, &handler,
+		std::placeholders::_1);
 	
 	rcubeUI::runUI(new rcube::Cube(mapData), callback);
 

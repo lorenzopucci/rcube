@@ -21,7 +21,7 @@ ifeq ($(DEBUG),true)
 endif
 
 UI_TARGET := $(LIB_BIN_DIR)/ui.o
-BOT_TARGET := $(LIB_BIN_DIR)/robot.o
+BOT_TARGET := $(BIN_DIR)/robot.o
 
 FILES := $(wildcard $(SRC_DIR)/*.cpp)
 OBJECTS := $(patsubst $(SRC_DIR)/%.cpp,$(LIB_BIN_DIR)/%.o,$(FILES))
@@ -31,8 +31,8 @@ UI_OBJECTS = $(patsubst $(UI_DIR)/%.cpp,$(LIB_BIN_DIR)/ui_%.o,$(UI_FILES))
 
 BOT_FILES = $(wildcard $(BOT_DIR)/*.cpp)
 BOT_C_FILES = $(wildcard $(BOT_DIR)/*.c)
-BOT_OBJECTS = $(patsubst $(BOT_DIR)/%.cpp,$(BIN_DIR)/bot_%.o,$(BOT_FILES)) \
-	$(patsubst $(BOT_DIR)/%.c,$(BIN_DIR)/bot_%.o,$(BOT_C_FILES))
+BOT_OBJECTS = $(patsubst $(BOT_DIR)/%.cpp,$(BIN_DIR)/%.o,$(BOT_FILES)) \
+	$(patsubst $(BOT_DIR)/%.c,$(BIN_DIR)/%.o,$(BOT_C_FILES))
 
 RCUBE_CFLAGS :=
 RCUBE_LD_FLAGS :=
@@ -69,11 +69,11 @@ $(BOT_TARGET): $(OBJECTS) $(filter-out ../bin/ui_main.o, $(UI_OBJECTS)) \
 
 
 # rule valid for each cpp file
-$(BIN_DIR)/bot_%.o: $(BOT_DIR)/%.cpp
+$(BIN_DIR)/%.o: $(BOT_DIR)/%.cpp
 	$(CXX) -c $(CFLAGS) $^ -o $@
 
 # rule valid for each c file
-$(BIN_DIR)/bot_%.o: $(BOT_DIR)/%.c
+$(BIN_DIR)/%.o: $(BOT_DIR)/%.c
 	$(CC) -c $(CFLAGS) $^ -o $@
 
 

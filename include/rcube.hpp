@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2022 Lorenzo Pucci
+* Copyright (c) 2023 Lorenzo Pucci
 * You may use, distribute and modify this code under the terms of the MIT
 * license.
 *
@@ -118,6 +118,12 @@ namespace rcube
         * @param axis: the rotation axis
         * @param step: the number of 90° rotations to apply (clockwise relatively
         * to someone looking at the origin from the positive side of the axis)
+        */
+
+        rcube::Coordinates getRotated(const Axis& axis, int step) const;
+        /*
+        * Same as rotate, but instead of being applied, the result of the
+        * rotation is returned.
         */
     };
 

@@ -63,3 +63,17 @@ rcube::Coordinates getBlockPlace(rcube::Cube *cube, const Color &c1,
         cube->getFaceOrientation(c3)
     );
 }
+
+rcube::Move pullUp(const rcube::Coordinates &pos)
+{
+    rcube::Orientation layer = {Axis::Z, pos.z()};
+    int direction = layer.getRotated(Axis::X, pos.x()).direction;
+    return rcube::Move({Axis::X, pos.x()}, direction);
+}
+
+rcube::Move getUmove(rcube::Coordinates pos, const rcube::Orientation &orient)
+{
+    pos.rotate(Axis::Y, 1);
+    bool toInvert = pos.coords[orient.axis] == orient.direction;
+    return rcube::Move('U', toInvert ? -1 : 1);
+}

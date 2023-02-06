@@ -24,15 +24,18 @@ rcube::Algorithm CfopSolver::solve()
     rcube::Algorithm algo;
 
     algo = algo + cross();
-    //algo = algo + f2l();
+    algo = algo + f2l();
     //algo = algo + pll();
     //algo = algo + oll();
 
     algo.normalize();
     algo = algo.removeRotations();
 
-    std::cout << "[CFOP] Final algorithm: " << algo.to_string() << std::endl;
-    std::cout << "[CFOP] Cube solved in " << algo.length() << " moves\n";
+    if (_verbose)
+    {
+        std::cout << "[CFOP] Final algorithm: " << algo.to_string() << std::endl;
+        std::cout << "[CFOP] Cube solved in " << algo.length() << " moves\n";
+    }
     
     return algo;
 }
@@ -149,6 +152,281 @@ rcube::Algorithm CfopSolver::cross()
     if (_verbose)
     {
         std::cout << "[CFOP] Cross: " << algo.to_string() << std::endl;
+    }
+
+    return algo;
+}
+
+bool isEmptySlot(const rcube::Coordinates &pos,
+    const std::vector<rcube::Coordinates> &fullSlots)
+{
+    for (rcube::Coordinates place : fullSlots)
+    {
+        if (place.x() == pos.x() && place.z() == pos.z()) return false;
+    }
+    return true;
+}
+
+rcube::Coordinates toBeEmpty(const rcube::Coordinates &pos,
+    const rcube::Orientation &layer)
+{
+    if (layer.axis == Axis::X)
+    {
+        return rcube::Coordinates(pos.x(), 1, -pos.z());
+    }
+    return rcube::Coordinates(-pos.x(), 1, pos.z());
+}
+
+rcube::Coordinates computeEdgePlace(const rcube::Coordinates &cPos,
+    const rcube::Orientation &cOrient)
+{
+    if (cOrient.axis == Axis::X) return rcube::Coordinates(0, 1, -cPos.z());
+    return rcube::Coordinates(-cPos.x(), 1, 0);
+}
+
+void rotateU(rcube::Cube *cube, rcube::Algorithm *algo, rcube::Coordinates
+    *edgePos = nullptr, rcube::Coordinates *cornerPos = nullptr)
+{
+    cube->performMove(rcube::Move('U', 1));
+    algo->push(rcube::Move('U', 1));
+
+    if (edgePos != nullptr) edgePos->rotate(Axis::Y, 1);
+    if (cornerPos != nullptr) cornerPos-> rotate(Axis::Y, 1);
+}
+
+bool pairIsFormed(rcube::Cube *cube, const rcube::Coordinates &cPos, const rcube::Coordinates
+    &ePos, const rcube::Orientation &cOrient)
+{
+    if (cube->getStickerAt(cPos, {Axis::Y, 1}) != cube->getStickerAt(ePos,
+        {Axis::Y, 1})) return false;
+
+    if (cOrient.axis == Axis::Z) return cPos.x() == ePos.x();
+    return cPos.z() == ePos.z();
+}
+
+rcube::Algorithm CfopSolver::f2l()
+{
+    rcube::Algorithm algo;
+    std::vector<rcube::Coordinates> fullSlots;
+    auto crossColors = getAdjacentColors(_crossColor);
+
+    for (int i = 0; i < 4; ++i)
+    {
+    
+    Color cols[2] = {crossColors[i], crossColors[(i + 1) % 4]};
+    rcube::Coordinates edgePos = _cube.find(cols[0], cols[1]);
+    rcube::Coordinates cornerPos = _cube.find(cols[0], cols[1], _crossColor);
+    rcube::Orientation cOrient = _cube.getStickerOrientation(cornerPos, _crossColor);
+
+    /****************************** Place corner ******************************/
+
+    if (cornerPos.y() == 1 && cOrient.axis == Axis::Y)
+    {
+        while (!isEmptySlot(cornerPos, fullSlots))
+        {
+            rotateU(&_cube, &algo, nullptr, &cornerPos);
+        }
+
+        rcube::Move mv1 = pullUp(cornerPos);
+        rcube::Orientation layer = mv1.getAffectedFace();
+        rcube::Algorithm tmpAlgo({mv1, getUmove(cornerPos.getRotated(layer.axis,
+            layer.direction * mv1.direction), mv1.getAffectedFace()),
+            mv1.getInverted()});
+
+        _cube.performAlgorithm(tmpAlgo);
+        algo = algo + tmpAlgo;
+    }
+    else if (cornerPos.y() == -1)
+    {
+        rcube::Orientation layer = (cOrient.axis != Axis::Y) ? cOrient :
+            (rcube::Orientation){Axis::X, cornerPos.x()};
+        
+        int direction = (cornerPos.getRotated(layer.axis, layer.direction).y());
+        rcube::Move mv(layer, (direction == 1) ? 1 : -1);
+        rcube::Algorithm tmpAlgo({mv, getUmove(cornerPos, layer),
+            mv.getInverted()});
+
+        _cube.performAlgorithm(tmpAlgo);
+        algo = algo + tmpAlgo;
+    }
+
+    cornerPos = _cube.find(cols[0], cols[1], _crossColor);
+    edgePos = _cube.find(cols[0], cols[1]);
+    cOrient = _cube.getStickerOrientation(cornerPos, _crossColor);
+
+    /******************************* Place edge *******************************/
+
+    rcube::Coordinates edgePlace = computeEdgePlace(cornerPos, cOrient);
+
+    if (edgePos.y() == 1 && edgePos != edgePlace && !pairIsFormed(&_cube,
+        cornerPos, edgePos, cOrient))
+    {
+        rcube::Orientation layer;
+
+        while (true)
+        {
+            layer = {Axis::X, cornerPos.x()};
+            if (edgePos.x() != 0) layer = {Axis::Z, cornerPos.z()};
+
+            if (isEmptySlot(toBeEmpty(cornerPos, layer), fullSlots)) break;
+
+            rotateU(&_cube, &algo, &edgePos, &cornerPos);
+        }
+
+        cOrient = _cube.getStickerOrientation(cornerPos, _crossColor);
+        edgePlace = computeEdgePlace(cornerPos, cOrient);
+
+        // They are ready to form a pair
+        /*
+        if (_cube.getStickerAt(cornerPos, {Axis::Y, 1}) == _cube.getStickerAt(
+            edgePos, {Axis::Y, 1}) && layer == cOrient)
+        {
+            edgePlace = cornerPos;
+            edgePlace.coords[layer.axis] = 0;
+        }*/
+
+        rcube::Move mv(layer, 1);
+        if (cornerPos.getRotated(layer.axis, layer.direction).y() != -1)
+        {
+            mv = mv.getInverted();
+        }
+        _cube.performMove(mv);
+        algo.push(mv);
+
+        while (edgePos != edgePlace)
+        {
+            rotateU(&_cube, &algo, &edgePos);
+        }
+
+        _cube.performMove(mv.getInverted());
+        algo.push(mv.getInverted());
+    }
+
+    else if (edgePos.y() == 0)
+    {
+        rcube::Orientation layer;
+
+        while (true)
+        {
+            if (edgePos.x() == edgePlace.x())
+            {
+                layer = {Axis::X, edgePos.x()};
+                break;
+            }
+            else if (edgePos.z() == edgePlace.z())
+            {
+                layer = {Axis::Z, edgePos.z()};
+                break;
+            }
+            rotateU(&_cube, &algo, &edgePlace, &cornerPos);
+        }
+
+        rcube::Move mv(layer, 1);
+        if (edgePos.getRotated(layer.axis, layer.direction).y() != 1)
+        {
+            mv = mv.getInverted();
+        }
+        _cube.performMove(mv);
+        algo.push(mv);
+
+        cOrient = _cube.getStickerOrientation(cornerPos, _crossColor);
+        while (cOrient != layer.getInv())
+        {
+            rotateU(&_cube, &algo);
+            cOrient.rotate(Axis::Y, 1);
+        }
+
+        _cube.performMove(mv.getInverted());
+        algo.push(mv.getInverted());
+    }
+
+    /******************************** Join pair ********************************/
+
+    rcube::Coordinates cPlace = getBlockPlace(&_cube, _crossColor, cols[0], cols[1]);
+    edgePos = _cube.find(cols[0], cols[1]);
+    cornerPos = _cube.find(cols[0], cols[1], _crossColor);
+
+    if (_cube.getStickerAt(edgePos, {Axis::Y, 1}) != _cube.getStickerAt(
+        cornerPos, {Axis::Y, 1}))
+    {
+        while (cornerPos.x() != cPlace.x() || cornerPos.z() != cPlace.z())
+        {
+            rotateU(&_cube, &algo, &edgePos, &cornerPos);
+        }
+
+        cOrient = _cube.getStickerOrientation(cornerPos, _crossColor);
+        rcube::Move mv(cOrient, 1);
+        rcube::Coordinates afterRot = cornerPos.getRotated(cOrient.axis,
+            cOrient.direction);
+        if (afterRot.y() != 1)
+        {
+            mv = mv.getInverted();
+            afterRot.rotate(cOrient.axis, 2);
+        }
+        rcube::Move mv1 = getUmove(afterRot, cOrient).getInverted();
+
+        rcube::Algorithm tmpAlgo({mv, mv1, mv.getInverted()});
+        _cube.performAlgorithm(tmpAlgo);
+        algo = algo + tmpAlgo;
+    }
+    else
+    {
+        if (cornerPos.x() != edgePos.x() && cornerPos.z() != edgePos.z())
+        {
+            cOrient = _cube.getStickerOrientation(cornerPos, _crossColor);
+
+            while (!isEmptySlot(toBeEmpty(cornerPos, cOrient), fullSlots))
+            {
+                rotateU(&_cube, &algo, &edgePos, &cornerPos);
+                cOrient.rotate(Axis::Y, 1);
+            }
+
+            cOrient = _cube.getStickerOrientation(cornerPos, _crossColor);
+            rcube::Move mv(cOrient, 1);
+            if (cornerPos.getRotated(cOrient.axis, cOrient.direction).y() != -1)
+                mv = mv.getInverted();
+
+            rcube::Algorithm tmpAlgo({mv, rcube::Move('U', 2), mv.getInverted()});
+            _cube.performAlgorithm(tmpAlgo);
+            algo = algo + tmpAlgo;
+
+            edgePos = _cube.find(cols[0], cols[1]);
+            cornerPos = _cube.find(cols[0], cols[1], _crossColor);
+        }
+
+        cOrient = _cube.getStickerOrientation(cornerPos, _crossColor);
+        rcube::Coordinates thirdPos = cornerPos;
+        thirdPos.coords[cOrient.axis] *= -1;
+
+        while (thirdPos.x() != cPlace.x() || thirdPos.z() != cPlace.z())
+        {
+            rotateU(&_cube, &algo, &thirdPos, &cornerPos);
+            cOrient.rotate(Axis::Y, 1);
+        }
+
+        rcube::Move mv1(cOrient.getInv(), 1);
+        if (cPlace.getRotated(cOrient.axis, -cOrient.direction).y() != 1)
+            mv1 = mv1.getInverted();
+
+        rcube::Move mv2('U', 1);
+        rcube::Coordinates afterRot = cornerPos.getRotated(Axis::Y, 1);
+        if (afterRot.x() != cPlace.x() || afterRot.z() != cPlace.z())
+            mv2 = mv2.getInverted();
+
+        rcube::Algorithm tmpAlgo({mv1, mv2, mv1.getInverted()});
+        _cube.performAlgorithm(tmpAlgo);
+        algo = algo + tmpAlgo;
+    }
+
+    fullSlots.push_back(cPlace);
+
+    } // for (int i = 0; i < 4; ++i)
+
+    algo.normalize();
+
+    if (_verbose)
+    {
+        std::cout << "[CFOP] F2L: " << algo.to_string() << std::endl;
     }
 
     return algo;

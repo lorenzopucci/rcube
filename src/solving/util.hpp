@@ -23,3 +23,7 @@ rcube::Coordinates getBlockPlace(rcube::Cube *cube, const Color &c1,
     
 rcube::Coordinates getBlockPlace(rcube::Cube *cube, const Color &c1,
     const Color &c2, const Color &c3);
+
+rcube::Move pullUp(const rcube::Coordinates &pos);
+
+rcube::Move getUmove(rcube::Coordinates pos, const rcube::Orientation &orient);

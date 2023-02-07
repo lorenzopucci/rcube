@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2022 Lorenzo Pucci
+* Copyright (c) 2023 Lorenzo Pucci
 * You may use, distribute and modify this code under the terms of the MIT
 * license.
 *
@@ -73,9 +73,9 @@ void Camera::arrangeBlock(int* coords)
 {
     // multiplied by 1.1f to leave a small gap between blocks
     modelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(
-        static_cast<float>(*coords) * 1.1f,
-        static_cast<float>(*(coords + 1)) * 1.1f,
-        static_cast<float>(*(coords + 2)) * 1.1f
+        float(*coords),
+        float(*(coords + 1)),
+        float(*(coords + 2))
     ));
 }
 

@@ -13,11 +13,11 @@
 
 #include <glm/glm.hpp>
 
-#define STD_VS "ui/res/shaders/cube.vs"
-#define STD_FS "ui/res/shaders/cube.fs"
+#define STD_VS "ui/res/shaders/cube_vert.glsl"
+#define STD_FS "ui/res/shaders/cube_frag.glsl"
 
-#define TXT_VS "ui/res/shaders/text.vs"
-#define TXT_FS "ui/res/shaders/text.fs"
+#define TXT_VS "ui/res/shaders/text_vert.glsl"
+#define TXT_FS "ui/res/shaders/text_frag.glsl"
 
 class Shader
 {

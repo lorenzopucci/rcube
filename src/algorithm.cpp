@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2022 Lorenzo Pucci
+* Copyright (c) 2023 Lorenzo Pucci
 * You may use, distribute and modify this code under the terms of the MIT
 * license.
 *
@@ -76,26 +76,32 @@ rcube::Algorithm::Algorithm(const std::string& fromString)
         if (fromString[i+1] != '(')
         {
           throw std::invalid_argument("Invalid algorithm");
-          delete this;
         }
 
         i += 2;
         std::stringstream ss;
 
-        while (fromString[i] != ')')
+        while (i < fromString.length() && fromString[i] != ')')
         {
           ss << fromString[i];
           i++;
         }
-        if (algoDb.find(ss.str()) == algoDb.end())
+
+        bool found = false;
+        for (AlgoDBItem item : algoDb)
+        {
+          if (item.name != ss.str()) continue;
+
+          for (rcube::Move move : rcube::Algorithm(item.algo).algorithm)
+          {
+            found = true;
+            push(move);
+            break;
+          }
+        }
+        if (!found)
         {
           throw std::invalid_argument("Cannot find algorithm: " + ss.str());
-          delete this;
-        }
-
-        for (rcube::Move move : rcube::Algorithm(algoDb[ss.str()]).algorithm)
-        {
-          push(move);
         }
 
         i++;
@@ -105,7 +111,6 @@ rcube::Algorithm::Algorithm(const std::string& fromString)
       default:
       {
         throw std::invalid_argument("Invalid algorithm");
-        delete this;
       }
      }
    }

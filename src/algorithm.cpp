@@ -92,12 +92,10 @@ rcube::Algorithm::Algorithm(const std::string& fromString)
         {
           if (item.name != ss.str()) continue;
 
-          for (rcube::Move move : rcube::Algorithm(item.algo).algorithm)
-          {
-            found = true;
-            push(move);
-            break;
-          }
+          found = true;
+          std::vector<rcube::Move> algo = rcube::Algorithm(item.algo).algorithm;
+          algorithm.insert(algorithm.end(), algo.begin(), algo.end());
+          break;
         }
         if (!found)
         {

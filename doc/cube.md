@@ -167,11 +167,18 @@ The pattern is a `std::string` with the following syntax:
 corresponding color (`W` for white, `Y` for yellow and so on);
 - The lowercase letters `w`, `y`, `g`, `b`, `r`, `o` indicate a sticker that
 is NOT of the corresponding color (`w` is every color but white);
-- All the other letters indicate a sticker of an unspecified color, but with
-the following rules:
+- All the letters from `A` to `L` that are not colors also indicate a sticker
+of unspecified color, but with the following rules:
+    - For all pairs of uppercase and lowercase letters, the first case used in
+    the expression picks a color, and the letter of the other case corresponds
+    to all colors but that one (if `A`, which appears first in the string, is
+    green, `a` is all colors but green);
+    - Different letters may not correspond to different colors;
+- All the letters from `M` to `Z` that are not colors indicate a sticker of an
+unspecified color, but with the following rules:
     - Different letters correspond to different colors;
     - A pair of uppercase and lowercase letters correspond to opposite colors
-    (if `A` is blue, `a` is green);
+    (if `M` is blue, `m` is green);
 
 The face is read left-to-right, top-to-bottom:
 ```

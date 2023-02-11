@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2022 Lorenzo Pucci
+* Copyright (c) 2023 Lorenzo Pucci
 * You may use, distribute and modify this code under the terms of the MIT
 * license.
 *
@@ -9,36 +9,37 @@
 
 #include <rcube.hpp>
 
+#include "solving/util.hpp"
+
 bool handleLetters(Color color, char given, char otherCase,
     std::map<char, Color> *letterMapping)
 {
+    bool isTypeB = (int)given >= 77 && (int)otherCase >= 77;
+
     if (letterMapping->find(given) != letterMapping->end())
     {
         return color == letterMapping->at(given);
     }
     else if (letterMapping->find(otherCase) != letterMapping->end())
     {
-        Color newColor;
-
-        switch (letterMapping->at(otherCase))
+        if (isTypeB)
         {
-            case Color::White: newColor = Color::Yellow; break;
-            case Color::Yellow: newColor = Color::White; break;
-            case Color::Green: newColor = Color::Blue; break;
-            case Color::Blue: newColor = Color::Green; break;
-            case Color::Red: newColor = Color::Orange; break;
-            case Color::Orange: newColor = Color::Red; break;
+            Color opposite = getOppositeColor(letterMapping->at(otherCase));
+            letterMapping->insert(std::pair<char, Color>(given, opposite));
+            return color == opposite;
         }
 
-        letterMapping->insert(std::pair<char, Color>(given, newColor));
-        return color == newColor;
+        return color != letterMapping->at(otherCase);
     }
     else
     {
-        // make sure no other letter is pointing to that color
-        for (auto it : *letterMapping)
+        if (isTypeB)
         {
-            if (it.second == color) return false;
+            // make sure no other letter is pointing to that color
+            for (auto it : *letterMapping)
+            {
+                if (it.second == color && tolower(it.first) >= 109) return false;
+            }
         }
 
         letterMapping->insert(std::pair<char, Color>(given, color));

@@ -69,16 +69,19 @@ print("\n~~~ Performing M2UR ~~~")
 performAlgorithm("M2E2S2 M2UR")
 
 io.write("Face match: letters ... ")
-test(faceMatches({axis=1, direction=1}, "AACaaDAAD"), true)
+test(faceMatches({axis=1, direction=1}, "MMNmmAMMA"), true)
 
 io.write("Face match: mixture 1 ... ")
 test(faceMatches({axis=2, direction=-1}, "AOOaGrA**"), true)
 
-io.write("Face match: mixture 2 ... ")
-test(faceMatches({axis=2, direction=1}, "**wGBAaBC"), false)
+io.write("Face match: mixture 2.0 ... ")
+test(faceMatches({axis=2, direction=1}, "**wGBAaBC"), true)
+
+io.write("Face match: mixture 2.1 ... ")
+test(faceMatches({axis=2, direction=1}, "**wGBMmBC"), false)
 
 io.write("Layer match: letters ... ")
-test(layerMatches({axis=1, direction=1}, "AACAADcaadDd"), true)
+test(layerMatches({axis=1, direction=1}, "MMAMMPcmmpPp"), true)
 
 io.write("Layer match: mixture 1 ... ")
 test(layerMatches({axis=1, direction=-1}, "AADW*dywOGrZ"), false)

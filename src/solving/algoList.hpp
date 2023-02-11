@@ -19,8 +19,8 @@ std::vector<AlgoDBItem> algoDb
     // general
     {"sexy-move", "RUR'U'", GENERAL},
     {"inv-sexy-move", "RUR'U'", GENERAL},
-    {"sune", "RUR'UR2UR'", OLL, "aAaAAAAAa"}, // ambiguous
-    {"anti-sune", "L'U'LU'L'2U'L", OLL, "aAaAAAAAa"}, // ambiguous
+    {"sune", "RUR'URU2R'", OLL, "aAaAAAAAa"}, // ambiguous
+    {"anti-sune", "L'U'LU'L'U2L", OLL, "aAaAAAAAa"}, // ambiguous
 
 
     // OLL

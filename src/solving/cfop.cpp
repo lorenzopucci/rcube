@@ -8,11 +8,15 @@
 */
 
 #include <iostream>
+#include <algorithm>
 
 #include <rcube.hpp>
 #include <solving.hpp>
 
 #include "util.hpp"
+#include "algoDButil.hpp"
+
+extern std::vector<AlgoDBItem> algoDb;
 
 
 CfopSolver::CfopSolver(const rcube::Cube &cube, Color crossColor, bool verbose)
@@ -25,8 +29,8 @@ rcube::Algorithm CfopSolver::solve()
 
     algo = algo + cross();
     algo = algo + f2l();
+    algo = algo + oll();
     //algo = algo + pll();
-    //algo = algo + oll();
 
     algo.normalize();
     algo = algo.removeRotations();
@@ -194,8 +198,8 @@ void rotateU(rcube::Cube *cube, rcube::Algorithm *algo, rcube::Coordinates
     if (cornerPos != nullptr) cornerPos-> rotate(Axis::Y, 1);
 }
 
-bool pairIsFormed(rcube::Cube *cube, const rcube::Coordinates &cPos, const rcube::Coordinates
-    &ePos, const rcube::Orientation &cOrient)
+bool pairIsFormed(rcube::Cube *cube, const rcube::Coordinates &cPos, const
+    rcube::Coordinates &ePos, const rcube::Orientation &cOrient)
 {
     if (cube->getStickerAt(cPos, {Axis::Y, 1}) != cube->getStickerAt(ePos,
         {Axis::Y, 1})) return false;
@@ -427,6 +431,80 @@ rcube::Algorithm CfopSolver::f2l()
     if (_verbose)
     {
         std::cout << "[CFOP] F2L: " << algo.to_string() << std::endl;
+    }
+
+    return algo;
+}
+
+rcube::Algorithm CfopSolver::oll()
+{
+    // Currently a two phase oll (cross + corners)
+    rcube::Algorithm a1("");
+    rcube::Algorithm a2("");
+
+    const rcube::Orientation TOP = {Axis::Y, 1};
+    const rcube::Orientation BACK = {Axis::Z, -1};
+    const rcube::Coordinates BACK_LEFT(-1, 1, -1);
+
+    char topColor = (char)getOppositeColor(_crossColor);
+
+    /********************************** Cross **********************************/
+
+    if (_cube.faceMatches(TOP, "*a*AAA*a*", BACK_LEFT))
+    {
+        a1 = rcube::Algorithm("$(T2)");
+    }
+    else if (_cube.faceMatches(TOP, "*A*AAa*a*", BACK_LEFT))
+    {
+        a1 = rcube::Algorithm("FURU'R'F'");
+    }
+    else if (_cube.faceMatches(TOP, "*a*aAa*a*", BACK_LEFT))
+    {
+        a1 = rcube::Algorithm("$(O1)");
+    }
+    _cube.performAlgorithm(a1);
+
+    /*********************************** OLL ***********************************/
+
+    if (_cube.faceMatches(TOP, "aAaAAAAAa", BACK_LEFT)) // otherwise ambiguous
+    {
+        if (_cube.getStickerAt(rcube::Coordinates(1, 1, 1), {Axis::Z, 1}) ==
+            getOppositeColor(_crossColor))
+        {
+            a2 = rcube::Algorithm("$(sune)");
+        }
+        else
+        {
+            a2 = rcube::Algorithm("U'$(anti-sune)");
+        }
+    }
+    else
+    {
+        for (AlgoDBItem item : algoDb)
+        {
+            if (item.type != AlgoType::OLL || item.match == "") continue;
+
+            std::string match = item.match;
+            std::replace(match.begin(), match.end(), 'a', topColor);
+            std::replace(match.begin(), match.end(), 'A',
+                (char)toupper(topColor));
+
+            if (_cube.layerMatches(TOP, match, BACK_LEFT, BACK))
+            {
+                a2 = rcube::Algorithm(item.algo);
+                break;
+            }
+        }
+    }
+    _cube.performAlgorithm(a2);
+    
+
+    rcube::Algorithm algo = a1 + a2;
+    algo.normalize();
+
+    if (_verbose)
+    {
+        std::cout << "[CFOP] OLL: " << algo.to_string() << std::endl;
     }
 
     return algo;

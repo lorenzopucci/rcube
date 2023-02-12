@@ -30,7 +30,7 @@ rcube::Algorithm CfopSolver::solve()
     algo = algo + cross();
     algo = algo + f2l();
     algo = algo + oll();
-    //algo = algo + pll();
+    algo = algo + pll();
 
     algo.normalize();
     algo = algo.removeRotations();
@@ -505,6 +505,84 @@ rcube::Algorithm CfopSolver::oll()
     if (_verbose)
     {
         std::cout << "[CFOP] OLL: " << algo.to_string() << std::endl;
+    }
+
+    return algo;
+}
+
+rcube::Algorithm CfopSolver::pll()
+{
+    // Currently a two phase pll (corners + edges)
+    rcube::Algorithm a1("");
+    rcube::Algorithm a2("");
+
+    const rcube::Orientation TOP = {Axis::Y, 1};
+    const rcube::Orientation BACK = {Axis::Z, -1};
+    const rcube::Coordinates BACK_LEFT(-1, 1, -1);
+
+    char topColor = (char)getOppositeColor(_crossColor);
+
+    /********************************* Corners *********************************/
+
+    if (_cube.layerMatches(TOP, "M*Nm*MN*mn*n", BACK_LEFT, BACK))
+    {
+        a1 = rcube::Algorithm("$(T-perm)");
+    }
+    else if (_cube.layerMatches(TOP, "M*mN*nm*Mn*N", BACK_LEFT, BACK))
+    {
+        a1 = rcube::Algorithm("$(Y-perm)");
+    }
+    _cube.performAlgorithm(a1);
+
+    /********************************** Edges **********************************/
+
+    if (_cube.layerMatches(TOP, "MMMNmNmnmnNn", BACK_LEFT, BACK)) // otherwise ambiguous
+    {
+        while (_cube.getStickerAt(BACK_LEFT, BACK) !=
+            _cube.getStickerAt(rcube::Coordinates(0, 1, -1), BACK))
+        {
+            _cube.performMove(rcube::Move('U', 1));
+            a1.push(rcube::Move('U', 1));
+        }
+
+        if (_cube.getStickerAt(rcube::Coordinates(-1, 1, 0), {Axis::X, -1}) ==
+            _cube.getStickerAt(rcube::Coordinates(1, 1, 1), {Axis::X, 1}))
+        {
+            a2 = rcube::Algorithm("$(Ub-perm)");
+        }
+        else
+        {
+            a2 = rcube::Algorithm("$(Ua-perm)");
+        }
+    }
+    else
+    {
+        for (AlgoDBItem item : algoDb)
+        {
+            if (item.type != AlgoType::PLL || item.match == "") continue;
+
+            if (_cube.layerMatches(TOP, item.match, BACK_LEFT, BACK))
+            {
+                a2 = rcube::Algorithm(item.algo);
+                break;
+            }
+        }
+    }
+    _cube.performAlgorithm(a2);
+
+    while (!_cube.isSolved())
+    {
+        _cube.performMove(rcube::Move('U', 1));
+        a2.push(rcube::Move('U', 1));
+    }
+    
+
+    rcube::Algorithm algo = a1 + a2;
+    algo.normalize();
+
+    if (_verbose)
+    {
+        std::cout << "[CFOP] PLL: " << algo.to_string() << std::endl;
     }
 
     return algo;

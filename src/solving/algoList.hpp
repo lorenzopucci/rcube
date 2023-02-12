@@ -98,10 +98,10 @@ std::vector<AlgoDBItem> algoDb
 
 
     // PLL
-    {"Ub-perm", "R2U(RUR'U')R'U'(R'UR')", PLL, "AAACaCacacCc"}, // ambiguous
-    {"Ua-perm", "(RU'RU)RU(RU'R'U')R2", PLL, "AAACaCacacCc"}, // ambiguous
-    {"Z-perm", "M2UM2UM'U2M2U2M'U2", PLL, "ACAcacacaCAC"},
-    {"H-perm", "M2UM2U2M2UM2", PLL, "AaACcCaAacCc"},
+    {"Ub-perm", "R2U(RUR'U')R'U'(R'UR')", PLL, "MMMNmNmnmnNn"}, // ambiguous
+    {"Ua-perm", "(RU'RU)RU(RU'R'U')R2", PLL, "MMMNmNmnmnNn"}, // ambiguous
+    {"Z-perm", "M2UM2UM'U2M2U2M'U2", PLL, "MNMnmnmnmNMN"},
+    {"H-perm", "M2UM2U2M2UM2", PLL, "MmMNnNmMmnNn"},
 
     {"Aa-perm", "x(R'UR')D2(RU'R')D2R2x'", PLL},
     {"Ab-perm", "xR2D2(RUR')D2(RU'R)x'", PLL},
@@ -111,11 +111,11 @@ std::vector<AlgoDBItem> algoDb
     {"Rb-perm", "(R'U2RU2)R'F(RUR'U')R'F'R2U'", PLL},
     {"Ja-perm", "(R'UL'U2)(RU'R'U2RLU'", PLL},
     {"Jb-perm", "(RUR'F')(RUR'U')R'FR2U'R'U'", PLL},
-    {"T-perm", "(RUR'U')(R'FR2U')R'U'(RUR'F')", PLL, "A*Ca*AC*ac*c"},
+    {"T-perm", "(RUR'U')(R'FR2U')R'U'(RUR'F')", PLL, "M*Nm*MN*mn*n"},
     {"F-perm", "(R'U'F')(RUR'U')(R'FR2U')(R'U'RU)(R'UR)", PLL},
 
     {"V-perm", "(R'UR'U')y(R'F'R2U')(R'UR'F)RF", PLL},
-    {"Y-perm", "F(RU'R'U')(RUR'F')(RUR'U')(R'FRF')", PLL, "A*aC*ca*Ac*C"},
+    {"Y-perm", "F(RU'R'U')(RUR'F')(RUR'U')(R'FRF')", PLL, "M*mN*nm*Mn*N"},
     {"Na-perm", "(RUR'U)(RUR'F')(RUR'U')(R'FR2U')R'U2(RU'R')", PLL},
     {"Nb-perm", "(R'URU')(R'F'U'F)(RUR'F)R'F'(RU'R)", PLL},
     

@@ -591,6 +591,15 @@ namespace rcube
         * @param cmd: the code to execute.
         * @return: 1 on success, 0 on failure
         */
+       
+        rcube::Algorithm solveCfop(bool verbose = false,
+                Color crossColor = Color::White);
+        /*
+        * Solves the cube using the cfop algorithm (see include/solving.hpp).
+        * @param verbose: enable output to stdout
+        * @param crossColor: the color of the face to start from
+        * @return: the algorithm used to solve the cube
+        */
 
     private:
         // internally, the cube is abstracted as an array of 6 rcube::Center, 12

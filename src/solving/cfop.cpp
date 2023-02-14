@@ -439,7 +439,9 @@ rcube::Algorithm CfopSolver::f2l()
 rcube::Algorithm CfopSolver::oll()
 {
     // Currently a two phase oll (cross + corners)
+    rcube::Algorithm preA1("");
     rcube::Algorithm a1("");
+    rcube::Algorithm preA2("");
     rcube::Algorithm a2("");
 
     const rcube::Orientation TOP = {Axis::Y, 1};
@@ -450,15 +452,15 @@ rcube::Algorithm CfopSolver::oll()
 
     /********************************** Cross **********************************/
 
-    if (_cube.faceMatches(TOP, "*a*AAA*a*", BACK_LEFT))
+    if (_cube.faceMatches(TOP, "*a*AAA*a*", BACK_LEFT, &preA1))
     {
         a1 = rcube::Algorithm("$(T2)");
     }
-    else if (_cube.faceMatches(TOP, "*A*AAa*a*", BACK_LEFT))
+    else if (_cube.faceMatches(TOP, "*A*AAa*a*", BACK_LEFT, &preA1))
     {
         a1 = rcube::Algorithm("FURU'R'F'");
     }
-    else if (_cube.faceMatches(TOP, "*a*aAa*a*", BACK_LEFT))
+    else if (_cube.faceMatches(TOP, "*a*aAa*a*", BACK_LEFT, &preA1))
     {
         a1 = rcube::Algorithm("$(O1)");
     }
@@ -466,7 +468,7 @@ rcube::Algorithm CfopSolver::oll()
 
     /*********************************** OLL ***********************************/
 
-    if (_cube.faceMatches(TOP, "aAaAAAAAa", BACK_LEFT)) // otherwise ambiguous
+    if (_cube.faceMatches(TOP, "aAaAAAAAa", BACK_LEFT, &preA2)) // otherwise ambiguous
     {
         if (_cube.getStickerAt(rcube::Coordinates(1, 1, 1), {Axis::Z, 1}) ==
             getOppositeColor(_crossColor))
@@ -489,7 +491,7 @@ rcube::Algorithm CfopSolver::oll()
             std::replace(match.begin(), match.end(), 'A',
                 (char)toupper(topColor));
 
-            if (_cube.layerMatches(TOP, match, BACK_LEFT, BACK))
+            if (_cube.layerMatches(TOP, match, BACK_LEFT, BACK, &preA2))
             {
                 a2 = rcube::Algorithm(item.algo);
                 break;
@@ -499,7 +501,7 @@ rcube::Algorithm CfopSolver::oll()
     _cube.performAlgorithm(a2);
     
 
-    rcube::Algorithm algo = a1 + a2;
+    rcube::Algorithm algo = preA1 + a1 + preA2 + a2;
     algo.normalize();
 
     if (_verbose)
@@ -513,7 +515,9 @@ rcube::Algorithm CfopSolver::oll()
 rcube::Algorithm CfopSolver::pll()
 {
     // Currently a two phase pll (corners + edges)
+    rcube::Algorithm preA1("");
     rcube::Algorithm a1("");
+    rcube::Algorithm preA2("");
     rcube::Algorithm a2("");
 
     const rcube::Orientation TOP = {Axis::Y, 1};
@@ -524,11 +528,11 @@ rcube::Algorithm CfopSolver::pll()
 
     /********************************* Corners *********************************/
 
-    if (_cube.layerMatches(TOP, "M*Nm*MN*mn*n", BACK_LEFT, BACK))
+    if (_cube.layerMatches(TOP, "M*Nm*MN*mn*n", BACK_LEFT, BACK, &preA1))
     {
         a1 = rcube::Algorithm("$(T-perm)");
     }
-    else if (_cube.layerMatches(TOP, "M*mN*nm*Mn*N", BACK_LEFT, BACK))
+    else if (_cube.layerMatches(TOP, "M*mN*nm*Mn*N", BACK_LEFT, BACK, &preA1))
     {
         a1 = rcube::Algorithm("$(Y-perm)");
     }
@@ -536,7 +540,7 @@ rcube::Algorithm CfopSolver::pll()
 
     /********************************** Edges **********************************/
 
-    if (_cube.layerMatches(TOP, "MMMNmNmnmnNn", BACK_LEFT, BACK)) // otherwise ambiguous
+    if (_cube.layerMatches(TOP, "MMMNmNmnmnNn", BACK_LEFT, BACK, &preA2)) // otherwise ambiguous
     {
         while (_cube.getStickerAt(BACK_LEFT, BACK) !=
             _cube.getStickerAt(rcube::Coordinates(0, 1, -1), BACK))
@@ -561,7 +565,7 @@ rcube::Algorithm CfopSolver::pll()
         {
             if (item.type != AlgoType::PLL || item.match == "") continue;
 
-            if (_cube.layerMatches(TOP, item.match, BACK_LEFT, BACK))
+            if (_cube.layerMatches(TOP, item.match, BACK_LEFT, BACK, &preA2))
             {
                 a2 = rcube::Algorithm(item.algo);
                 break;
@@ -577,7 +581,7 @@ rcube::Algorithm CfopSolver::pll()
     }
     
 
-    rcube::Algorithm algo = a1 + a2;
+    rcube::Algorithm algo = preA1 + a1 + preA2 + a2;
     algo.normalize();
 
     if (_verbose)

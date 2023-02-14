@@ -125,8 +125,8 @@ int getCharPos(const rcube::Coordinates2D &coords)
         coords.coords[Axis::X] + 1;
 }
 
-bool rcube::Cube::faceMatches(const rcube::Orientation &face,
-    const std::string &expr, const rcube::Coordinates &dest)
+bool rcube::Cube::faceMatches(const rcube::Orientation &face, const std::string
+    &expr, const rcube::Coordinates &dest, rcube::Algorithm *algo)
 {
     // check the syntax
     if (expr.size() != 9) return false;
@@ -190,10 +190,16 @@ bool rcube::Cube::faceMatches(const rcube::Orientation &face,
 
             rcube::Move mv(face, 1);
 
-            for (int i = 0; i < 4; ++i)
+            int i = 0;
+            for (; i < 4; ++i)
             {
                 if (first->location == dest) break;
                 performMove(mv);
+            }
+            if (algo != nullptr)
+            {
+                if (i == 3) i = -1;
+                algo->push(rcube::Move(face, i));
             }
         }
 
@@ -271,7 +277,7 @@ int MatchingPath::getBlockNum(const rcube::Coordinates &blockPos,
 
 bool rcube::Cube::layerMatches(const rcube::Orientation &layer, const
     std::string &expr, const rcube::Coordinates &dest, const rcube::Orientation
-    &orient)
+    &orient, rcube::Algorithm *algo)
 {
     if (expr.size() != 12) return false;
 
@@ -450,6 +456,7 @@ bool rcube::Cube::layerMatches(const rcube::Orientation &layer, const
     if (dest.coords[layer.axis] != layer.direction) return true;
 
     rcube::Move mv(layer, 1);
+    int moveCount = 0;
 
     for (int i = 0; i < 8; ++i)
     {
@@ -471,10 +478,19 @@ bool rcube::Cube::layerMatches(const rcube::Orientation &layer, const
             for (int x = 0; x < 4; ++x)
             {
                 performMove(mv);
+                moveCount++;
                 if (corners[i].location != dest) continue;
 
-                if (orient == (rcube::Orientation){Axis::X, 0}) return true;
-                if (startStk->orientation == orient) return true;
+                if (orient == (rcube::Orientation){Axis::X, 0} ||
+                    startStk->orientation == orient)
+                {
+                    if (algo != nullptr)
+                    {
+                        if (moveCount == 3) moveCount = -1;
+                        algo->push(rcube::Move(layer, moveCount));
+                    }
+                    return true;
+                }
             }
         }
     }

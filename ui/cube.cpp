@@ -33,12 +33,6 @@ void Cube::update(const rcube::BlockArray &blocks)
     this->blocks = blocks;
 }
 
-bool isEdge(const rcube::Coordinates &pos)
-{
-    return pos.x() * pos.y() * pos.z() == 0 &&
-        abs(pos.x() + pos.y() + pos.z()) != 1;
-}
-
 float getx0(const Color &color)
 {
     float pos;

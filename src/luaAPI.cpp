@@ -238,7 +238,7 @@ int RcubeLua::reverseAlgo(lua_State *L)
 int RcubeLua::removeRotations(lua_State *L)
 {
     rcube::Algorithm algo(lua_tostring(L, 1));
-    algo = algo.removeRotations();
+    algo.removeRotations();
 
     lua_pushstring(L, algo.to_string().c_str());
     return 1;

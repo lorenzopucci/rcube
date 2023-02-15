@@ -33,7 +33,7 @@ rcube::Algorithm CfopSolver::solve()
     algo = algo + pll();
 
     algo.normalize();
-    algo = algo.removeRotations();
+    algo.removeRotations();
 
     if (_verbose)
     {

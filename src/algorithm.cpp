@@ -282,7 +282,7 @@ void removeRotationsUnit(const rcube::Algorithm &algo, rcube::Algorithm *newAlgo
   }
 }
 
-rcube::Algorithm rcube::Algorithm::removeRotations() const
+rcube::Algorithm rcube::Algorithm::withoutRotations() const
 {
   rcube::Algorithm newAlgo;
   std::map<rcube::Orientation, rcube::Orientation> faceMap;
@@ -294,6 +294,11 @@ rcube::Algorithm rcube::Algorithm::removeRotations() const
 
   newAlgo.normalize();
   return newAlgo;
+}
+
+void rcube::Algorithm::removeRotations()
+{
+  algorithm = withoutRotations().algorithm;
 }
 
 std::string rcube::Algorithm::to_string() const

@@ -442,6 +442,11 @@ namespace rcube
          * Applies a rcube::Algorithm
         */
 
+        void performAlgorithm (const std::string &algorithm);
+        /*
+        * Shortcut for performAlgorithm(rcube::Algorithm("string"))
+        */
+
         void scramble(const int &length = 12, rcube::Algorithm* dest = nullptr);
         /*
          * Performs a randomly generated algorithm.

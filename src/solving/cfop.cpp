@@ -514,11 +514,8 @@ rcube::Algorithm CfopSolver::oll()
 
 rcube::Algorithm CfopSolver::pll()
 {
-    // Currently a two phase pll (corners + edges)
-    rcube::Algorithm preA1("");
-    rcube::Algorithm a1("");
-    rcube::Algorithm preA2("");
-    rcube::Algorithm a2("");
+    rcube::Algorithm preAlgo("");
+    rcube::Algorithm algo("");
 
     const rcube::Orientation TOP = {Axis::Y, 1};
     const rcube::Orientation BACK = {Axis::Z, -1};
@@ -526,62 +523,26 @@ rcube::Algorithm CfopSolver::pll()
 
     char topColor = (char)getOppositeColor(_crossColor);
 
-    /********************************* Corners *********************************/
-
-    if (_cube.layerMatches(TOP, "M*Nm*MN*mn*n", BACK_LEFT, BACK, &preA1))
+    for (AlgoDBItem item : algoDb)
     {
-        a1 = rcube::Algorithm("$(T-perm)");
-    }
-    else if (_cube.layerMatches(TOP, "M*mN*nm*Mn*N", BACK_LEFT, BACK, &preA1))
-    {
-        a1 = rcube::Algorithm("$(Y-perm)");
-    }
-    _cube.performAlgorithm(a1);
-
-    /********************************** Edges **********************************/
-
-    if (_cube.layerMatches(TOP, "MMMNmNmnmnNn", BACK_LEFT, BACK, &preA2)) // otherwise ambiguous
-    {
-        while (_cube.getStickerAt(BACK_LEFT, BACK) !=
-            _cube.getStickerAt(rcube::Coordinates(0, 1, -1), BACK))
+        if (item.type != AlgoType::PLL || item.match == "") continue;
+        
+        if (_cube.layerMatches(TOP, item.match, BACK_LEFT, BACK, &preAlgo))
         {
-            _cube.performMove(rcube::Move('U', 1));
-            a1.push(rcube::Move('U', 1));
-        }
-
-        if (_cube.getStickerAt(rcube::Coordinates(-1, 1, 0), {Axis::X, -1}) ==
-            _cube.getStickerAt(rcube::Coordinates(1, 1, 1), {Axis::X, 1}))
-        {
-            a2 = rcube::Algorithm("$(Ub-perm)");
-        }
-        else
-        {
-            a2 = rcube::Algorithm("$(Ua-perm)");
+            algo = rcube::Algorithm(item.algo);
+            break;
         }
     }
-    else
-    {
-        for (AlgoDBItem item : algoDb)
-        {
-            if (item.type != AlgoType::PLL || item.match == "") continue;
-
-            if (_cube.layerMatches(TOP, item.match, BACK_LEFT, BACK, &preA2))
-            {
-                a2 = rcube::Algorithm(item.algo);
-                break;
-            }
-        }
-    }
-    _cube.performAlgorithm(a2);
+    _cube.performAlgorithm(algo);
 
     while (!_cube.isSolved())
     {
         _cube.performMove(rcube::Move('U', 1));
-        a2.push(rcube::Move('U', 1));
+        algo.push(rcube::Move('U', 1));
     }
     
 
-    rcube::Algorithm algo = preA1 + a1 + preA2 + a2;
+    algo = preAlgo + algo;
     algo.normalize();
 
     if (_verbose)

@@ -98,29 +98,29 @@ std::vector<AlgoDBItem> algoDb
 
 
     // PLL
-    {"Ub-perm", "R2U(RUR'U')R'U'(R'UR')", PLL, "MMMNmNmnmnNn"}, // ambiguous
-    {"Ua-perm", "(RU'RU)RU(RU'R'U')R2", PLL, "MMMNmNmnmnNn"}, // ambiguous
+    {"Ub-perm", "R2U(RUR'U')R'U'(R'UR')", PLL, "MMMNmNmnmnNn"},
+    {"Ua-perm", "(RU'RU)RU(RU'R'U')R2", PLL, "MMMNnNnmNmnmn"},
     {"Z-perm", "M2UM2UM'U2M2U2M'U2", PLL, "MNMnmnmnmNMN"},
     {"H-perm", "M2UM2U2M2UM2", PLL, "MmMNnNmMmnNn"},
 
-    {"Aa-perm", "x(R'UR')D2(RU'R')D2R2x'", PLL},
-    {"Ab-perm", "xR2D2(RUR')D2(RU'R)x'", PLL},
-    {"E-perm", "x'(RU'R'D)(RUR'D')(RUR'D)(RU'R'D')x", PLL},
+    {"Aa-perm", "x(R'UR')D2(RU'R')D2R2x'", PLL, "MNMnMmNnnmmN"},
+    {"Ab-perm", "xR2D2(RUR')D2(RU'R)x'", PLL, "NnMnmnmNNMMm"},
+    {"E-perm", "x'(RU'R'D)(RUR'D')(RUR'D)(RU'R'D')x", PLL, "MNmnmNmnMNMn"},
 
-    {"Ra-perm", "(RU'R'U')(RURD)(R'U'RD')(R'U2R')U'", PLL},
-    {"Rb-perm", "(R'U2RU2)R'F(RUR'U')R'F'R2U'", PLL},
-    {"Ja-perm", "(R'UL'U2)(RU'R'U2RLU'", PLL},
-    {"Jb-perm", "(RUR'F')(RUR'U')R'FR2U'R'U'", PLL},
-    {"T-perm", "(RUR'U')(R'FR2U')R'U'(RUR'F')", PLL, "M*Nm*MN*mn*n"},
-    {"F-perm", "(R'U'F')(RUR'U')(R'FR2U')(R'U'RU)(R'UR)", PLL},
+    {"Ra-perm", "(RU'R'U')(RURD)(R'U'RD')(R'U2R')U'", PLL, "MNnmnMnmmNMN"},
+    {"Rb-perm", "(R'U2RU2)R'F(RUR'U')R'F'R2U'", PLL, "NMnMmNmNmnnM"},
+    {"Ja-perm", "(R'UL'U2)(RU'R'U2RLU'", PLL, "MmmNMMnnnmNN"},
+    {"Jb-perm", "(RUR'F')(RUR'U')R'FR2U'R'U'", PLL, "NNMnnNMMnmmm"},
+    {"T-perm", "(RUR'U')(R'FR2U')R'U'(RUR'F')", PLL, "MMNmnMNmmnNn"},
+    {"F-perm", "(R'U'F')(RUR'U')(R'FR2U')(R'U'RU)(R'UR)", PLL, "MmNmNMNMmnnn"},
 
-    {"V-perm", "(R'UR'U')y(R'F'R2U')(R'UR'F)RF", PLL},
-    {"Y-perm", "F(RU'R'U')(RUR'F')(RUR'U')(R'FRF')", PLL, "M*mN*nm*Mn*N"},
-    {"Na-perm", "(RUR'U)(RUR'F')(RUR'U')(R'FR2U')R'U2(RU'R')", PLL},
-    {"Nb-perm", "(R'URU')(R'F'U'F)(RUR'F)R'F'(RU'R)", PLL},
+    {"V-perm", "(R'UR'U')y(R'F'R2U')(R'UR'F)RF", PLL, "MNmNmnmMMnnN"},
+    {"Y-perm", "F(RU'R'U')(RUR'F')(RUR'U')(R'FRF')", PLL, "MnmNNnmMMnmN"},
+    {"Na-perm", "(RUR'U)(RUR'F')(RUR'U')(R'FR2U')R'U2(RU'R')", PLL, "NNnMMmnnNmmM"},
+    {"Nb-perm", "(R'URU')(R'F'U'F)(RUR'F)R'F'(RU'R)", PLL, "NnnMmmnNNmMM"},
     
-    {"Ga-perm", "R2U(R'UR'U')(RU'R2)DU'(R'URD')U", PLL},
-    {"Gb-perm", "y'D(R'U'RU)D'(R2UR'U)(RU'RU')R2U'", PLL},
-    {"Gc-perm", "R2U'(RU'RU)(R'UR2D')(URU'R')DU'", PLL},
-    {"Gd-perm", "D'(RUR'U')D(R2U'RU')(R'UR'U)R2U", PLL}
+    {"Ga-perm", "R2U(R'UR'U')(RU'R2)DU'(R'URD')U", PLL, "NnMnmNMMnmNm"},
+    {"Gb-perm", "y'D(R'U'RU)D'(R2UR'U)(RU'RU')R2U'", PLL, "NnNMNnmmMnMm"},
+    {"Gc-perm", "R2U'(RU'RU)(R'UR2D')(URU'R')DU'", PLL, "NMMnmNMNnmnm"},
+    {"Gd-perm", "D'(RUR'U')D(R2U'RU')(R'UR'U)R2U", PLL, "NnMnNNMmnmMm"}
 };

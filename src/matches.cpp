@@ -452,7 +452,8 @@ bool rcube::Cube::layerMatches(const rcube::Orientation &layer, const
 
     if (possiblePaths.size() == 0) return false;
 
-    if (dest == rcube::Coordinates(0, 0, 0)) return true;
+    if (dest == rcube::Coordinates(0, 0, 0) || orient ==
+        (rcube::Orientation){Axis::X, 0}) return true;
     if (dest.coords[layer.axis] != layer.direction) return true;
 
     rcube::Move mv(layer, 1);
@@ -481,8 +482,7 @@ bool rcube::Cube::layerMatches(const rcube::Orientation &layer, const
                 moveCount++;
                 if (corners[i].location != dest) continue;
 
-                if (orient == (rcube::Orientation){Axis::X, 0} ||
-                    startStk->orientation == orient)
+                if (startStk->orientation == orient)
                 {
                     if (algo != nullptr)
                     {
@@ -494,4 +494,5 @@ bool rcube::Cube::layerMatches(const rcube::Orientation &layer, const
             }
         }
     }
+    return false;
 }

@@ -1,0 +1,1 @@
+# `rcube::Algorithm`

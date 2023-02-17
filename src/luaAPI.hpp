@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2022 Lorenzo Pucci
+* Copyright (c) 2023 Lorenzo Pucci
 * You may use, distribute and modify this code under the terms of the MIT
 * license.
 *
@@ -39,6 +39,8 @@ public:
 
     int getFaceColor(lua_State *L);
 
+    int getFaceOrientation(lua_State *L);
+
     int display(lua_State *L);
 
     int faceMatches(lua_State *L);
@@ -50,6 +52,8 @@ public:
     int reverseAlgo(lua_State *L);
 
     int removeRotations(lua_State *L);
+
+    int solveCfop(lua_State *L);
 
     rcube::Cube *_cube;
 };

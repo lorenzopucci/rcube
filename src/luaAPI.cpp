@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2022 Lorenzo Pucci
+* Copyright (c) 2023 Lorenzo Pucci
 * You may use, distribute and modify this code under the terms of the MIT
 * license.
 *
@@ -75,9 +75,7 @@ int RcubeLua::performMove(lua_State *L)
 
 int RcubeLua::performAlgorithm(lua_State *L)
 {
-    std::string algo = lua_tostring(L, 1);
-
-    _cube->performAlgorithm(rcube::Algorithm(algo));
+    _cube->performAlgorithm(lua_tostring(L, 1));
     return 1;
 }
 
@@ -174,6 +172,16 @@ int RcubeLua::getFaceColor(lua_State *L)
     return 1;
 }
 
+int RcubeLua::getFaceOrientation(lua_State *L)
+{
+    Color col = (Color)lua_tostring(L, 1)[0];
+    rcube::Orientation ort = _cube->getFaceOrientation(col);
+    std::map<std::string, int> orient = {{"axis", (int)ort.axis},
+        {"direction", ort.direction}};
+    pushTable(L, orient);
+    return 1;
+}
+
 int RcubeLua::display(lua_State *L)
 {
     _cube->display();
@@ -241,6 +249,13 @@ int RcubeLua::removeRotations(lua_State *L)
     algo.removeRotations();
 
     lua_pushstring(L, algo.to_string().c_str());
+    return 1;
+}
+
+int RcubeLua::solveCfop(lua_State *L)
+{
+    rcube::Algorithm solution = _cube->solveCfop();
+    lua_pushstring(L, solution.to_string().c_str());
     return 1;
 }
 

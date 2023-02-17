@@ -79,6 +79,15 @@ one-character string (e.g. `"w"` for white).
 
 <br>
 
+### `<table> getFaceOrientation(<string> color)`
+
+- `color`: the color of the face;
+
+Equivalent to `rcube::Cube::getFaceOrientation`. The orientation is returned
+in a table.
+
+<br>
+
 ### `<string> getStickerAt(<table> pos, <table> orient)`
 
 - `pos`: the coordinates of the block the sticker belongs to (`{x=#, y=#, z=#}`);
@@ -137,9 +146,18 @@ returned as a string.
 Equivalent to `rcube::Algorithm::reverse`. The reversed algorithm is
 returned as a string.
 
+<br>
+
 ### `<string> removeRotations(<string> algo)`
 
 - `algo`: the algorithm to remove rotations from;
 
 Equivalent to `rcube::Algorithm::removeRotations`. The new algorithm is
+returned as a string.
+
+<br>
+
+### `<string> solveCfop()`
+
+Equivalent to `rcube::Cube::solveCfop`. The algorithm used to solve the cube is
 returned as a string.

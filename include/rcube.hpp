@@ -533,9 +533,12 @@ namespace rcube
       * given orientation.
       */
 
-        bool faceMatches(const rcube::Orientation &face, const std::string
-        &expr, const rcube::Coordinates &dest = rcube::Coordinates(0, 0, 0),
-        rcube::Algorithm *algo = nullptr);
+        bool faceMatches(
+            const rcube::Orientation &face,
+            const std::string &expr,
+            const rcube::Coordinates &dest = rcube::Coordinates(0, 0, 0),
+            rcube::Algorithm *algo = nullptr
+        );
         /*
         * Checks if a face matches a pattern. This is one of the most powerful
         * tools of this library, please refer to the documentation for a thorough
@@ -549,16 +552,39 @@ namespace rcube
         * face will be pushed
         */
 
-        bool layerMatches(const rcube::Orientation &layer, const std::string
-        &expr, const rcube::Coordinates &dest = rcube::Coordinates(0, 0, 0),
-        const rcube::Orientation &orient = {Axis::X,0}, rcube::Algorithm *algo
-        = nullptr);
+        bool layerMatches(
+            const rcube::Orientation &layer,
+            const std::string &expr,
+            const rcube::Coordinates &dest = rcube::Coordinates(0, 0, 0),
+            const rcube::Orientation &orient = {Axis::X,0},
+            rcube::Algorithm *algo = nullptr
+        );
         /*
         * Checks if a layer (the 12 stickers adjacent to the same face) matches
         * a pattern.
         * @param layer: the layer to check (expressed as the orientation of the
         * adjacent face). Use Orientation::axis=0 for central layers (for example
         * {X, 0} is the layer that is rotated by a M move).
+        * @param expr: the pattern (its syntax is explained in the documentation)
+        * @param dest: if it is not (0,0,0), the layer will be rotated so as the
+        * position of the block corresponding to the first character in expr
+        * will correspond to this location.
+        * @param orient: determines the position of the first sticker along with
+        * dest
+        * @param algo: a pointer to an algorithm to which the moves used to adjust
+        * the face will be pushed
+        */
+
+       bool layerAndFaceMatch(
+            const rcube::Orientation &layer,
+            const std::string &expr,
+            const rcube::Coordinates &dest = rcube::Coordinates(0, 0, 0),
+            const rcube::Orientation &orient = {Axis::X,0},
+            rcube::Algorithm *algo = nullptr
+        );
+        /*
+        * Union of layerMatches and faceMatches: checks if they both match
+        * @param layer: the layer to check
         * @param expr: the pattern (its syntax is explained in the documentation)
         * @param dest: if it is not (0,0,0), the layer will be rotated so as the
         * position of the block corresponding to the first character in expr

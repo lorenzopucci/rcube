@@ -8,6 +8,7 @@
 */
 
 #include <rcube.hpp>
+#include <iostream>
 
 #include "solving/util.hpp"
 
@@ -125,8 +126,12 @@ int getCharPos(const rcube::Coordinates2D &coords)
         coords.coords[Axis::X] + 1;
 }
 
-bool rcube::Cube::faceMatches(const rcube::Orientation &face, const std::string
-    &expr, const rcube::Coordinates &dest, rcube::Algorithm *algo)
+bool rcube::Cube::faceMatches (
+    const rcube::Orientation &face,
+    const std::string &expr,
+    const rcube::Coordinates &dest,
+    rcube::Algorithm *algo
+)
 {
     // check the syntax
     if (expr.size() != 9) return false;
@@ -229,6 +234,8 @@ struct MatchingPath
     int getBlockNum(const rcube::Coordinates &blockPos,
         const rcube::Orientation &stk);
     // get the distance of a block from the starting point
+
+    int getFaceBlockNum(const rcube::Coordinates &pos);
 };
 
 MatchingPath::MatchingPath(const rcube::Coordinates &startBlock, const
@@ -275,9 +282,23 @@ int MatchingPath::getBlockNum(const rcube::Coordinates &blockPos,
     return counter * 3 + facePos;
 }
 
-bool rcube::Cube::layerMatches(const rcube::Orientation &layer, const
-    std::string &expr, const rcube::Coordinates &dest, const rcube::Orientation
-    &orient, rcube::Algorithm *algo)
+int MatchingPath::getFaceBlockNum(const rcube::Coordinates &pos)
+{
+    int row = abs(pos.coords[_facesOrder[0].axis] -
+        _startBlock.coords[_facesOrder[0].axis]);
+    int column = abs(pos.coords[_facesOrder[3].axis] -
+        _startBlock.coords[_facesOrder[3].axis]);
+    
+    return row * 3 + column;
+}
+
+bool rcube::Cube::layerMatches(
+    const rcube::Orientation &layer,
+    const std::string &expr,
+    const rcube::Coordinates &dest,
+    const rcube::Orientation &orient,
+    rcube::Algorithm *algo
+)
 {
     if (expr.size() != 12) return false;
 
@@ -446,6 +467,173 @@ bool rcube::Cube::layerMatches(const rcube::Orientation &layer, const
                     continue;
                 }
                 ++x;
+            }
+        }
+    }
+
+    if (possiblePaths.size() == 0) return false;
+
+    if (dest == rcube::Coordinates(0, 0, 0) || orient ==
+        (rcube::Orientation){Axis::X, 0}) return true;
+    if (dest.coords[layer.axis] != layer.direction) return true;
+
+    rcube::Move mv(layer, 1);
+    int moveCount = 0;
+
+    for (int i = 0; i < 8; ++i)
+    {
+        if (corners[i].location.coords[layer.axis] != layer.direction) continue;
+
+        for (auto path : possiblePaths)
+        {
+            if (corners[i].location != path._startBlock) continue;
+
+            rcube::Sticker *startStk;
+            for (int x = 0; x < 3; ++x)
+            {
+                if (corners[i].stickers[x].orientation == path._facesOrder[0])
+                {
+                    startStk = corners[i].stickers + x;
+                }
+            }
+
+            for (int x = 0; x < 4; ++x)
+            {
+                performMove(mv);
+                moveCount++;
+                if (corners[i].location != dest) continue;
+
+                if (startStk->orientation == orient)
+                {
+                    if (algo != nullptr)
+                    {
+                        if (moveCount == 3) moveCount = -1;
+                        algo->push(rcube::Move(layer, moveCount));
+                    }
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
+}
+
+bool rcube::Cube::layerAndFaceMatch(
+    const rcube::Orientation &layer,
+    const std::string &expr,
+    const rcube::Coordinates &dest,
+    const rcube::Orientation &orient,
+    rcube::Algorithm *algo
+)
+{
+    if (expr.size() != 22 || layer.direction == 0) return false;
+
+    std::string faceExpr = expr.substr(0, 9);
+    std::string layerExpr = expr.substr(10, 12);
+
+    std::vector<MatchingPath> possiblePaths;
+    std::map<char, Color> lmTmp;
+
+    // check the center
+    if (!stickerMatches(getCenterFrom(layer)->color, faceExpr[4], &lmTmp))
+        return false;
+    lmTmp.clear();
+
+    // first, get a list of all the possible paths
+    for (int i = 0; i < 8; ++i)
+    {
+        if (corners[i].location.coords[layer.axis] != layer.direction)
+            continue;
+        
+        for (int k = 0; k < 3; ++k) // check the sticker belonging to the face
+        {
+            if (corners[i].stickers[k].orientation != layer) continue;
+            if (!stickerMatches(corners[i].stickers[k].color, faceExpr[0], &lmTmp))
+            {
+                lmTmp.clear();
+                stickerMatches(getCenterFrom(layer)->color, faceExpr[4], &lmTmp);
+                goto nextBlock;
+            }
+            break;
+        }
+
+        for (int k = 0; k < 3; ++k)
+        {
+            if (corners[i].stickers[k].orientation == layer) continue;
+
+            if (stickerMatches(corners[i].stickers[k].color, layerExpr[0], &lmTmp))
+            {
+                possiblePaths.push_back(MatchingPath(corners[i].location,
+                    corners[i].stickers[k].orientation, layer, lmTmp));
+            }
+
+            lmTmp.clear();
+            stickerMatches(getCenterFrom(layer)->color, faceExpr[4], &lmTmp);
+        }
+    nextBlock:;
+    }
+
+    // check for each edge and corner if it fits in all paths. If not,
+    // erase the path from the vector
+    for (int i = 0; i < 12; ++i)
+    {
+        if (edges[i].location.coords[layer.axis] == layer.direction)
+        {
+        for (int k = 0; k < 2; ++k)
+        {
+            rcube::Sticker *stk = edges[i].stickers + k;
+
+            for (int x = 0; x < possiblePaths.size();)
+            {
+                if (stk->orientation == layer && stickerMatches(stk->color,
+                    faceExpr[possiblePaths[x].getFaceBlockNum(edges[i].location)],
+                    &possiblePaths[x]._letterMapping))
+                {
+                    ++x;
+                    continue;
+                }
+
+                if (stk->orientation != layer && stickerMatches(stk->color,
+                    layerExpr[possiblePaths[x].getBlockNum( edges[i].location,
+                    stk->orientation)], &possiblePaths[x]._letterMapping)
+                )
+                {
+                    ++x;
+                    continue;
+                }
+                possiblePaths.erase(possiblePaths.begin() + x);
+            }
+        }
+        }
+
+        if (i >= 8) continue;
+
+        if (corners[i].location.coords[layer.axis] != layer.direction)
+            continue;
+
+        for (int k = 0; k < 3; ++k)
+        {
+            rcube::Sticker *stk = corners[i].stickers + k;
+
+            for (int x = 0; x < possiblePaths.size();)
+            {
+                if (stk->orientation == layer && stickerMatches(stk->color,
+                    faceExpr[possiblePaths[x].getFaceBlockNum(corners[i].location)],
+                    &possiblePaths[x]._letterMapping))
+                {
+                    ++x;
+                    continue;
+                }
+
+                if (stk->orientation != layer && stickerMatches(stk->color,
+                    layerExpr[possiblePaths[x].getBlockNum(corners[i].location,
+                    stk->orientation)], &possiblePaths[x]._letterMapping)
+                )
+                {
+                    ++x;
+                    continue;
+                }
+                possiblePaths.erase(possiblePaths.begin() + x);
             }
         }
     }

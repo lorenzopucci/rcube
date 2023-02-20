@@ -59,6 +59,7 @@ void initLua(lua_State *L)
     lua_register(L, "display", &runFunction<&RcubeLua::display>);
     lua_register(L, "faceMatches", &runFunction<&RcubeLua::faceMatches>);
     lua_register(L, "layerMatches", &runFunction<&RcubeLua::layerMatches>);
+    lua_register(L, "layerAndFaceMatch", &runFunction<&RcubeLua::layerAndFaceMatch>);
     lua_register(L, "normalizeAlgo", &runFunction<&RcubeLua::normalizeAlgo>);
     lua_register(L, "reverseAlgo", &runFunction<&RcubeLua::reverseAlgo>);
     lua_register(L, "removeRotations", &runFunction<&RcubeLua::removeRotations>);

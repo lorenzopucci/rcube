@@ -1,4 +1,4 @@
--- Copyright (c) 2022 Lorenzo Pucci
+-- Copyright (c) 2023 Lorenzo Pucci
 -- You may use, distribute and modify this code under the terms of the MIT
 -- license.
 --
@@ -88,6 +88,18 @@ test(layerMatches({axis=1, direction=-1}, "AADW*dywOGrZ"), false)
 
 io.write("Layer match: mixture 2 ... ")
 test(layerMatches({axis=0, direction=0}, "AaAR*gAAyGGr"), true)
+
+io.write("Layer and face match: colors ... ")
+test(layerAndFaceMatch({axis=0, direction=1}, "RRBoRGRRy-bGRWYWOwBYYY"), true)
+
+io.write("Layer and face match: letters ... ")
+test(layerAndFaceMatch({axis=1, direction=1}, "Aa*MmM*mM-PCCc**pPpDDd"), true)
+
+io.write("Layer and face match: mixture 1 ... ")
+test(layerAndFaceMatch({axis=2, direction=1}, "MmGYBGMoo-BW*rgGFFbkkk"), false)
+
+io.write("Layer and face match: mixture 2 ... ")
+test(layerAndFaceMatch({axis=1, direction=1}, "KKkYAG*Kr-MMWBmmY*mZzZ"), true)
 
 io.write("Find: center ... ")
 testList(find("y"), {x= 0, y= 1, z= 0})

@@ -2,9 +2,6 @@
 <img src="icon.png" style="width: 180px">
 <h1>Rcube</h1>
 </div>
-C++ abstraction of a Rubik's cube.
-
-<br>
 
 This repository contains:
 - A C++ library that includes all the logic to interact with a virtual Rubik's

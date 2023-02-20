@@ -242,6 +242,34 @@ right place, but the right sticker will also be at the given orientation. If
 
 <br>
 
+### `rcube::Cube::layerAndFaceMatch(const rcube::Orientation &layer, const std::string &expr, const rcube::Coordinates &dest = rcube::Coordinates(0,0,0), const rcube::Orientation &orient = {Axis::X, 0}, rcube::Algorithm *algo = nullptr)`
+
+- `layer`: the layer to check;
+- `expr`: the regular expression;
+- `dest`: the place to which the block corresponding to the first character of
+`expr` will be rotated (see below);
+- `orient`: determines the position of the first sticker along with `dest`;
+- `algo`: a pointer to a `rcube::Algorithm` where the possible moves involved in
+adjusting the face will be stored;
+
+Returns `true` when both the face and its adjacent stickers match a given
+regular expression (as in `rcube::cube::faceMatches`).
+
+The expression must have the following structure:
+```
+<face expr (9 char)>-<layer expr (12 char)>
+```
+Where the first stickers of both expressions belong to the same block and the
+first 3 stickers of the layer are adjacent to the first 3 stickers of the face.
+
+If a match is found and `dest` is not `(0,0,0)`, the layer will be rotated
+until the block corresponding to the first character of `expr` ends up at the
+given position. If `orient` is not `{X, 0}`, not only will the block be in the
+right place, but the right sticker will also be at the given orientation. If
+`algo` is not `nullptr`, the moves used to do so will be stored there.
+
+<br>
+
 ### `rcube::Net rcube::Cube::netRender()`
 
 Returns a 2D representation of the cube (basically a

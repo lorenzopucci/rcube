@@ -438,11 +438,8 @@ rcube::Algorithm CfopSolver::f2l()
 
 rcube::Algorithm CfopSolver::oll()
 {
-    // Currently a two phase oll (cross + corners)
-    rcube::Algorithm preA1("");
-    rcube::Algorithm a1("");
-    rcube::Algorithm preA2("");
-    rcube::Algorithm a2("");
+    rcube::Algorithm preAlgo("");
+    rcube::Algorithm algo("");
 
     const rcube::Orientation TOP = {Axis::Y, 1};
     const rcube::Orientation BACK = {Axis::Z, -1};
@@ -450,58 +447,20 @@ rcube::Algorithm CfopSolver::oll()
 
     char topColor = (char)getOppositeColor(_crossColor);
 
-    /********************************** Cross **********************************/
+    for (AlgoDBItem item : algoDb)
+    {
+        if (item.type != AlgoType::OLL || item.match == "") continue;
 
-    if (_cube.faceMatches(TOP, "*a*AAA*a*", BACK_LEFT, &preA1))
-    {
-        a1 = rcube::Algorithm("$(T2)");
-    }
-    else if (_cube.faceMatches(TOP, "*A*AAa*a*", BACK_LEFT, &preA1))
-    {
-        a1 = rcube::Algorithm("FURU'R'F'");
-    }
-    else if (_cube.faceMatches(TOP, "*a*aAa*a*", BACK_LEFT, &preA1))
-    {
-        a1 = rcube::Algorithm("$(O1)");
-    }
-    _cube.performAlgorithm(a1);
-
-    /*********************************** OLL ***********************************/
-
-    if (_cube.faceMatches(TOP, "aAaAAAAAa", BACK_LEFT, &preA2)) // otherwise ambiguous
-    {
-        if (_cube.getStickerAt(rcube::Coordinates(1, 1, 1), {Axis::Z, 1}) ==
-            getOppositeColor(_crossColor))
+        if (_cube.layerAndFaceMatch(TOP, item.match, BACK_LEFT, BACK, &preAlgo))
         {
-            a2 = rcube::Algorithm("$(sune)");
-        }
-        else
-        {
-            a2 = rcube::Algorithm("U'$(anti-sune)");
+            algo = rcube::Algorithm(item.algo);
+            break;
         }
     }
-    else
-    {
-        for (AlgoDBItem item : algoDb)
-        {
-            if (item.type != AlgoType::OLL || item.match == "") continue;
-
-            std::string match = item.match;
-            std::replace(match.begin(), match.end(), 'a', topColor);
-            std::replace(match.begin(), match.end(), 'A',
-                (char)toupper(topColor));
-
-            if (_cube.layerMatches(TOP, match, BACK_LEFT, BACK, &preA2))
-            {
-                a2 = rcube::Algorithm(item.algo);
-                break;
-            }
-        }
-    }
-    _cube.performAlgorithm(a2);
+    _cube.performAlgorithm(algo);
     
 
-    rcube::Algorithm algo = preA1 + a1 + preA2 + a2;
+    algo = preAlgo + algo;
     algo.normalize();
 
     if (_verbose)

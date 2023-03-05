@@ -2,13 +2,13 @@
 This is the code I used to build a Rubik's cube solver robot with 6 stepper
 motors and a Raspberry Pi.
 
-## Setup
-- Initially, a Raspberry Pi Camera using OpenCV scans the faces of the cube.
-- The motors controlling the D, L, F, U faces are connected to two 74HC595N
-shift registers, with a common clock and latch but different SD inputs (to
-double the writing speed).
-- The R and B motors are connected directly to the GPIO ports on my Raspberry
-Pi (because I did not have a third shift register).
+![Demo](media/demo.gif)
+
+Currently what the code does is:
+1- Scanning the cube's faces with a Raspberry Pi camera and OpenCV
+2- Opening a GUI window with the current status of the cube. All the moves
+entered with the keyboard will be forwarded to the motors (including `ctrl+D`
+to solve the cube).
 
 ## Compiling
 Before compiling the robot part, the `lib` and `ui` targets of `../Makefile`

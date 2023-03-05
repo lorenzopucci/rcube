@@ -9,18 +9,13 @@
 
 #include <stdint.h>
 
-#define DATA1_PIN 0
-#define DATA2_PIN 7
-#define LATCH_PIN 2
-#define CLOCK_PIN 3
+const int RPins[4] = {8, 9, 7, 0};
+const int BPins[4] = {15, 16, 1, 4};
+const int DPins[4] = {2, 3, 12, 13};
+const int LPins[4] = {5, 6, 10, 11};
+const int FPins[4] = {14, 30, 21, 22};
+const int UPins[4] = {24, 25, 28, 29};
 
-const int RPins[4] = {6, 5, 4, 1};
-const int BPins[4] = {21, 22, 23, 25};
-
-#define L_MOTOR 0
-#define D_MOTOR 1
-#define U_MOTOR 2
-#define F_MOTOR 3
 
 #define CYCLES_90D 128
 

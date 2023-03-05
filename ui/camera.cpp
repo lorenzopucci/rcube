@@ -186,17 +186,19 @@ void EventHandler::onKey(GLFWwindow* window, int key, int scancode, int action,
             newMove = 'U'; break;
         case GLFW_KEY_D:
         {
-            
-#ifndef IGNORE_LUA
-
             if (camera->pressingCtrl && action == GLFW_PRESS)
             {
-                userPtr->cube->runScript("scripts/cfop.lua");
+                rcube::Algorithm algo = userPtr->cube->solveCfop(true);
                 userPtr->cubeUpdated = false;
+
+                if (userPtr->moveCallback == NULL) break;
+
+                for (rcube::Move mv : algo.algorithm)
+                {
+                    userPtr->moveCallback(mv);
+                }
                 break;
             }
-#endif
-
             newMove = 'D'; break;
         }
 
@@ -212,7 +214,8 @@ void EventHandler::onKey(GLFWwindow* window, int key, int scancode, int action,
             if (camera->pressingCtrl && action == GLFW_PRESS)
             {
                 rcube::Algorithm dest;
-                userPtr->cube->scramble(12, &dest);
+                userPtr->cube->scramble(15, &dest);
+
                 std::cout << "Scramble: " << dest.to_string() << std::endl;
                 
                 userPtr->cubeUpdated = false;
@@ -220,6 +223,13 @@ void EventHandler::onKey(GLFWwindow* window, int key, int scancode, int action,
 
                 userPtr->timer->resume();
                 userPtr->timer->start();
+
+                if (userPtr->moveCallback == NULL) break;
+
+                for (rcube::Move mv : dest.algorithm)
+                {
+                    userPtr->moveCallback(mv);
+                }
                 break;
             }
             else

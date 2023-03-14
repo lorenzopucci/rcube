@@ -44,6 +44,16 @@ rcube::Algorithm CfopSolver::solve()
     return algo;
 }
 
+void rotateU(rcube::Cube *cube, rcube::Algorithm *algo, rcube::Coordinates
+    *edgePos = nullptr, rcube::Coordinates *cornerPos = nullptr)
+{
+    cube->performMove(rcube::Move('U', 1));
+    algo->push(rcube::Move('U', 1));
+
+    if (edgePos != nullptr) edgePos->rotate(Axis::Y, 1);
+    if (cornerPos != nullptr) cornerPos-> rotate(Axis::Y, 1);
+}
+
 rcube::Algorithm CfopSolver::cross()
 {
     rcube::Algorithm algo;
@@ -63,31 +73,62 @@ rcube::Algorithm CfopSolver::cross()
     // with -Y orientation but wrong place -> pull to +Y
     if (edgePos.y() == -1 && cOrient.axis == Axis::Y)
     {
+        if (edgeColor == crossEdges[0])
+        {
+            while (edgePos != place)
+            {
+                _cube.performMove(rcube::Move('D', 1));
+                algo.push(rcube::Move('D', 1));
+                edgePos.rotate(Axis::Y, -1);
+            }
+            continue;
+        }
         rcube::Move mv(_cube.getStickerOrientation(edgePos, edgeColor), 2);
         _cube.performMove(mv);
         algo.push(mv);
     }
 
-    // in boottom layer but with wrong orientation -> pull to middle layer
+    // in boottom layer but with wrong orientation -> pull to top layer
     else if (edgePos.y() == -1 && cOrient.axis != Axis::Y)
     {
-        rcube::Move mv(_cube.getStickerOrientation(edgePos, _crossColor), 1);
+        rcube::Move mv(cOrient, 2);
         _cube.performMove(mv);
         algo.push(mv);
+
+        edgePos.rotate(cOrient.axis, 2);
     }
 
-    // in top layer but with orientation != +Y -> flip to +Y
-    else if (edgePos.y() == 1 && cOrient.axis != Axis::Y)
+    // in top layer but with orientation != +Y -> pair with center and pull down
+    if (edgePos.y() == 1 && cOrient.axis != Axis::Y)
     {
         rcube::Algorithm tmpAlgo;
-        
-        if      (edgePos.x() ==  1) tmpAlgo = rcube::Algorithm("R'F'UFR");
-        else if (edgePos.x() == -1) tmpAlgo = rcube::Algorithm("LFU'F'L'");
-        else if (edgePos.z() ==  1) tmpAlgo = rcube::Algorithm("FRU'R'F'");
-        else if (edgePos.z() == -1) tmpAlgo = rcube::Algorithm("B'R'URB");
+
+        if (place.coords[cOrient.axis] != 0)
+        {
+            rotateU(&_cube, &algo, &edgePos);
+            cOrient.rotate(Axis::Y, 1);
+        }
+        rcube::Move mv(cOrient, cOrient.direction * (place.x() +
+            place.z()) * (cOrient.axis - 1));
+        tmpAlgo.push(mv);
+        edgePos.rotate(cOrient.axis, mv.direction * cOrient.direction);
+
+        rcube::Move mv1({Axis::X, place.x()}, -place.x() * edgePos.z());
+        if (place.z() != 0)
+        {
+            mv1 = rcube::Move({Axis::Z, place.z()}, place.z() * edgePos.x());
+        }
+        tmpAlgo.push(mv1);
+
+        if (_cube.getStickerAt(rcube::Coordinates(mv.getAffectedFace(),
+            {Axis::Y, -1}), {Axis::Y, -1}) == _crossColor)
+        {
+            tmpAlgo.push(mv.getInverted());
+        }
 
         _cube.performAlgorithm(tmpAlgo);
         algo = algo + tmpAlgo;
+        continue;
     }
 
     edgePos = _cube.find(_crossColor, edgeColor);
@@ -124,8 +165,14 @@ rcube::Algorithm CfopSolver::cross()
             mv = rcube::Move({Axis::X, edgePos.x()},
                 cOrient.direction * edgePos.x());
         }
+        rcube::Algorithm tmpAlgo({mv, rcube::Move('U', 1)});
 
-        rcube::Algorithm tmpAlgo({mv, rcube::Move('U', 1), mv.getInverted()});
+        if (_cube.getStickerAt(rcube::Coordinates(mv.getAffectedFace(),
+            {Axis::Y, -1}), {Axis::Y, -1}) == _crossColor)
+        {
+            tmpAlgo.push(mv.getInverted());
+        }
+
         _cube.performAlgorithm(tmpAlgo);
         algo = algo + tmpAlgo;
 
@@ -186,16 +233,6 @@ rcube::Coordinates computeEdgePlace(const rcube::Coordinates &cPos,
 {
     if (cOrient.axis == Axis::X) return rcube::Coordinates(0, 1, -cPos.z());
     return rcube::Coordinates(-cPos.x(), 1, 0);
-}
-
-void rotateU(rcube::Cube *cube, rcube::Algorithm *algo, rcube::Coordinates
-    *edgePos = nullptr, rcube::Coordinates *cornerPos = nullptr)
-{
-    cube->performMove(rcube::Move('U', 1));
-    algo->push(rcube::Move('U', 1));
-
-    if (edgePos != nullptr) edgePos->rotate(Axis::Y, 1);
-    if (cornerPos != nullptr) cornerPos-> rotate(Axis::Y, 1);
 }
 
 bool pairIsFormed(rcube::Cube *cube, const rcube::Coordinates &cPos, const

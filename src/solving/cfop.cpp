@@ -245,19 +245,19 @@ bool pairIsFormed(rcube::Cube *cube, const rcube::Coordinates &cPos, const
     return cPos.z() == ePos.z();
 }
 
-rcube::Algorithm CfopSolver::f2l()
+rcube::Algorithm solveF2lPair(rcube::Cube cube, Color crossColor, Color c1,
+    Color c2, const std::vector<rcube::Coordinates> &fullSlots)
 {
     rcube::Algorithm algo;
-    std::vector<rcube::Coordinates> fullSlots;
-    auto crossColors = getAdjacentColors(_crossColor);
-
-    for (int i = 0; i < 4; ++i)
-    {
     
-    Color cols[2] = {crossColors[i], crossColors[(i + 1) % 4]};
-    rcube::Coordinates edgePos = _cube.find(cols[0], cols[1]);
-    rcube::Coordinates cornerPos = _cube.find(cols[0], cols[1], _crossColor);
-    rcube::Orientation cOrient = _cube.getStickerOrientation(cornerPos, _crossColor);
+    rcube::Coordinates edgePos = cube.find(c1, c2);
+    rcube::Coordinates cornerPos = cube.find(c1, c2, crossColor);
+    rcube::Orientation cOrient = cube.getStickerOrientation(cornerPos, crossColor);
+
+    if (blockIsInPlace(&cube, edgePos) && blockIsInPlace(&cube, cornerPos))
+    {
+        return algo;
+    }
 
     /****************************** Place corner ******************************/
 
@@ -265,7 +265,7 @@ rcube::Algorithm CfopSolver::f2l()
     {
         while (!isEmptySlot(cornerPos, fullSlots))
         {
-            rotateU(&_cube, &algo, nullptr, &cornerPos);
+            rotateU(&cube, &algo, nullptr, &cornerPos);
         }
 
         rcube::Move mv1 = pullUp(cornerPos);
@@ -274,7 +274,7 @@ rcube::Algorithm CfopSolver::f2l()
             layer.direction * mv1.direction), mv1.getAffectedFace()),
             mv1.getInverted()});
 
-        _cube.performAlgorithm(tmpAlgo);
+        cube.performAlgorithm(tmpAlgo);
         algo = algo + tmpAlgo;
     }
     else if (cornerPos.y() == -1)
@@ -287,59 +287,62 @@ rcube::Algorithm CfopSolver::f2l()
         rcube::Algorithm tmpAlgo({mv, getUmove(cornerPos, layer),
             mv.getInverted()});
 
-        _cube.performAlgorithm(tmpAlgo);
+        cube.performAlgorithm(tmpAlgo);
         algo = algo + tmpAlgo;
     }
 
-    cornerPos = _cube.find(cols[0], cols[1], _crossColor);
-    edgePos = _cube.find(cols[0], cols[1]);
-    cOrient = _cube.getStickerOrientation(cornerPos, _crossColor);
+    cornerPos = cube.find(c1, c2, crossColor);
+    edgePos = cube.find(c1, c2);
+    cOrient = cube.getStickerOrientation(cornerPos, crossColor);
 
     /******************************* Place edge *******************************/
 
     rcube::Coordinates edgePlace = computeEdgePlace(cornerPos, cOrient);
 
-    if (edgePos.y() == 1 && edgePos != edgePlace && !pairIsFormed(&_cube,
+    if (edgePos.y() == 1 && edgePos != edgePlace && !pairIsFormed(&cube,
         cornerPos, edgePos, cOrient))
     {
         rcube::Orientation layer;
 
         while (true)
         {
-            layer = {Axis::X, cornerPos.x()};
-            if (edgePos.x() != 0) layer = {Axis::Z, cornerPos.z()};
+            layer = cOrient;
+            if (edgePos.coords[layer.axis] == layer.direction)
+            {
+                layer.axis = (Axis)((layer.axis + 2) % 4); // 0->2, 2->0
+                layer.direction = cornerPos.coords[layer.axis];
+            }
 
             if (isEmptySlot(toBeEmpty(cornerPos, layer), fullSlots)) break;
 
-            rotateU(&_cube, &algo, &edgePos, &cornerPos);
+            rotateU(&cube, &algo, &edgePos, &cornerPos);
+            cOrient.rotate(Axis::Y, 1);
         }
-
-        cOrient = _cube.getStickerOrientation(cornerPos, _crossColor);
         edgePlace = computeEdgePlace(cornerPos, cOrient);
 
-        // They are ready to form a pair
-        /*
-        if (_cube.getStickerAt(cornerPos, {Axis::Y, 1}) == _cube.getStickerAt(
-            edgePos, {Axis::Y, 1}) && layer == cOrient)
+        // ready to form a pair
+        if (cube.getStickerAt(cornerPos, {Axis::Y, 1}) == cube.getStickerAt(
+            edgePos, {Axis::Y, 1}) && layer == cOrient &&
+            edgePos.coords[cOrient.axis] != cOrient.direction)
         {
             edgePlace = cornerPos;
             edgePlace.coords[layer.axis] = 0;
-        }*/
+        }
 
         rcube::Move mv(layer, 1);
         if (cornerPos.getRotated(layer.axis, layer.direction).y() != -1)
         {
             mv = mv.getInverted();
         }
-        _cube.performMove(mv);
+        cube.performMove(mv);
         algo.push(mv);
 
         while (edgePos != edgePlace)
         {
-            rotateU(&_cube, &algo, &edgePos);
+            rotateU(&cube, &algo, &edgePos);
         }
 
-        _cube.performMove(mv.getInverted());
+        cube.performMove(mv.getInverted());
         algo.push(mv.getInverted());
     }
 
@@ -359,7 +362,7 @@ rcube::Algorithm CfopSolver::f2l()
                 layer = {Axis::Z, edgePos.z()};
                 break;
             }
-            rotateU(&_cube, &algo, &edgePlace, &cornerPos);
+            rotateU(&cube, &algo, &edgePlace, &cornerPos);
         }
 
         rcube::Move mv(layer, 1);
@@ -367,35 +370,35 @@ rcube::Algorithm CfopSolver::f2l()
         {
             mv = mv.getInverted();
         }
-        _cube.performMove(mv);
+        cube.performMove(mv);
         algo.push(mv);
 
-        cOrient = _cube.getStickerOrientation(cornerPos, _crossColor);
+        cOrient = cube.getStickerOrientation(cornerPos, crossColor);
         while (cOrient != layer.getInv())
         {
-            rotateU(&_cube, &algo);
+            rotateU(&cube, &algo);
             cOrient.rotate(Axis::Y, 1);
         }
 
-        _cube.performMove(mv.getInverted());
+        cube.performMove(mv.getInverted());
         algo.push(mv.getInverted());
     }
 
     /******************************** Join pair ********************************/
 
-    rcube::Coordinates cPlace = getBlockPlace(&_cube, _crossColor, cols[0], cols[1]);
-    edgePos = _cube.find(cols[0], cols[1]);
-    cornerPos = _cube.find(cols[0], cols[1], _crossColor);
+    rcube::Coordinates cPlace = getBlockPlace(&cube, crossColor, c1, c2);
+    edgePos = cube.find(c1, c2);
+    cornerPos = cube.find(c1, c2, crossColor);
 
-    if (_cube.getStickerAt(edgePos, {Axis::Y, 1}) != _cube.getStickerAt(
+    if (cube.getStickerAt(edgePos, {Axis::Y, 1}) != cube.getStickerAt(
         cornerPos, {Axis::Y, 1}))
     {
         while (cornerPos.x() != cPlace.x() || cornerPos.z() != cPlace.z())
         {
-            rotateU(&_cube, &algo, &edgePos, &cornerPos);
+            rotateU(&cube, &algo, &edgePos, &cornerPos);
         }
 
-        cOrient = _cube.getStickerOrientation(cornerPos, _crossColor);
+        cOrient = cube.getStickerOrientation(cornerPos, crossColor);
         rcube::Move mv(cOrient, 1);
         rcube::Coordinates afterRot = cornerPos.getRotated(cOrient.axis,
             cOrient.direction);
@@ -407,41 +410,41 @@ rcube::Algorithm CfopSolver::f2l()
         rcube::Move mv1 = getUmove(afterRot, cOrient).getInverted();
 
         rcube::Algorithm tmpAlgo({mv, mv1, mv.getInverted()});
-        _cube.performAlgorithm(tmpAlgo);
+        cube.performAlgorithm(tmpAlgo);
         algo = algo + tmpAlgo;
     }
     else
     {
         if (cornerPos.x() != edgePos.x() && cornerPos.z() != edgePos.z())
         {
-            cOrient = _cube.getStickerOrientation(cornerPos, _crossColor);
+            cOrient = cube.getStickerOrientation(cornerPos, crossColor);
 
             while (!isEmptySlot(toBeEmpty(cornerPos, cOrient), fullSlots))
             {
-                rotateU(&_cube, &algo, &edgePos, &cornerPos);
+                rotateU(&cube, &algo, &edgePos, &cornerPos);
                 cOrient.rotate(Axis::Y, 1);
             }
 
-            cOrient = _cube.getStickerOrientation(cornerPos, _crossColor);
+            cOrient = cube.getStickerOrientation(cornerPos, crossColor);
             rcube::Move mv(cOrient, 1);
             if (cornerPos.getRotated(cOrient.axis, cOrient.direction).y() != -1)
                 mv = mv.getInverted();
 
             rcube::Algorithm tmpAlgo({mv, rcube::Move('U', 2), mv.getInverted()});
-            _cube.performAlgorithm(tmpAlgo);
+            cube.performAlgorithm(tmpAlgo);
             algo = algo + tmpAlgo;
 
-            edgePos = _cube.find(cols[0], cols[1]);
-            cornerPos = _cube.find(cols[0], cols[1], _crossColor);
+            edgePos = cube.find(c1, c2);
+            cornerPos = cube.find(c1, c2, crossColor);
         }
 
-        cOrient = _cube.getStickerOrientation(cornerPos, _crossColor);
+        cOrient = cube.getStickerOrientation(cornerPos, crossColor);
         rcube::Coordinates thirdPos = cornerPos;
         thirdPos.coords[cOrient.axis] *= -1;
 
         while (thirdPos.x() != cPlace.x() || thirdPos.z() != cPlace.z())
         {
-            rotateU(&_cube, &algo, &thirdPos, &cornerPos);
+            rotateU(&cube, &algo, &thirdPos, &cornerPos);
             cOrient.rotate(Axis::Y, 1);
         }
 
@@ -455,13 +458,54 @@ rcube::Algorithm CfopSolver::f2l()
             mv2 = mv2.getInverted();
 
         rcube::Algorithm tmpAlgo({mv1, mv2, mv1.getInverted()});
-        _cube.performAlgorithm(tmpAlgo);
+        cube.performAlgorithm(tmpAlgo);
         algo = algo + tmpAlgo;
     }
 
-    fullSlots.push_back(cPlace);
+    return algo;
+}
 
-    } // for (int i = 0; i < 4; ++i)
+rcube::Algorithm CfopSolver::f2l()
+{
+    rcube::Algorithm algo;
+    std::vector<rcube::Coordinates> fullSlots;
+    auto crossColors = getAdjacentColors(_crossColor);
+
+    while (fullSlots.size() < 4)
+    {
+        rcube::Algorithm pairAlgo, tmpAlgo;
+
+        int lowestIdx;
+        int lowestSize = 100;
+
+        for (int i = 0; i < 4; ++i)
+        {
+            Color c1 = crossColors[i];
+            Color c2 = crossColors[(i + 1) % 4];
+
+            if (std::find(fullSlots.begin(), fullSlots.end(),
+                getBlockPlace(&_cube, _crossColor, c1, c2)) != fullSlots.end())
+            {
+                continue;
+            }
+
+            tmpAlgo = solveF2lPair(_cube, _crossColor, c1, c2, fullSlots);
+
+            if (tmpAlgo.length() < lowestSize)
+            {
+                lowestIdx = i;
+                lowestSize = tmpAlgo.length();
+                pairAlgo = tmpAlgo;
+            }
+        }
+
+        _cube.performAlgorithm(pairAlgo);
+        algo = algo + pairAlgo;
+
+        Color c1 = crossColors[lowestIdx];
+        Color c2 = crossColors[(lowestIdx + 1) % 4];
+        fullSlots.push_back(getBlockPlace(&_cube, _crossColor, c1, c2));
+    }
 
     algo.normalize();
 
@@ -481,8 +525,6 @@ rcube::Algorithm CfopSolver::oll()
     const rcube::Orientation TOP = {Axis::Y, 1};
     const rcube::Orientation BACK = {Axis::Z, -1};
     const rcube::Coordinates BACK_LEFT(-1, 1, -1);
-
-    char topColor = (char)getOppositeColor(_crossColor);
 
     for (AlgoDBItem item : algoDb)
     {
@@ -516,8 +558,6 @@ rcube::Algorithm CfopSolver::pll()
     const rcube::Orientation TOP = {Axis::Y, 1};
     const rcube::Orientation BACK = {Axis::Z, -1};
     const rcube::Coordinates BACK_LEFT(-1, 1, -1);
-
-    char topColor = (char)getOppositeColor(_crossColor);
 
     for (AlgoDBItem item : algoDb)
     {

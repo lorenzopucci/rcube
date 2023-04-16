@@ -77,3 +77,18 @@ rcube::Move getUmove(rcube::Coordinates pos, const rcube::Orientation &orient)
     bool toInvert = pos.coords[orient.axis] == orient.direction;
     return rcube::Move('U', toInvert ? -1 : 1);
 }
+
+bool blockIsInPlace(rcube::Cube *cube, const rcube::Coordinates &pos)
+{
+    for (int i = 0; i < 3; ++i)
+    {
+        if (pos.coords[i] == 0) continue;
+
+        rcube::Orientation face = {(Axis)i, pos.coords[i]};
+        if (cube->getFaceColor(face) != cube->getStickerAt(pos, face))
+        {
+            return false;
+        }
+    }
+    return true;
+}

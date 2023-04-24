@@ -8,7 +8,6 @@
 */
 
 #include <rcube.hpp>
-#include <iostream>
 
 #include "solving/util.hpp"
 
@@ -548,14 +547,19 @@ bool rcube::Cube::layerAndFaceMatch(
         for (int k = 0; k < 3; ++k) // check the sticker belonging to the face
         {
             if (corners[i].stickers[k].orientation != layer) continue;
+
+            lmTmp.clear();
+            stickerMatches(getCenterFrom(layer)->color, faceExpr[4], &lmTmp);
+
             if (!stickerMatches(corners[i].stickers[k].color, faceExpr[0], &lmTmp))
             {
-                lmTmp.clear();
-                stickerMatches(getCenterFrom(layer)->color, faceExpr[4], &lmTmp);
                 goto nextBlock;
             }
             break;
         }
+
+        lmTmp.clear();
+        stickerMatches(getCenterFrom(layer)->color, faceExpr[4], &lmTmp);
 
         for (int k = 0; k < 3; ++k)
         {
@@ -674,6 +678,7 @@ bool rcube::Cube::layerAndFaceMatch(
                 {
                     if (algo != nullptr)
                     {
+                        moveCount = moveCount % 4;
                         if (moveCount == 3) moveCount = -1;
                         algo->push(rcube::Move(layer, moveCount));
                     }

@@ -103,7 +103,7 @@ std::vector<AlgoDBItem> algoDb
     {"O4", "f(RUR'U')f'UF(RUR'U')F'", OLL, "aaAaAaaaa-aAaaAAaAAaAA"},
     {"O5", "(RUR'U)(R'FRF')U2(R'FRF')", OLL, "AaaaAaaaA-aAAaAaaAaAAa"},
     {"O6", "yRU2(R2FRF')U2M'(URU'r')", OLL, "AaAaAaaaa-aAaaAaAAAaAa"},
-    {"O7", "MU(RUR'U')M'(R'FRF')", OLL, "AaAaAaaaa-aAaaAAaAAaAA"},
+    {"O7", "MU(RUR'U')M'(R'FRF')", OLL, "AaAaAaaaa-aAaaAAaAaAAa"},
     {"O8", "MU(RUR'U')M2(URU'r')", OLL, "AaAaAaAaA-aAaaAaaAaaAa"},
 
 

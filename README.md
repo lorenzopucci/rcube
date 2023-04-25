@@ -2,9 +2,6 @@
 <img src="icon.png" style="width: 180px">
 <h1>Rcube</h1>
 </div>
-C++ abstraction of a Rubik's cube.
-
-<br>
 
 This repository contains:
 - A C++ library that includes all the logic to interact with a virtual Rubik's
@@ -29,7 +26,9 @@ The following content of this file is only about the library.
 in Lua);
 - [x] Cube status retrieval in multiple and advanced ways (such as regual
 expressions);
-- [ ] Solving algorithms;
+- [x] Algorithm database and manipulation;
+- [x] Human-like solver;
+- [ ] Optimal solver;
 - [ ] Support of cubes of different sizes (`2*2*2`, `4*4*4`...);
 
 ## Example
@@ -47,8 +46,10 @@ int main()
     cube.performAlgorithm(algo.reverse());
     assert(cube.isSolved());
 
-    cube.scarmble(12);
-    cube.runScript("scripts/cfop.lua");
+    cube.scarmble(18);
+    cube.solveCfop();
+
+    cube.runScript("test/main.lua");
     cube.display();
 }
 ```

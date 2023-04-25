@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2022 Lorenzo Pucci
+* Copyright (c) 2023 Lorenzo Pucci
 * You may use, distribute and modify this code under the terms of the MIT
 * license.
 *
@@ -40,15 +40,15 @@ Texture::Texture(const std::string &path)
         header.imageSize = header.width * header.height * channels;
     }
 
-    char data[header.imageSize];
+    char *data = (char*)malloc(header.imageSize * sizeof(char));
     file.read(data, header.imageSize);
     file.close();
 
-    int format;
+    int f1, f2;
     switch (channels)
     {
-        case 3: format = GL_RGB; break;
-        case 4: format = GL_RGBA; break;
+        case 3: f1 = GL_RGB; f2 = GL_BGR; break;
+        case 4: f1 = GL_RGBA; f2 = GL_BGRA; break;
         default:
             std::cerr << "Invalid texture format" << std::endl; break;
     }
@@ -60,8 +60,8 @@ Texture::Texture(const std::string &path)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexImage2D(GL_TEXTURE_2D, 0, format, header.width, header.height,
-        0, format, GL_UNSIGNED_BYTE, data);
+    glTexImage2D(GL_TEXTURE_2D, 0, f1, header.width, header.height,
+        0, f2, GL_UNSIGNED_BYTE, data);
 	glGenerateMipmap(GL_TEXTURE_2D);
 }
 

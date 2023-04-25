@@ -55,7 +55,7 @@ void robotWorker(std::queue<rcube::Move> *moveQueue)
 				{
 					rcube::Algorithm newAlgo = rotations;
 					newAlgo.push(move);
-					newAlgo = newAlgo.removeRotations();
+					newAlgo.removeRotations();
 					move = newAlgo.algorithm[0];
 				}
 

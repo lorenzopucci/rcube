@@ -46,6 +46,14 @@ Applies an algorithm (set of moves) to the cube.
 
 <br>
 
+### `void rcube::Cube::performAlgorithm (const std::string& algorithm)`
+
+- `algorithm`: the algorithm to perform as a string;
+
+Shortcut for `performAlgorithm(rcube::Algorithm("string"))`
+
+<br>
+
 ### `void rcube::Cube::scramble(const int &length = 12, rcube::Algorithm* dest = nullptr)`
 
 - `length`: the scramble's length (number of random moves, default: `12`);
@@ -139,6 +147,14 @@ Returns the color of the center of a given face.
 
 <br>
 
+### `Color rcube::Cube::getFaceOrientation(const Color &color)`
+
+- `face`: the color of the face;
+
+Returns the orientation of a face given the color of its center.
+
+<br>
+
 ### `Color rcube::Cube::getStickerAt(const rcube::Coordinates &pos, const rcube::Orientation &orient)`
 
 - `pos`: the coordinates of the block the sticker belongs to;
@@ -152,12 +168,14 @@ no such sticker in the block or if the coordinates are not valid.
 
 <br>
 
-### `rcube::Cube::faceMatches(const rcube::Orientation &face, const std::string &expr, const rcube::Coordinates &dest = rcube::Coordinates(0,0,0))`
+### `rcube::Cube::faceMatches(const rcube::Orientation &face, const std::string &expr, const rcube::Coordinates &dest = rcube::Coordinates(0,0,0), rcube::Algorithm *algo = nullptr)`
 
 - `face`: the face to check (expressed with its orientation);
 - `expr`: the regualr expression;
 - `dest`: the place to which the block corresponding to the first character of
 `expr` will be rotated (see below);
+- `algo`: a pointer to a `rcube::Algorithm` where the possible moves involved in
+adjusting the face will be stored;
 
 Returns `true` when the stickers of the given face match the given pattern.
 The pattern is a `std::string` with the following syntax:
@@ -167,11 +185,18 @@ The pattern is a `std::string` with the following syntax:
 corresponding color (`W` for white, `Y` for yellow and so on);
 - The lowercase letters `w`, `y`, `g`, `b`, `r`, `o` indicate a sticker that
 is NOT of the corresponding color (`w` is every color but white);
-- All the other letters indicate a sticker of an unspecified color, but with
-the following rules:
+- All the letters from `A` to `L` that are not colors indicate a sticker
+of unspecified color, but with the following rules:
+    - For all pairs of uppercase and lowercase letters, the first case used in
+    the expression picks a color, and the letter of the other case corresponds
+    to all colors but that one (if `A`, which appears first in the string, is
+    green, `a` is all colors but green);
+    - Different letters may not correspond to different colors;
+- All the letters from `M` to `Z` that are not colors also indicate a sticker
+of an unspecified color, but with the following rules:
     - Different letters correspond to different colors;
     - A pair of uppercase and lowercase letters correspond to opposite colors
-    (if `A` is blue, `a` is green);
+    (if `M` is blue, `m` is green);
 
 The face is read left-to-right, top-to-bottom:
 ```
@@ -185,11 +210,12 @@ Note: the string MUST be 9 characters long, otherwise it will not be accepted.
 
 If a match is found and `dest` is not `(0,0,0)`, the face will be rotated
 until the block corresponding to the first character of `expr` ends up at the
-given position.
+given position. If `algo` is not `nullptr`, the moves used to do so will be
+stored there.
 
 <br>
 
-### `rcube::Cube::layerMatches(const rcube::Orientation &layer, const std::string &expr, const rcube::Coordinates &dest = rcube::Coordinates(0,0,0), const rcube::Orientation &orient = {Axis::X, 0})`
+### `rcube::Cube::layerMatches(const rcube::Orientation &layer, const std::string &expr, const rcube::Coordinates &dest = rcube::Coordinates(0,0,0), const rcube::Orientation &orient = {Axis::X, 0}, rcube::Algorithm *algo = nullptr)`
 
 - `layer`: the layer to check (expressed with the orientation of its adjacent
 face. For middle layer, use `layer.direction=0` even though
@@ -197,9 +223,9 @@ face. For middle layer, use `layer.direction=0` even though
 - `expr`: the regular expression;
 - `dest`: the place to which the block corresponding to the first character of
 `expr` will be rotated (see below);
-- `dest`: the place to which the block corresponding to the first character of
-`expr` will be rotated (see below);
 - `orient`: determines the position of the first sticker along with `dest`;
+- `algo`: a pointer to a `rcube::Algorithm` where the possible moves involved in
+adjusting the face will be stored;
 
 Returns `true` when the stickers of the given layer match the given pattern.
 The term layer means the set of stickers adjacent to the same face or one of
@@ -211,7 +237,36 @@ but instead of 9, it must be 12 characters long.
 If a match is found and `dest` is not `(0,0,0)`, the layer will be rotated
 until the block corresponding to the first character of `expr` ends up at the
 given position. If `orient` is not `{X, 0}`, not only will the block be in the
-right place, but the right sticker will also be at the given orientation.
+right place, but the right sticker will also be at the given orientation. If
+`algo` is not `nullptr`, the moves used to do so will be stored there.
+
+<br>
+
+### `rcube::Cube::layerAndFaceMatch(const rcube::Orientation &layer, const std::string &expr, const rcube::Coordinates &dest = rcube::Coordinates(0,0,0), const rcube::Orientation &orient = {Axis::X, 0}, rcube::Algorithm *algo = nullptr)`
+
+- `layer`: the layer to check;
+- `expr`: the regular expression;
+- `dest`: the place to which the block corresponding to the first character of
+`expr` will be rotated (see below);
+- `orient`: determines the position of the first sticker along with `dest`;
+- `algo`: a pointer to a `rcube::Algorithm` where the possible moves involved in
+adjusting the face will be stored;
+
+Returns `true` when both the face and its adjacent stickers match a given
+regular expression (as in `rcube::cube::faceMatches`).
+
+The expression must have the following structure:
+```
+<face expr (9 char)>-<layer expr (12 char)>
+```
+Where the first stickers of both expressions belong to the same block and the
+first 3 stickers of the layer are adjacent to the first 3 stickers of the face.
+
+If a match is found and `dest` is not `(0,0,0)`, the layer will be rotated
+until the block corresponding to the first character of `expr` ends up at the
+given position. If `orient` is not `{X, 0}`, not only will the block be in the
+right place, but the right sticker will also be at the given orientation. If
+`algo` is not `nullptr`, the moves used to do so will be stored there.
 
 <br>
 
@@ -261,3 +316,13 @@ C++ API has been ported to Lua, for more details about the functions available
 
 Runs one line of Lua code. Returns 1 on success, 0 on failure. For more details
 about the Lua API [read this](lua.md).
+
+<br>
+
+### `rcube::Algorithm solveCfop(bool verbose = false, Color crossColor = Color::White)`
+
+- `verbose`: enable output to stdout;
+- `crossColor`: the color of the face to start from
+
+Initializes a `CfopSolver` with the given arguments and solves the cube. Returns
+the algorithm used. For more detail, read [this](solving.md)

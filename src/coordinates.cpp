@@ -96,3 +96,12 @@ void rcube::Coordinates::rotate (const Axis& axis, int step)
         }
     }
 }
+
+rcube::Coordinates rcube::Coordinates::getRotated(const Axis& axis, int step)
+    const
+{
+    rcube::Coordinates newCoords(x(), y(), z());
+    newCoords.rotate(axis, step);
+    
+    return newCoords;
+}

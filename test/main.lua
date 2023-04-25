@@ -1,4 +1,4 @@
--- Copyright (c) 2022 Lorenzo Pucci
+-- Copyright (c) 2023 Lorenzo Pucci
 -- You may use, distribute and modify this code under the terms of the MIT
 -- license.
 --
@@ -69,22 +69,37 @@ print("\n~~~ Performing M2UR ~~~")
 performAlgorithm("M2E2S2 M2UR")
 
 io.write("Face match: letters ... ")
-test(faceMatches({axis=1, direction=1}, "AACaaDAAD"), true)
+test(faceMatches({axis=1, direction=1}, "MMNmmAMMA"), true)
 
 io.write("Face match: mixture 1 ... ")
 test(faceMatches({axis=2, direction=-1}, "AOOaGrA**"), true)
 
-io.write("Face match: mixture 2 ... ")
-test(faceMatches({axis=2, direction=1}, "**wGBAaBC"), false)
+io.write("Face match: mixture 2.0 ... ")
+test(faceMatches({axis=2, direction=1}, "**wGBAaBC"), true)
+
+io.write("Face match: mixture 2.1 ... ")
+test(faceMatches({axis=2, direction=1}, "**wGBMmBC"), false)
 
 io.write("Layer match: letters ... ")
-test(layerMatches({axis=1, direction=1}, "AACAADcaadDd"), true)
+test(layerMatches({axis=1, direction=1}, "MMAMMPcmmpPp"), true)
 
 io.write("Layer match: mixture 1 ... ")
 test(layerMatches({axis=1, direction=-1}, "AADW*dywOGrZ"), false)
 
 io.write("Layer match: mixture 2 ... ")
 test(layerMatches({axis=0, direction=0}, "AaAR*gAAyGGr"), true)
+
+io.write("Layer and face match: colors ... ")
+test(layerAndFaceMatch({axis=0, direction=1}, "RRBoRGRRy-bGRWYWOwBYYY"), true)
+
+io.write("Layer and face match: letters ... ")
+test(layerAndFaceMatch({axis=1, direction=1}, "Aa*MmM*mM-PCCc**pPpDDd"), true)
+
+io.write("Layer and face match: mixture 1 ... ")
+test(layerAndFaceMatch({axis=2, direction=1}, "MmGYBGMoo-BW*rgGFFbkkk"), false)
+
+io.write("Layer and face match: mixture 2 ... ")
+test(layerAndFaceMatch({axis=1, direction=1}, "KKkYAG*Kr-MMWBmmY*mZzZ"), true)
 
 io.write("Find: center ... ")
 testList(find("y"), {x= 0, y= 1, z= 0})

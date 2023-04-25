@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2022 Lorenzo Pucci
+* Copyright (c) 2023 Lorenzo Pucci
 * You may use, distribute and modify this code under the terms of the MIT
 * license.
 *
@@ -50,7 +50,7 @@ int rcubeUI::runUI (rcube::Cube *cube, std::function<void(rcube::Move)>
 
     GLFWwindow* window;
     window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT,
-        "Rubiks cube", NULL, NULL);
+        "Rcube GUI", NULL, NULL);
     if (window == NULL)
     {
         std::cerr << "Failed to open GLFW window. If you have an Intel GPU, "

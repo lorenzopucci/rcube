@@ -17,6 +17,7 @@
 
 #include <rcube.hpp>
 #include <utility.hpp>
+#include <solving.hpp>
 
 using pairCoords2DColor = std::pair<rcube::Coordinates2D, Color>;
 using pairOrientColor = std::pair<rcube::Orientation, Color>;
@@ -259,6 +260,11 @@ void rcube::Cube::performAlgorithm (const rcube::Algorithm& algorithm)
         performMove(move);
 }
 
+void rcube::Cube::performAlgorithm (const std::string &algorithm)
+{
+    performAlgorithm(rcube::Algorithm(algorithm));
+}
+
 void rcube::Cube::scramble(const int &length, rcube::Algorithm* dest)
 {
     rcube::Algorithm scramble = rcube::Algorithm::generateScramble(length);
@@ -484,4 +490,13 @@ rcube::BlockArray rcube::Cube::blockRender()
     assert(patternIndex == 26);
 
     return pattern;
+}
+
+rcube::Algorithm rcube::Cube::solveCfop(bool verbose, Color crossColor)
+{
+    CfopSolver solver(*this, crossColor, verbose);
+    rcube::Algorithm solution = solver.solve();
+    performAlgorithm(solution);
+
+    return solution;
 }

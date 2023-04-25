@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2022 Lorenzo Pucci
+* Copyright (c) 2023 Lorenzo Pucci
 * You may use, distribute and modify this code under the terms of the MIT
 * license.
 *
@@ -55,12 +55,15 @@ void initLua(lua_State *L)
         &runFunction<&RcubeLua::getStickerOrientation>);
     lua_register(L, "getStickerAt", &runFunction<&RcubeLua::getStickerAt>);
     lua_register(L, "getFaceColor", &runFunction<&RcubeLua::getFaceColor>);
+    lua_register(L, "getFaceOrientation", &runFunction<&RcubeLua::getFaceOrientation>);
     lua_register(L, "display", &runFunction<&RcubeLua::display>);
     lua_register(L, "faceMatches", &runFunction<&RcubeLua::faceMatches>);
     lua_register(L, "layerMatches", &runFunction<&RcubeLua::layerMatches>);
+    lua_register(L, "layerAndFaceMatch", &runFunction<&RcubeLua::layerAndFaceMatch>);
     lua_register(L, "normalizeAlgo", &runFunction<&RcubeLua::normalizeAlgo>);
     lua_register(L, "reverseAlgo", &runFunction<&RcubeLua::reverseAlgo>);
     lua_register(L, "removeRotations", &runFunction<&RcubeLua::removeRotations>);
+    lua_register(L, "solveCfop", &runFunction<&RcubeLua::solveCfop>);
 }
 
 int rcube::Cube::runScript(const std::string &path)

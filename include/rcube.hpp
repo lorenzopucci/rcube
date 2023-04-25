@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2022 Lorenzo Pucci
+* Copyright (c) 2023 Lorenzo Pucci
 * You may use, distribute and modify this code under the terms of the MIT
 * license.
 *
@@ -118,6 +118,12 @@ namespace rcube
         * @param axis: the rotation axis
         * @param step: the number of 90° rotations to apply (clockwise relatively
         * to someone looking at the origin from the positive side of the axis)
+        */
+
+        rcube::Coordinates getRotated(const Axis& axis, int step) const;
+        /*
+        * Same as rotate, but instead of being applied, the result of the
+        * rotation is returned.
         */
     };
 
@@ -375,10 +381,16 @@ namespace rcube
         * and changing the moves' directions.
         */
 
-        rcube::Algorithm removeRotations() const;
+        rcube::Algorithm withoutRotations() const;
         /*
         * Returns an algorithm equivalent to the current instance but without
         * rotations (x, y, z). For example, RyRF' become RBR'.
+        */
+
+        void removeRotations();
+        /*
+        * Same as withoutRotations but it is applied to the current instance
+        * instead of being returned.
         */
 
         std::string to_string() const;
@@ -434,6 +446,11 @@ namespace rcube
         void performAlgorithm (const rcube::Algorithm& algorithm);
         /*
          * Applies a rcube::Algorithm
+        */
+
+        void performAlgorithm (const std::string &algorithm);
+        /*
+        * Shortcut for performAlgorithm(rcube::Algorithm("string"))
         */
 
         void scramble(const int &length = 12, rcube::Algorithm* dest = nullptr);
@@ -516,8 +533,12 @@ namespace rcube
       * given orientation.
       */
 
-        bool faceMatches(const rcube::Orientation &face, const std::string
-        &expr, const rcube::Coordinates &dest = rcube::Coordinates(0, 0, 0));
+        bool faceMatches(
+            const rcube::Orientation &face,
+            const std::string &expr,
+            const rcube::Coordinates &dest = rcube::Coordinates(0, 0, 0),
+            rcube::Algorithm *algo = nullptr
+        );
         /*
         * Checks if a face matches a pattern. This is one of the most powerful
         * tools of this library, please refer to the documentation for a thorough
@@ -527,11 +548,17 @@ namespace rcube
         * @param dest: if it is not (0,0,0), the face will be rotated so as the
         * position of the block corresponding to the first character in expr
         * will correspond to this location.
+        * @algo a pointer to an algorithm to which the moves used to adjust the
+        * face will be pushed
         */
 
-        bool layerMatches(const rcube::Orientation &layer, const std::string
-        &expr, const rcube::Coordinates &dest = rcube::Coordinates(0, 0, 0),
-        const rcube::Orientation &orient = {Axis::X,0});
+        bool layerMatches(
+            const rcube::Orientation &layer,
+            const std::string &expr,
+            const rcube::Coordinates &dest = rcube::Coordinates(0, 0, 0),
+            const rcube::Orientation &orient = {Axis::X,0},
+            rcube::Algorithm *algo = nullptr
+        );
         /*
         * Checks if a layer (the 12 stickers adjacent to the same face) matches
         * a pattern.
@@ -544,6 +571,28 @@ namespace rcube
         * will correspond to this location.
         * @param orient: determines the position of the first sticker along with
         * dest
+        * @param algo: a pointer to an algorithm to which the moves used to adjust
+        * the face will be pushed
+        */
+
+       bool layerAndFaceMatch(
+            const rcube::Orientation &layer,
+            const std::string &expr,
+            const rcube::Coordinates &dest = rcube::Coordinates(0, 0, 0),
+            const rcube::Orientation &orient = {Axis::X,0},
+            rcube::Algorithm *algo = nullptr
+        );
+        /*
+        * Union of layerMatches and faceMatches: checks if they both match
+        * @param layer: the layer to check
+        * @param expr: the pattern (its syntax is explained in the documentation)
+        * @param dest: if it is not (0,0,0), the layer will be rotated so as the
+        * position of the block corresponding to the first character in expr
+        * will correspond to this location.
+        * @param orient: determines the position of the first sticker along with
+        * dest
+        * @param algo: a pointer to an algorithm to which the moves used to adjust
+        * the face will be pushed
         */
 
         rcube::Net netRender();
@@ -578,6 +627,15 @@ namespace rcube
         * to Lua are listed in the documentation.
         * @param cmd: the code to execute.
         * @return: 1 on success, 0 on failure
+        */
+       
+        rcube::Algorithm solveCfop(bool verbose = false,
+                Color crossColor = Color::White);
+        /*
+        * Solves the cube using the cfop algorithm (see include/solving.hpp).
+        * @param verbose: enable output to stdout
+        * @param crossColor: the color of the face to start from
+        * @return: the algorithm used to solve the cube
         */
 
     private:

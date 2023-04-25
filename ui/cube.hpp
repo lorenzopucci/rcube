@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2022 Lorenzo Pucci
+* Copyright (c) 2023 Lorenzo Pucci
 * You may use, distribute and modify this code under the terms of the MIT
 * license.
 *
@@ -19,6 +19,9 @@
 #include "vertexArray.hpp"
 #include "shader.hpp"
 #include "camera.hpp"
+#include "texture.hpp"
+
+#define STICKER_TXT_PATH "ui/res/textures/stickers.bmp"
 
 const float vertices[] = {
         -0.5f, -0.5f, -0.5f,
@@ -31,33 +34,16 @@ const float vertices[] = {
         0.5f, 0.5f, 0.5f,
 };
 
-const unsigned int indices[] = {
-        1, 3, 0, // Left
-        3, 0, 2,
-
-        3, 2, 6, // Top
-        3, 6, 7,
-
-        0, 4, 2, // Back
-        4, 2, 6,
-
-        5, 7, 6, // Right
-        5, 6, 4,
-
-        0, 1, 4, // Bottom
-        1, 4, 5,
-
-        1, 3, 5, // Front
-        3, 5, 7,
+const unsigned int vtxIndices[] = {
+        1, 3, 0, 2, // Left
+        2, 3, 6, 7, // Top
+        0, 2, 4, 6, // Back
+        4, 5, 6, 7, // Right
+        0, 1, 4, 5, // Bottom
+        1, 3, 5, 7  // Front
 };
 
-struct RGBA
-{
-    float red;
-    float green;
-    float blue;
-    float alpha = 1.0f;
-};
+const unsigned int defIdxs[] = {0, 1, 2, 1, 2, 3};
 
 class Cube
 {
@@ -69,8 +55,8 @@ public:
         void draw(Camera* camera, Shader *shader);
 
 private:
-        rcube::BlockArray blocks;
+        Texture *texture;
+        IndexBuffer *ib = new IndexBuffer(defIdxs, 6);
 
-        VertexArray *va = new VertexArray();
-        VertexBuffer *vb;
+        rcube::BlockArray blocks;
 };

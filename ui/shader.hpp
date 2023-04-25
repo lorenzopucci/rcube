@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2022 Lorenzo Pucci
+* Copyright (c) 2023 Lorenzo Pucci
 * You may use, distribute and modify this code under the terms of the MIT
 * license.
 *
@@ -13,11 +13,11 @@
 
 #include <glm/glm.hpp>
 
-#define STD_VS "ui/res/shaders/standard.vs"
-#define STD_FS "ui/res/shaders/standard.fs"
+#define STD_VS "ui/res/shaders/cube_vert.glsl"
+#define STD_FS "ui/res/shaders/cube_frag.glsl"
 
-#define TXT_VS "ui/res/shaders/text.vs"
-#define TXT_FS "ui/res/shaders/text.fs"
+#define TXT_VS "ui/res/shaders/text_vert.glsl"
+#define TXT_FS "ui/res/shaders/text_frag.glsl"
 
 class Shader
 {

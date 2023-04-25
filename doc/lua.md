@@ -79,6 +79,15 @@ one-character string (e.g. `"w"` for white).
 
 <br>
 
+### `<table> getFaceOrientation(<string> color)`
+
+- `color`: the color of the face;
+
+Equivalent to `rcube::Cube::getFaceOrientation`. The orientation is returned
+in a table.
+
+<br>
+
 ### `<string> getStickerAt(<table> pos, <table> orient)`
 
 - `pos`: the coordinates of the block the sticker belongs to (`{x=#, y=#, z=#}`);
@@ -110,7 +119,7 @@ Equivalent to `rcube::Cube::faceMatches`.
 ### `<boolean> layerMatches(<table> orientation, <string> expr, [<table> dest, <table> orient])`
 
 - `orientation`: the orientation of the layer to check (`{axis=#, direction=#}`);
-- `expr`: the regular expression to compare with the face. For its syntax
+- `expr`: the regular expression to compare with the layer. For its syntax
 [read here](cube.md#rcubecubefacematchesconst-rcubeorientation-face-const-stdstring-expr)
 - `dest`: the place to which the block corresponding to the first character of
 `expr` will be rotated (optional);
@@ -118,6 +127,20 @@ Equivalent to `rcube::Cube::faceMatches`.
 character of `expr` will be placed;
 
 Equivalent to `rcube::Cube::layerMatches`
+
+<br>
+
+### `<boolean> layerAndFaceMatch(<table> orientation, <string> expr, [<table> dest, <table> orient])`
+
+- `orientation`: the orientation of the layer to check (`{axis=#, direction=#}`);
+- `expr`: the regular expression. For its syntax
+[read here](cube.md#rcubecubefacematchesconst-rcubeorientation-face-const-stdstring-expr)
+- `dest`: the place to which the block corresponding to the first character of
+`expr` will be rotated (optional);
+- `orient`: the orientation at which the sticker corresponding to the first
+character of `expr` will be placed;
+
+Equivalent to `rcube::Cube::layerAndFaceMatch`
 
 <br>
 
@@ -137,9 +160,18 @@ returned as a string.
 Equivalent to `rcube::Algorithm::reverse`. The reversed algorithm is
 returned as a string.
 
+<br>
+
 ### `<string> removeRotations(<string> algo)`
 
 - `algo`: the algorithm to remove rotations from;
 
 Equivalent to `rcube::Algorithm::removeRotations`. The new algorithm is
+returned as a string.
+
+<br>
+
+### `<string> solveCfop()`
+
+Equivalent to `rcube::Cube::solveCfop`. The algorithm used to solve the cube is
 returned as a string.

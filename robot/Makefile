@@ -24,7 +24,9 @@ UI_TARGET := $(LIB_BIN_DIR)/ui.o
 BOT_TARGET := $(BIN_DIR)/robot.o
 
 FILES := $(wildcard $(SRC_DIR)/*.cpp)
-OBJECTS := $(patsubst $(SRC_DIR)/%.cpp,$(LIB_BIN_DIR)/%.o,$(FILES))
+SOLVER_FILES := $(wildcard $(SRC_DIR)/solving/*.cpp)
+OBJECTS := $(patsubst $(SRC_DIR)/%.cpp,$(LIB_BIN_DIR)/%.o,$(FILES)) \
+	$(patsubst $(SRC_DIR)/solving/%.cpp,$(LIB_BIN_DIR)/sol_%.o,$(SOLVER_FILES))
 
 UI_FILES = $(wildcard $(UI_DIR)/*.cpp)
 UI_OBJECTS = $(patsubst $(UI_DIR)/%.cpp,$(LIB_BIN_DIR)/ui_%.o,$(UI_FILES))

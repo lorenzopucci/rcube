@@ -5,8 +5,9 @@ motors and a Raspberry Pi.
 ![Demo](media/demo.gif)
 
 Currently what the code does is:
-1- Scanning the cube's faces with a Raspberry Pi camera and OpenCV
-2- Opening a GUI window with the current status of the cube. All the moves
+
+- Scanning the cube's faces with a Raspberry Pi camera and OpenCV
+- Opening a GUI window with the current status of the cube. All the moves
 entered with the keyboard will be forwarded to the motors (including `ctrl+D`
 to solve the cube).
 

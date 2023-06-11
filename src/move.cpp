@@ -20,16 +20,19 @@ Axis getAxis(const MoveFace& face)
     case LEFT:
     case RIGHT:
     case ROTATE_X:
+    case MIDDLE:
       return Axis::X;
 
     case UP:
     case DOWN:
     case ROTATE_Y:
+    case EQUATOR:
       return Axis::Y;
 
     case FRONT:
     case BACK:
     case ROTATE_Z:
+    case SIDE:
       return Axis::Z;
   }
 }
@@ -114,6 +117,11 @@ rcube::Orientation rcube::Move::getAffectedFace() const
     case LEFT:
     case BACK:
       return {axis, -1};
+    
+    case MIDDLE:
+    case SIDE:
+    case EQUATOR:
+      return {axis, 0};
 
     default: return {};
   }

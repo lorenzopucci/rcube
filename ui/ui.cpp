@@ -27,6 +27,7 @@
 #include "camera.hpp"
 #include "text.hpp"
 #include "ui.hpp"
+#include "util.hpp"
 
 #define WINDOW_WIDTH 640
 #define WINDOW_HEIGHT 480
@@ -75,11 +76,10 @@ int rcubeUI::runUI (rcube::Cube *cube, std::function<void(rcube::Move)>
     Camera *camera = new Camera(window);
     Text text = Text(WINDOW_WIDTH, WINDOW_HEIGHT);
     Timer timer(&text, 10, 10);
+    Cube cube3d(cube);
 
-    GlfwUserPtrData *userPtr = new GlfwUserPtrData {camera, cube, &text,
-        &timer, moveCallback};
-
-    Cube cube3d(cube->blockRender());
+    GlfwUserPtrData *userPtr = new GlfwUserPtrData {camera, &text,
+        &timer, &cube3d, moveCallback};
 
     glfwSetWindowUserPointer(window, userPtr);
     glfwSetScrollCallback(window, EventHandler::onScroll);
@@ -113,7 +113,7 @@ int rcubeUI::runUI (rcube::Cube *cube, std::function<void(rcube::Move)>
         }
         if (!userPtr->cubeUpdated)
         {
-            cube3d.update(cube->blockRender());
+            cube3d.update();
             userPtr->cubeUpdated = true;
         }
         if (userPtr->hasBeenScrambled && cube->isSolved())
@@ -123,6 +123,7 @@ int rcubeUI::runUI (rcube::Cube *cube, std::function<void(rcube::Move)>
             timer.stop();
         }
 
+        cube3d.updateAnimations();
         cube3d.draw(camera, &shader);
         timer.refresh();
         text.draw();

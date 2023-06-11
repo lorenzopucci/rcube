@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2022 Lorenzo Pucci
+* Copyright (c) 2023 Lorenzo Pucci
 * You may use, distribute and modify this code under the terms of the MIT
 * license.
 *
@@ -12,16 +12,17 @@
 #include <glm/glm.hpp>
 #include <GLFW/glfw3.h>
 #include <glm/gtc/matrix_transform.hpp>
-
-#include "text.hpp"
-
-#include <rcube.hpp>
+#include <glm/gtc/quaternion.hpp>
+#include <glm/gtx/quaternion.hpp>
+#include <glm/gtx/euler_angles.hpp>
+#include <glm/gtx/norm.hpp>
 
 #include <functional>
 
 #define MOUSE_SPEED 0.5f
 #define SPEED 3.0f
 #define INITIAL_FOV 75.0f
+#define ROT_SPEED 5.0f
 
 struct MouseCoordinates
 {
@@ -60,7 +61,7 @@ public:
     Camera(GLFWwindow* window);
     ~Camera() = default;
 
-    void arrangeBlock(int* coords);
+    void arrangeBlock(const glm::vec3 &pos, const glm::quat &orient);
     void scale(const float &factor);
     void resetTransformations();
     void centerView();
@@ -88,18 +89,4 @@ namespace EventHandler
     void onKey(GLFWwindow* window, int key, int scancode, int action, int mods);
     void onDrag(GLFWwindow* window, double xpos, double ypos);
     void onResize(GLFWwindow* window, int width, int height);
-};
-
-struct GlfwUserPtrData
-{
-    Camera *camera;
-    rcube::Cube *cube;
-    Text *text;
-    Timer *timer;
-
-    std::function<void(rcube::Move)> moveCallback = NULL;
-    
-    bool MVPupdated = false; // false when MPV needs to be sent to the GPU
-    bool cubeUpdated = false; // false when the cube needs to be re-rendered
-    bool hasBeenScrambled = false;
 };

@@ -7,30 +7,31 @@
 * not, see: <https://mit-license.org>.
 */
 
-#include <map>
-#include <algorithm>
-
-#include <rcube.hpp>
-#include <utility.hpp>
-
 #include "cube.hpp"
-#include "renderer.hpp"
-#include "vertexArray.hpp"
-#include "shader.hpp"
-#include "vertexBuffer.hpp"
-#include "indexBuffer.hpp"
-#include "camera.hpp"
 
 
-Cube::Cube(const rcube::BlockArray &blocks)
+Cube::Cube(rcube::Cube *cube)
 {
+    this->cube = cube;
     texture = new Texture(STICKER_TXT_PATH);
-    this->update(blocks);
+    this->update();
 }
 
-void Cube::update(const rcube::BlockArray &blocks)
+void Cube::update()
 {
-    this->blocks = blocks;
+    rcube::BlockArray blocks = cube->blockRender();
+
+    for (int i = 0; i < 26; ++i)
+    {
+        rcube::Coordinates pos = blocks.blocks[i].position;
+
+        this->cubies[i] = (Cubie){
+            blocks.blocks[i].stickers,
+            pos,
+            glm::vec3(pos.x(), pos.y(), pos.z()),
+            glm::vec3(pos.x(), pos.y(), pos.z())
+        };
+    }
 }
 
 float getx0(const Color &color)
@@ -96,21 +97,19 @@ void Cube::draw(Camera* camera, Shader* shader)
     // render all 26 blocks
     for (int block = 0; block < 26; ++block)
     {
-        rcube::Coordinates pos = blocks.blocks[block].position;
-
         camera->resetTransformations();
-        camera->arrangeBlock(pos.coords);
+        camera->arrangeBlock(cubies[block].pos, cubies[block].orient);
         shader->setUniformMat4f("MVP", camera->getMVP());
 
         for (int face = 0; face < 6; ++face)
         {
             rcube::Orientation o = {(Axis)(face % 3), (face % 2) * 2 - 1};
 
-            if (blocks.blocks[block].stickers.find(o) ==
-                blocks.blocks[block].stickers.end()) continue;
+            if (cubies[block].stickers.find(o) == cubies[block].stickers.end())
+                continue;
             
-            float x0 = getx0(blocks.blocks[block].stickers[o]);
-            float y0 = gety0(pos, o);
+            float x0 = getx0(cubies[block].stickers[o]);
+            float y0 = gety0(cubies[block].formalPos, o);
             float x1 = x0 + 1.0f/6.0f;
             float y1 = y0 + 1.0f/6.0f;
 
@@ -142,4 +141,90 @@ void Cube::draw(Camera* camera, Shader* shader)
         }
     }
     glDisable(GL_BLEND);
+}
+
+void Cube::performMove(const rcube::Move &move)
+{
+    this->cube->performMove(move);
+    this->addAnimation(move);
+}
+
+glm::vec3 toGlmAxis(const Axis &axis)
+{
+    switch (axis)
+    {
+        case Axis::X: return glm::vec3(1.0f, 0.0f, 0.0f);
+        case Axis::Y: return glm::vec3(0.0f, 1.0f, 0.0f);
+        case Axis::Z: return glm::vec3(0.0f, 0.0f, 1.0f);
+    }
+}
+
+void Cube::addAnimation(const rcube::Move &move)
+{
+    int angleSign = -1;
+    if (move.getAffectedFace().direction != 1 && move.face != SIDE)
+    {
+        angleSign = 1;
+    }
+
+    glm::quat rotation = glm::angleAxis(1.5708f * angleSign * move.direction,
+        toGlmAxis(move.axis));
+
+    switch (move.face)
+    {
+    case ROTATE_X:
+    case ROTATE_Y:
+    case ROTATE_Z:
+
+        for (int i = 0; i < 26; ++i)
+        {
+            cubies[i].finalOrient = glm::normalize(cubies[i].orient * rotation);
+        }
+        break;
+
+    default:
+        
+        rcube::Orientation face = move.getAffectedFace();
+        for (int i = 0; i < 26; ++i)
+        {
+            if (cubies[i].formalPos.coords[face.axis] != face.direction)
+                continue;
+            
+            cubies[i].finalOrient = glm::normalize(cubies[i].orient * rotation);
+        }
+        break;
+    }
+}
+
+void Cube::updateAnimations()
+{
+    double now = static_cast<double>(glfwGetTime());
+    bool toUpdate = false;
+
+    for (int i = 0; i < 26; ++i)
+    {
+        if (cubies[i].orient == cubies[i].finalOrient) continue;
+
+        float cosTheta = glm::dot(cubies[i].orient, cubies[i].finalOrient);
+
+        if (abs(cosTheta) >= 0.90f)
+        {
+            toUpdate = true;
+            cubies[i].orient = cubies[i].finalOrient;
+            continue;
+        }
+        toUpdate = false;
+
+        cubies[i].orient = glm::normalize(glm::slerp(cubies[i].orient,
+            cubies[i].finalOrient, ROT_SPEED * float(now - lastCall)));
+            
+        cubies[i].pos = cubies[i].orient * cubies[i].startPos;
+    }
+
+    if (toUpdate)
+    {
+        this->update();
+    }
+    
+    lastCall = now;
 }

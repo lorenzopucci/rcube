@@ -10,6 +10,7 @@
 #pragma once
 
 #include <map>
+#include <algorithm>
 
 #include <rcube.hpp>
 #include <utility.hpp>
@@ -20,6 +21,7 @@
 #include "shader.hpp"
 #include "camera.hpp"
 #include "texture.hpp"
+#include "renderer.hpp"
 
 #define STICKER_TXT_PATH "ui/res/textures/stickers.bmp"
 
@@ -45,18 +47,40 @@ const unsigned int vtxIndices[] = {
 
 const unsigned int defIdxs[] = {0, 1, 2, 1, 2, 3};
 
+struct Cubie
+{
+        std::map<rcube::Orientation, Color> stickers;
+        rcube::Coordinates formalPos;
+
+        glm::vec3 pos;
+        glm::vec3 startPos;
+        
+        glm::quat orient = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
+        glm::quat finalOrient = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
+};
+
 class Cube
 {
 public:
-        Cube(const rcube::BlockArray &blocks);
+        Cube(rcube::Cube *cube);
 
-        void update(const rcube::BlockArray &blocks);
+        void performMove(const rcube::Move &move);
+
+        void update();
 
         void draw(Camera* camera, Shader *shader);
 
+        void updateAnimations();
+
+        rcube::Cube *cube;
+
 private:
+
+        void addAnimation(const rcube::Move &move);
+
         Texture *texture;
         IndexBuffer *ib = new IndexBuffer(defIdxs, 6);
 
-        rcube::BlockArray blocks;
+        Cubie cubies[26];
+        double lastCall = 0;
 };

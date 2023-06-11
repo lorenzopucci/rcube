@@ -14,6 +14,7 @@
 #include <rcube.hpp>
 
 #include "camera.hpp"
+#include "util.hpp"
 
 
 Rotation Arcball::update(const MouseCoordinates &current)
@@ -69,14 +70,10 @@ MouseCoordinates Camera::getMouseCoordinates(GLFWwindow* window)
     return (MouseCoordinates){x, y};
 }
 
-void Camera::arrangeBlock(int* coords)
+void Camera::arrangeBlock(const glm::vec3 &pos, const glm::quat &orient)
 {
-    // multiplied by 1.1f to leave a small gap between blocks
-    modelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(
-        float(*coords),
-        float(*(coords + 1)),
-        float(*(coords + 2))
-    ));
+    modelMatrix = glm::translate(glm::mat4(1.0f), pos);
+    modelMatrix *= mat4_cast(orient);
 }
 
 void Camera::scale(const float &factor)
@@ -188,7 +185,7 @@ void EventHandler::onKey(GLFWwindow* window, int key, int scancode, int action,
         {
             if (camera->pressingCtrl && action == GLFW_PRESS)
             {
-                rcube::Algorithm algo = userPtr->cube->solveCfop(true);
+                rcube::Algorithm algo = userPtr->cube3d->cube->solveCfop(true);
                 userPtr->cubeUpdated = false;
 
                 if (userPtr->moveCallback == NULL) break;
@@ -214,7 +211,7 @@ void EventHandler::onKey(GLFWwindow* window, int key, int scancode, int action,
             if (camera->pressingCtrl && action == GLFW_PRESS)
             {
                 rcube::Algorithm dest;
-                userPtr->cube->scramble(15, &dest);
+                userPtr->cube3d->cube->scramble(15, &dest);
 
                 std::cout << "Scramble: " << dest.to_string() << std::endl;
                 
@@ -268,8 +265,7 @@ void EventHandler::onKey(GLFWwindow* window, int key, int scancode, int action,
 
 
     rcube::Move move(newMove, 1 - (camera->pressingShift * 2));
-    userPtr->cube->performMove(move);
-    userPtr->cubeUpdated = false;
+    userPtr->cube3d->performMove(move);
 
     if (userPtr->moveCallback != NULL)
     {
@@ -285,9 +281,7 @@ void EventHandler::onDrag(GLFWwindow* window, double xpos, double ypos)
 
     if (!camera->arcball.on) return;
 
-    double currTime = static_cast<float>(glfwGetTime());
-    float deltaTime = float(currTime - camera->lastTime);
-    camera->lastTime = currTime;
+    camera->lastTime = static_cast<float>(glfwGetTime());
     
     Rotation rot = camera->arcball.update({xpos, ypos});
 

@@ -28,6 +28,7 @@ void Cube::update()
         this->cubies[i] = (Cubie){
             blocks.blocks[i].stickers,
             pos,
+            pos,
             glm::vec3(pos.x(), pos.y(), pos.z()),
             glm::vec3(pos.x(), pos.y(), pos.z())
         };
@@ -105,13 +106,15 @@ void Cube::draw(Camera* camera, Shader* shader)
         {
             rcube::Orientation o = {(Axis)(face % 3), (face % 2) * 2 - 1};
 
-            if (cubies[block].stickers.find(o) == cubies[block].stickers.end())
-                continue;
-            
-            float x0 = getx0(cubies[block].stickers[o]);
-            float y0 = gety0(cubies[block].formalPos, o);
-            float x1 = x0 + 1.0f/6.0f;
-            float y1 = y0 + 1.0f/6.0f;
+            float x0 = 0.0f, y0 = 0.0f, x1 = 0.0f, y1 = 0.0f;
+
+            if (cubies[block].stickers.find(o) != cubies[block].stickers.end())
+            {
+                x0 = getx0(cubies[block].stickers[o]);
+                y0 = gety0(cubies[block].formalPos, o);
+                x1 = x0 + 1.0f/6.0f;
+                y1 = y0 + 1.0f/6.0f;
+            }
 
             float squareVertices[20] = {
                 0.0f, 0.0f, 0.0f, x0, y0,
@@ -162,7 +165,7 @@ glm::vec3 toGlmAxis(const Axis &axis)
 void Cube::addAnimation(const rcube::Move &move)
 {
     int angleSign = -1;
-    if (move.getAffectedFace().direction != 1 && move.face != SIDE)
+    if (move.getAffectedFace().direction < 1 && move.face != SIDE)
     {
         angleSign = 1;
     }
@@ -178,7 +181,9 @@ void Cube::addAnimation(const rcube::Move &move)
 
         for (int i = 0; i < 26; ++i)
         {
-            cubies[i].finalOrient = glm::normalize(cubies[i].orient * rotation);
+            cubies[i].finalOrient = glm::normalize(rotation *
+                cubies[i].finalOrient);
+            cubies[i].finalPos.rotate(move.axis, move.direction);
         }
         break;
 
@@ -187,10 +192,12 @@ void Cube::addAnimation(const rcube::Move &move)
         rcube::Orientation face = move.getAffectedFace();
         for (int i = 0; i < 26; ++i)
         {
-            if (cubies[i].formalPos.coords[face.axis] != face.direction)
+            if (cubies[i].finalPos.coords[face.axis] != face.direction)
                 continue;
             
-            cubies[i].finalOrient = glm::normalize(cubies[i].orient * rotation);
+            cubies[i].finalOrient = glm::normalize(rotation *
+                cubies[i].finalOrient);
+            cubies[i].finalPos.rotate(move.axis, move.direction);
         }
         break;
     }

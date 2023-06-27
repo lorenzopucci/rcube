@@ -123,7 +123,7 @@ rcube::Orientation rcube::Move::getAffectedFace() const
     case EQUATOR:
       return {axis, 0};
 
-    default: return {};
+    default: return {axis, 2};
   }
 }
 

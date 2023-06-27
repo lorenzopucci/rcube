@@ -17,5 +17,12 @@ uniform sampler2D textureSampler;
 
 void main ()
 {
-	color = texture(textureSampler, UV);
+	if (UV.x == 0.0 && UV.y == 0.0)
+	{
+		color = vec4(0, 0, 0, 1);
+	}
+	else
+	{
+		color = texture(textureSampler, UV);
+	}
 };

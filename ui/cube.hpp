@@ -50,7 +50,9 @@ const unsigned int defIdxs[] = {0, 1, 2, 1, 2, 3};
 struct Cubie
 {
         std::map<rcube::Orientation, Color> stickers;
+        
         rcube::Coordinates formalPos;
+        rcube::Coordinates finalPos;
 
         glm::vec3 pos;
         glm::vec3 startPos;

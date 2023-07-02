@@ -35,55 +35,33 @@ void Cube::update()
     }
 }
 
-float getx0(const Color &color)
-{
-    float pos;
-
-    switch (color)
-    {
-        case Color::White: pos = 0.0f; break;
-        case Color::Yellow: pos = 1.0f; break;
-        case Color::Green: pos = 2.0f; break;
-        case Color::Blue: pos = 3.0f; break;
-        case Color::Red: pos = 4.0f; break;
-        case Color::Orange: pos = 5.0f; break;
-    }
-    return float(pos/6.0f);
-}
-
 float gety0(const rcube::Coordinates &pos, const rcube::Orientation &face)
 {
-    if (pos.x() * pos.y() * pos.z() == 0)
+    if (pos.x() * pos.y() * pos.z() != 0) return float(5.0f/6.0f); // corner
+    if (abs(pos.x() + pos.y() + pos.z()) == 1) return float(4.0f/6.0f); // center
+
+    // edge
+    if (pos.x() == 0)
     {
-        if (abs(pos.x() + pos.y() + pos.z()) == 1) // center
-        {
-            return float(4.0f/6.0f);
-        }
-
-        // edge
-        if (pos.x() == 0)
-        {
-            if ((face.axis == Axis::Z && pos.y() == 1) || (face.axis == Axis::Y
-                && pos.z() == 1)) return 1.0f/6.0f;
-            return 0.0f;
-        }
-        else if (face.axis == Axis::X && face.direction == -1)
-        {
-            if (pos.y() == 1) return 1.0f/6.0f;
-            else if (pos.z() == 0) return 0.0f;
-            else if (pos.z() == 1) return 2.0f/6.0f;
-        }
-        else if (face.axis == Axis::X && face.direction == 1)
-        {
-            if (pos.z() == 1) return 1.0f/6.0f;
-            else if (pos.y() == 0) return 0.0f;
-            else if (pos.y() == -1) return 2.0f/6.0f;
-        }
-        else if (pos.x() == -1 && face.axis != Axis::X) return 2.0f/6.0f;
-
-        return float(3.0f/6.0f);
+        if ((face.axis == Axis::Z && pos.y() == 1) || (face.axis == Axis::Y
+            && pos.z() == 1)) return 1.0f/6.0f;
+        return 0.0f;
     }
-    return float(5.0f/6.0f); // corner
+    else if (face.axis == Axis::X && face.direction == -1)
+    {
+        if (pos.y() == 1) return 1.0f/6.0f;
+        else if (pos.z() == 0) return 0.0f;
+        else if (pos.z() == 1) return 2.0f/6.0f;
+    }
+    else if (face.axis == Axis::X && face.direction == 1)
+    {
+        if (pos.z() == 1) return 1.0f/6.0f;
+        else if (pos.y() == 0) return 0.0f;
+        else if (pos.y() == -1) return 2.0f/6.0f;
+    }
+    else if (pos.x() == -1 && face.axis != Axis::X) return 2.0f/6.0f;
+
+    return float(3.0f/6.0f);
 }
 
 void Cube::draw(Camera* camera, Shader* shader)
@@ -110,9 +88,11 @@ void Cube::draw(Camera* camera, Shader* shader)
 
             if (cubies[block].stickers.find(o) != cubies[block].stickers.end())
             {
-                x0 = getx0(cubies[block].stickers[o]);
+                glm::vec3 col = colors[(char)cubies[block].stickers[o]];
+                shader->setUniform4f("inColor", col.x, col.y, col.z, 1.0f);
+
                 y0 = gety0(cubies[block].formalPos, o);
-                x1 = x0 + 1.0f/6.0f;
+                x1 = 1.0f;
                 y1 = y0 + 1.0f/6.0f;
             }
 

@@ -47,6 +47,15 @@ const unsigned int vtxIndices[] = {
 
 const unsigned int defIdxs[] = {0, 1, 2, 1, 2, 3};
 
+std::map<char, glm::vec3> colors = {
+	{'w', glm::vec3(0.9333f, 0.9333f, 0.9333f)},
+	{'y', glm::vec3(0.9216f, 0.7882f, 0.0627f)},
+	{'g', glm::vec3(0.0706f, 0.8588f, 0.0706f)},
+	{'b', glm::vec3(0.0392f, 0.3725f, 0.6941f)},
+	{'r', glm::vec3(0.8863f, 0.0392f, 0.0392f)},
+	{'o', glm::vec3(0.9647f, 0.5216f, 0.0000f)}
+};
+
 struct Cubie
 {
         std::map<rcube::Orientation, Color> stickers;

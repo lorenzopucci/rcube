@@ -13,7 +13,7 @@
 
 #include <rcube.hpp>
 #include <utility.hpp>
-#include "./solving/algoList.hpp"
+#include "./cfop/algoList.hpp"
 
 rcube::Algorithm::Algorithm(const std::string& fromString)
 {

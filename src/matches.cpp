@@ -9,7 +9,7 @@
 
 #include <rcube.hpp>
 
-#include "solving/util.hpp"
+#include "cfop/util.hpp"
 
 bool handleLetters(Color color, char given, char otherCase,
     std::map<char, Color> *letterMapping)

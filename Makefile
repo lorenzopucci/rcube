@@ -23,9 +23,11 @@ TEST_TARGET := $(BIN_DIR)/test.o
 UI_TARGET := $(BIN_DIR)/ui.o
 
 FILES := $(wildcard $(SRC_DIR)/*.cpp)
-SOLVER_FILES := $(wildcard $(SRC_DIR)/solving/*.cpp)
+CFOP_FILES := $(wildcard $(SRC_DIR)/cfop/*.cpp)
+KOCIEMBA_FILES := $(wildcard $(SRC_DIR)/kociemba/*.cpp)
 OBJECTS := $(patsubst $(SRC_DIR)/%.cpp,$(BIN_DIR)/%.o,$(FILES)) \
-	$(patsubst $(SRC_DIR)/solving/%.cpp,$(BIN_DIR)/sol_%.o,$(SOLVER_FILES))
+	$(patsubst $(SRC_DIR)/cfop/%.cpp,$(BIN_DIR)/cfop_%.o,$(CFOP_FILES)) \
+	$(patsubst $(SRC_DIR)/kociemba/%.cpp,$(BIN_DIR)/koc_%.o,$(KOCIEMBA_FILES))
 
 TEST_FILES = $(wildcard $(TEST_DIR)/*.cpp)
 TEST_OBJECTS = $(patsubst $(TEST_DIR)/%.cpp,$(BIN_DIR)/test_%.o,$(TEST_FILES))
@@ -65,8 +67,12 @@ $(UI_TARGET): $(OBJECTS) $(UI_OBJECTS)
 $(BIN_DIR)/%.o: $(SRC_DIR)/%.cpp
 	$(CXX) -c $(CFLAGS) $^ -o $@
 
-# rule valid for each file in ./src/solving
-$(BIN_DIR)/sol_%.o: $(SRC_DIR)/solving/%.cpp
+# rule valid for each file in ./src/cfop
+$(BIN_DIR)/cfop_%.o: $(SRC_DIR)/cfop/%.cpp
+	$(CXX) -c $(CFLAGS) $^ -o $@
+
+# rule valid for each file in ./src/kociemba
+$(BIN_DIR)/koc_%.o: $(SRC_DIR)/kociemba/%.cpp
 	$(CXX) -c $(CFLAGS) $^ -o $@
 
 # rule valid for each file in ./test

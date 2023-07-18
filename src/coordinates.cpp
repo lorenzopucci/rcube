@@ -105,3 +105,39 @@ rcube::Coordinates rcube::Coordinates::getRotated(const Axis& axis, int step)
     
     return newCoords;
 }
+
+std::vector<rcube::Coordinates> rcube::Coordinates::iterateCorners()
+{
+    std::vector<rcube::Coordinates> res;
+
+    for (int x = -1; x < 2; x += 2)
+    {
+        for (int y = -1; y < 2; y += 2)
+        {
+            for (int z = -1; z < 2; z += 2)
+            {
+                res.push_back(rcube::Coordinates(x, y, z));
+            }
+        }
+    }
+    return res;
+}
+
+std::vector<rcube::Coordinates> rcube::Coordinates::iterateEdges()
+{
+    std::vector<rcube::Coordinates> res;
+
+    for (int x = -1; x < 2; x += 2)
+    {
+        for (int y = -1; y < 2; y += 2)
+        {
+            for (int z = -1; z < 2; z += 2)
+            {
+                if (x * y * z != 0 || abs(x + y + z) == 1) continue;
+                
+                res.push_back(rcube::Coordinates(x, y, z));
+            }
+        }
+    }
+    return res;
+}

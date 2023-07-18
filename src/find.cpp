@@ -157,3 +157,13 @@ Color rcube::Cube::getStickerAt(const rcube::Coordinates &coords,
         std::to_string((int)orient.axis) + ", " + std::to_string(
         orient.direction) + ") at " + coords.to_string());
 }
+
+bool rcube::Cube::blockHasColor(const rcube::Coordinates &block,
+    const Color &color)
+{
+    for (rcube::Orientation orient : rcube::Orientation::iterateOnBlock(block))
+    {
+        if (getStickerAt(block, orient) == color) return true;
+    }
+    return false;
+}

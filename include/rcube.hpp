@@ -18,6 +18,8 @@
 
 namespace rcube
 {
+    struct Coordinates;
+
     struct Orientation
     {
         /*
@@ -58,6 +60,13 @@ namespace rcube
        * order: -X, +X, -Y, +Y, -Z, +Z
        * This is used for iteration through objects like rcube::Net
        */
+
+      static std::vector<rcube::Orientation> iterateOnBlock(const
+        rcube::Coordinates &block);
+        /*
+        * Returns a vector containing all the 2 (or 3) orientations of the
+        * stickers of an edge (or corner) of given coordinates.
+        */
     };
 
     struct Coordinates
@@ -125,6 +134,16 @@ namespace rcube
         * Same as rotate, but instead of being applied, the result of the
         * rotation is returned.
         */
+
+       static std::vector<Coordinates> iterateCorners();
+       /*
+       * Returns a vector containing the 8 coordinates of the corners
+       */
+
+       static std::vector<Coordinates> iterateEdges();
+       /*
+       * Returns a vector containing the 12 coordinates of the edges
+       */
     };
 
     struct Coordinates2D
@@ -532,6 +551,12 @@ namespace rcube
       * Returns the color of the sticker at some given coordinates, with a
       * given orientation.
       */
+
+        bool blockHasColor(const rcube::Coordinates &block, const Color &color);
+        /*
+        * Returns true if the block at given coordinates has a sticker of a given
+        * color.
+        */
 
         bool faceMatches(
             const rcube::Orientation &face,

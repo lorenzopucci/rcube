@@ -84,3 +84,16 @@ std::vector<rcube::Orientation> rcube::Orientation::iterate()
     }
     return vec;
 }
+
+std::vector<rcube::Orientation> rcube::Orientation::iterateOnBlock(const
+    rcube::Coordinates &block)
+{
+    std::vector<rcube::Orientation> res;
+
+    for (int i = 0; i < 3; ++i)
+    {
+        if (block.coords[i] != 0)
+            res.push_back((rcube::Orientation){(Axis)i, block.coords[i]});
+    }
+    return res;
+}

@@ -34,3 +34,16 @@ private:
     bool _verbose;
     Color _crossColor;
 };
+
+
+class KociembaSolver
+{
+public:
+    KociembaSolver(const rcube::Cube &cube, bool verbose = false);
+
+    rcube::Algorithm solve();
+
+private:
+    rcube::Cube _cube;
+    bool _verbose;
+};

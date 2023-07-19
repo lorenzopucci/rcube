@@ -44,9 +44,13 @@ KociembaSolver::KociembaSolver(const rcube::Cube &cube, bool verbose)
 
 
 void search (
-    uint16_t twist, uint16_t flip, uint16_t slice,
-    rcube::Algorithm prevMoves,
-    int dist, int left
+    uint16_t twist, // current twist: needs to be brought to 0
+    uint16_t flip, // current flip: needs to be brought to 0
+    uint16_t slice, // current slice: needs to be brought to 0
+    rcube::Algorithm prevMoves, // already applied moves for phase 1
+    int dist, // lower bound for the number of moves needed to reach G1
+    int left // number of moves after which the maximum length allowed to
+             // phase 1 is exceeded
     )
 {
     rcube::Orientation prevMoveOrient = {Axis::X, 0};
@@ -59,15 +63,21 @@ void search (
     for (int i = 0; i < 18; ++i)
     {
         rcube::Move move = ph1Moves[i];
+
+        // Pairs of successive moves to the same face can be ignored
         if (move.getAffectedFace() == prevMoveOrient) continue;
 
-        uint16_t newTwist = twistMove[twist][i];
-        uint16_t newFlip = flipMove[flip][i];
-        uint16_t newSlice = sliceSortedMove[slice * 24][i] / 24;
+        uint16_t newTwist = Kociemba::twistMove[twist][i];
+        uint16_t newFlip = Kociemba::flipMove[flip][i];
+        uint16_t newSlice = Kociemba::sliceSortedMove[slice * 24][i] / 24;
 
+        // newDist is only a lower bound for the distance to G1, a sequence of
+        // newDist moves to take the cube to G1 does not necessarily exist.
         int newDist = MAX(
-            readTable(sliceFlipPrun, N_SLICE * newFlip + newSlice),
-            readTable(sliceTwistPrun, N_SLICE * newTwist + newSlice)
+            Kociemba::readTable(Kociemba::sliceFlipPrun, N_SLICE *
+                newFlip + newSlice),
+            Kociemba::readTable(Kociemba::sliceTwistPrun, N_SLICE *
+                newTwist + newSlice)
         );
         if (newDist >= left) continue;
 
@@ -82,7 +92,7 @@ void search (
 
 rcube::Algorithm KociembaSolver::solve()
 {
-    initTables();
+    Kociemba::initTables();
     Kociemba::CubieCube cc(_cube);
     
     search(cc.getTwist(), cc.getFlip(), cc.getSliceSorted() / 24,

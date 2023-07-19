@@ -15,6 +15,8 @@
 #include "lookupTables.hpp"
 #include <rcube.hpp>
 
+namespace Kociemba
+{
 
 short twistMove[N_TWIST][N_MOVE] = {{0}};
 short flipMove[N_FLIP][N_MOVE] = {{0}};
@@ -26,6 +28,11 @@ signed char sliceFlipPrun[N_SLICE * N_FLIP / 2] = {0};
 
 signed char readTable(signed char *table, int index)
 {
+    // The leftmost 4 bits of each byte are used to store the values at odd
+    // indices, the other 4 bits are used to store the values at even indices.
+    // Therefore the table in base 2 looks like {BBBBAAAA, DDDDCCCC, ...} where
+    // AAAA is the value at index 0, BBBB is the value at index 1 and so on.
+
     if (index % 2 == 0)
         return table[index / 2] & 0x0f;
     
@@ -44,7 +51,7 @@ void generateTwistMove(const std::string &path)
 {
     std::cout << "[KOCIEMBA] Generating twistMove table...\n";
 
-    Kociemba::CubieCube cube = Kociemba::CubieCube();
+    CubieCube cube = CubieCube();
     auto orients = rcube::Orientation::iterate();
 
     for (int i = 0; i < N_TWIST; ++i)
@@ -60,7 +67,7 @@ void generateTwistMove(const std::string &path)
                 cube.cornerMultiply(mv);
                 twistMove[i][3 * k + j] = cube.getTwist();
             }
-            cube.cornerMultiply(mv);
+            cube.cornerMultiply(mv); // resets the cube's state
         }
     }
     writeFile((char*)twistMove, sizeof(twistMove), "twistMove", path);
@@ -72,7 +79,7 @@ void generateFlipMove(const std::string &path)
 {
     std::cout << "[KOCIEMBA] Generating flipMove table...\n";
     
-    Kociemba::CubieCube cube = Kociemba::CubieCube();
+    CubieCube cube = CubieCube();
     auto orients = rcube::Orientation::iterate();
 
     for (int i = 0; i < N_FLIP; ++i)
@@ -88,7 +95,7 @@ void generateFlipMove(const std::string &path)
                 cube.edgeMultiply(mv);
                 flipMove[i][3 * k + j] = cube.getFlip();
             }
-            cube.edgeMultiply(mv);
+            cube.edgeMultiply(mv); // reset the cube's state
         }
     }
     writeFile((char*)flipMove, sizeof(flipMove), "flipMove", path);
@@ -100,7 +107,7 @@ void generateSliceSortedMove(const std::string &path)
 {
     std::cout << "[KOCIEMBA] Generating sliceSortedMove table...\n";
     
-    Kociemba::CubieCube cube = Kociemba::CubieCube();
+    CubieCube cube = CubieCube();
     auto orients = rcube::Orientation::iterate();
 
     for (int i = 0; i < N_SLICE_SORTED; ++i)
@@ -116,7 +123,7 @@ void generateSliceSortedMove(const std::string &path)
                 cube.edgeMultiply(mv);
                 sliceSortedMove[i][3 * k + j] = cube.getSliceSorted();
             }
-            cube.edgeMultiply(mv);
+            cube.edgeMultiply(mv); // reset the cube's state
         }
     }
     writeFile((char*)sliceSortedMove, sizeof(sliceSortedMove),
@@ -129,10 +136,20 @@ void generateSliceTwistPrun(const std::string &path)
 {
     std::cout << "[KOCIEMBA] Generating sliceTwistPrun table...\n";
 
+    // This table is filled recursively: first 0 is assigned to index 0
+    // (where twist=0 and slice=0), then all the 18 moves are applied and 1 is
+    // assigned to all the combinations of twist and slice values found.
+    // In general, at the i-th iteration, all the combinations of twist and slice
+    // for which the table value is i-1 are taken, all the 18 moves are applied
+    // to them and i is written in the table at the index corresponding to the
+    // combinations of twist and slice found (if a smaller value was not written
+    // already). This makes sure that all the values are minimal. The cycle
+    // stops when all the table has been filled.
+
     int depth = 0, done = 1;
 
     for (int i = 0; i < N_SLICE * N_TWIST / 2 + 1; ++i)
-        sliceTwistPrun[i] = -1;
+        sliceTwistPrun[i] = -1; // 11111111 in binary
 
     writeTable(sliceTwistPrun, 0, 0);
     while (done != N_SLICE * N_TWIST)
@@ -150,7 +167,8 @@ void generateSliceTwistPrun(const std::string &path)
                 int newTwist = twistMove[twist][j];
 
                 if (readTable(sliceTwistPrun, N_SLICE * newTwist + newSlice)
-                    != 0x0f) continue;
+                    != 0x0f)
+                    continue; // The table has already been written at this index
 
                 writeTable(sliceTwistPrun, N_SLICE * newTwist + newSlice,
                     (signed char)(depth + 1));
@@ -169,10 +187,12 @@ void generateSliceFlipPrun(const std::string &path)
 {
     std::cout << "[KOCIEMBA] Generating sliceFlipPrun table...\n";
 
+    // This table is filled with the same algorithm as sliceTwistPrun
+
     int depth = 0, done = 1;
 
     for (int i = 0; i < N_SLICE * N_FLIP / 2; ++i)
-        sliceFlipPrun[i] = -1;
+        sliceFlipPrun[i] = -1; // 11111111 in binary
 
     writeTable(sliceFlipPrun, 0, 0);
     while (done != N_SLICE * N_FLIP)
@@ -267,3 +287,5 @@ void initTables()
     readFile((char*)sliceFlipPrun, sizeof(sliceFlipPrun),
         path + "/" + "sliceFlipPrun");
 }
+
+} // namespace Kociemba

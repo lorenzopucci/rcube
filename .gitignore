@@ -1,4 +1,4 @@
 bin/*
 .vscode/*
 .history/*
-.kociemba_lookup_tables/*
+kociemba_lookup_tables/*

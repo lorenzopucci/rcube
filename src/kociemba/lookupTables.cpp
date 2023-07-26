@@ -20,7 +20,10 @@ namespace Kociemba
 
 short twistMove[N_TWIST][N_MOVE] = {{0}};
 short flipMove[N_FLIP][N_MOVE] = {{0}};
-short sliceSortedMove[N_SLICE_SORTED][N_MOVE] = {{0}};
+short xEdgesMove[N_EDGES][N_MOVE] = {{0}};
+short yEdgesMove[N_EDGES][N_MOVE] = {{0}};
+short zEdgesMove[N_EDGES][N_MOVE] = {{0}};
+short cornersMove[N_CORNERS][N_MOVE] = {{0}};
 
 signed char sliceTwistPrun[N_SLICE * N_TWIST / 2 + 1] = {0};
 signed char sliceFlipPrun[N_SLICE * N_FLIP / 2] = {0};
@@ -103,16 +106,16 @@ void generateFlipMove(const std::string &path)
     std::cout << "[KOCIEMBA] Generated flipMove table\n";
 }
 
-void generateSliceSortedMove(const std::string &path)
+void generateXEdgesMove(const std::string &path)
 {
-    std::cout << "[KOCIEMBA] Generating sliceSortedMove table...\n";
+    std::cout << "[KOCIEMBA] Generating xEdgesMove table...\n";
     
     CubieCube cube = CubieCube();
     auto orients = rcube::Orientation::iterate();
 
-    for (int i = 0; i < N_SLICE_SORTED; ++i)
+    for (int i = 0; i < N_EDGES; ++i)
     {
-        cube.setSliceSorted(i);
+        cube.setXEdges(i);
 
         for (int k = 0; k < 6; ++k)
         {
@@ -121,15 +124,98 @@ void generateSliceSortedMove(const std::string &path)
             for (int j = 0; j < 3; ++j)
             {
                 cube.edgeMultiply(mv);
-                sliceSortedMove[i][3 * k + j] = cube.getSliceSorted();
+                xEdgesMove[i][3 * k + j] = cube.getXEdges();
             }
             cube.edgeMultiply(mv); // reset the cube's state
         }
     }
-    writeFile((char*)sliceSortedMove, sizeof(sliceSortedMove),
-        "sliceSortedMove", path);
+    writeFile((char*)xEdgesMove, sizeof(xEdgesMove), "xEdgesMove", path);
 
-    std::cout << "[KOCIEMBA] Generated sliceSortedMove table\n";
+    std::cout << "[KOCIEMBA] Generated xEdgesMove table\n";
+}
+
+void generateYEdgesMove(const std::string &path)
+{
+    std::cout << "[KOCIEMBA] Generating yEdgesMove table...\n";
+    
+    CubieCube cube = CubieCube();
+    auto orients = rcube::Orientation::iterate();
+
+    for (int i = 0; i < N_EDGES; ++i)
+    {
+        cube.setYEdges(i);
+
+        for (int k = 0; k < 6; ++k)
+        {
+            rcube::Move mv(orients[k], 1);
+
+            for (int j = 0; j < 3; ++j)
+            {
+                cube.edgeMultiply(mv);
+                yEdgesMove[i][3 * k + j] = cube.getYEdges();
+            }
+            cube.edgeMultiply(mv); // reset the cube's state
+        }
+    }
+    writeFile((char*)yEdgesMove, sizeof(yEdgesMove), "yEdgesMove", path);
+
+    std::cout << "[KOCIEMBA] Generated yEdgesMove table\n";
+}
+
+void generateZEdgesMove(const std::string &path)
+{
+    std::cout << "[KOCIEMBA] Generating zEdgesMove table...\n";
+    
+    CubieCube cube = CubieCube();
+    auto orients = rcube::Orientation::iterate();
+
+    for (int i = 0; i < N_EDGES; ++i)
+    {
+        cube.setZEdges(i);
+
+        for (int k = 0; k < 6; ++k)
+        {
+            rcube::Move mv(orients[k], 1);
+
+            for (int j = 0; j < 3; ++j)
+            {
+                cube.edgeMultiply(mv);
+                zEdgesMove[i][3 * k + j] = cube.getZEdges();
+            }
+            cube.edgeMultiply(mv); // reset the cube's state
+        }
+    }
+    writeFile((char*)zEdgesMove, sizeof(zEdgesMove), "zEdgesMove", path);
+
+    std::cout << "[KOCIEMBA] Generated zEdgesMove table\n";
+}
+
+void generateCornersMove(const std::string &path)
+{
+    std::cout << "[KOCIEMBA] Generating cornersMove table...\n";
+    
+    CubieCube cube = CubieCube();
+    auto orients = rcube::Orientation::iterate();
+
+    for (int i = 0; i < N_CORNERS; ++i)
+    {
+        cube.setCorners(i);
+
+        for (int k = 0; k < 6; ++k)
+        {
+            rcube::Move mv(orients[k], 1);
+
+            for (int j = 0; j < 3; ++j)
+            {
+                cube.cornerMultiply(mv);
+                cornersMove[i][3 * k + j] = cube.getCorners();
+            }
+            cube.edgeMultiply(mv); // reset the cube's state
+        }
+    }
+    writeFile((char*)cornersMove, sizeof(cornersMove), "cornersMove", path);
+
+    std::cout << "[KOCIEMBA] Generated cornersMove table\n";
 }
 
 void generateSliceTwistPrun(const std::string &path)
@@ -163,7 +249,7 @@ void generateSliceTwistPrun(const std::string &path)
 
             for (int j = 0; j < 18; ++j)
             {
-                int newSlice = sliceSortedMove[slice * 24][j] / 24;
+                int newSlice = yEdgesMove[slice * 24][j] / 24;
                 int newTwist = twistMove[twist][j];
 
                 if (readTable(sliceTwistPrun, N_SLICE * newTwist + newSlice)
@@ -206,7 +292,7 @@ void generateSliceFlipPrun(const std::string &path)
 
             for (int j = 0; j < 18; ++j)
             {
-                int newSlice = sliceSortedMove[slice * 24][j] / 24;
+                int newSlice = yEdgesMove[slice * 24][j] / 24;
                 int newFlip = flipMove[flip][j];
                 
                 if (readTable(sliceFlipPrun, N_SLICE * newFlip + newSlice)
@@ -227,15 +313,17 @@ void generateSliceFlipPrun(const std::string &path)
 
 void generateTable(const std::string &table, const std::string path)
 {
-    if (table == "flipMove")        {generateFlipMove(path); return;}
-    if (table == "twistMove")       {generateTwistMove(path); return;}
-    if (table == "sliceSortedMove") {generateSliceSortedMove(path); return;}
+    if (table == "flipMove")    {generateFlipMove(path); return;}
+    if (table == "twistMove")   {generateTwistMove(path); return;}
+    if (table == "xEdgesMove")  {generateXEdgesMove(path); return;}
+    if (table == "yEdgesMove")  {generateYEdgesMove(path); return;}
+    if (table == "zEdgesMove")  {generateZEdgesMove(path); return;}
+    if (table == "cornersMove") {generateCornersMove(path); return;}
 
     // sliceTwistPrun and sliceFlipPrun require the first 3 tables to be loaded
     readFile((char*)twistMove, sizeof(twistMove), path + "/" + "twistMove");
     readFile((char*)flipMove, sizeof(flipMove), path + "/" + "flipMove");
-    readFile((char*)sliceSortedMove, sizeof(sliceSortedMove), path + "/" +
-        "sliceSortedMove");
+    readFile((char*)yEdgesMove, sizeof(yEdgesMove), path + "/" + "yEdgesMove");
 
     if      (table == "sliceTwistPrun")  generateSliceTwistPrun(path);
     else if (table == "sliceFlipPrun")   generateSliceFlipPrun(path);
@@ -244,10 +332,12 @@ void generateTable(const std::string &table, const std::string path)
 void initTables()
 {
     std::string path = STD_PATH;
-    std::string tables[5] = {"twistMove", "flipMove", "sliceSortedMove",
-        "sliceTwistPrun", "sliceFlipPrun"};
+    std::string tables[8] = {"twistMove", "flipMove", "xEdgesMove",
+        "yEdgesMove", "zEdgesMove", "cornersMove", "sliceTwistPrun",
+        "sliceFlipPrun"
+    };
     
-    for (int i = 0; i < 5; ++i)
+    for (int i = 0; i < 8; ++i)
     {
         while (true)
         {
@@ -280,8 +370,11 @@ void initTables()
 
     readFile((char*)twistMove, sizeof(twistMove), path + "/" + "twistMove");
     readFile((char*)flipMove, sizeof(flipMove), path + "/" + "flipMove");
-    readFile((char*)sliceSortedMove, sizeof(sliceSortedMove),
-        path + "/" + "sliceSortedMove");
+    readFile((char*)xEdgesMove, sizeof(xEdgesMove), path + "/" + "xEdgesMove");
+    readFile((char*)yEdgesMove, sizeof(yEdgesMove), path + "/" + "yEdgesMove");
+    readFile((char*)zEdgesMove, sizeof(zEdgesMove), path + "/" + "zEdgesMove");
+    readFile((char*)cornersMove, sizeof(cornersMove),
+        path + "/" + "cornersMove");
     readFile((char*)sliceTwistPrun, sizeof(sliceTwistPrun),
         path + "/" + "sliceTwistPrun");
     readFile((char*)sliceFlipPrun, sizeof(sliceFlipPrun),

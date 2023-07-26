@@ -15,7 +15,8 @@
 #define N_FLIP 2048
 #define N_TWIST 2187
 #define N_SLICE 495
-#define N_SLICE_SORTED 11880
+#define N_EDGES 11880
+#define N_CORNERS 40320
 #define N_MOVE 18
 
 #define STD_PATH "kociemba_lookup_tables"
@@ -38,10 +39,24 @@ extern short twistMove[N_TWIST][N_MOVE];
 extern short flipMove[N_FLIP][N_MOVE];
 
 // Stores the effect of the 18 moves on all the 11880 different values of
-// sliceSorted (sliceSortedMove[sliceSorted][M] = new sliceSorted after applying
-// M).
+// xEdges (xEdgesMove[xEdges][M] = new xEdges after applying M).
 // The corresponding file size is 427.7kB
-extern short sliceSortedMove[N_SLICE_SORTED][N_MOVE];
+extern short xEdgesMove[N_EDGES][N_MOVE];
+
+// Stores the effect of the 18 moves on all the 11880 different values of
+// yEdges (yEdgesMove[yEdges][M] = new yEdges after applying M).
+// The corresponding file size is 427.7kB
+extern short yEdgesMove[N_EDGES][N_MOVE];
+
+// Stores the effect of the 18 moves on all the 11880 different values of
+// zEdges (zEdgesMove[zEdges][M] = new zEdges after applying M).
+// The corresponding file size is 427.7kB
+extern short zEdgesMove[N_EDGES][N_MOVE];
+
+// Stores the effect of the 18 moves on all the 40320 different values of
+// corners (cornersMove[corners][M] = new corners after applying M).
+// The corresponding file size is 427.7kB
+extern short cornersMove[N_CORNERS][N_MOVE];
 
 // Stores the number of moves required to reach twist=0 and slice=0 from all the
 // 2187*495 possible combinations of twist and slice values. This is one of the

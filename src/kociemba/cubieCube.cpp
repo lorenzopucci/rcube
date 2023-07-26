@@ -329,14 +329,38 @@ void CubieCube::setTwist(uint16_t twist)
     cOri[7] = (3 - (twistParity % 3)) % 3;
 }
 
-uint16_t CubieCube::getSliceSorted()
+template<typename T>
+void rotateRight(T* array, int left, int right)
+{
+    // shift to the right of one position the elements of an array between
+    // indices left and right
+
+    T tmp = array[right];
+    for (int i = right; i > left; --i)
+        array[i] = array[i - 1];
+    array[left] = tmp;
+}
+
+template<typename T>
+void rotateLeft(T* array, int left, int right)
+{
+    // shift to the right of one position the elements of an array between
+    // indices left and right
+
+    T tmp = array[left];
+    for (int i = left; i < right; ++i)
+        array[i] = array[i + 1];
+    array[right] = tmp;
+}
+
+uint16_t CubieCube::getXEdges()
 {
     uint16_t a = 0, b = 0, x = 0;
     Edge edges[4];
 
     for (int i = 11; i >= 0; --i)
     {
-        if (ePerm[i] >= Edge::FR && ePerm[i] <= Edge::BR)
+        if ((int)ePerm[i] % 2 == 1 && ePerm[i] < (int)Edge::FR)
         {
             a += choose(11 - i, x + 1);
             edges[3 - x] = ePerm[i];
@@ -347,12 +371,9 @@ uint16_t CubieCube::getSliceSorted()
     {
         int k = 0;
 
-        while (edges[i] != i + 8)
+        while (edges[i] != i * 2 + 1)
         {
-            Edge tmp = edges[0];
-            for (int j = 0; j < i; ++j)
-                edges[j] = edges[j + 1];
-            edges[i] = tmp;
+            rotateLeft(edges, 0, i);
             k++;
         }
         b = (i + 1) * b + k;
@@ -360,27 +381,23 @@ uint16_t CubieCube::getSliceSorted()
     return 24 * a + b;
 }
 
-void CubieCube::setSliceSorted(uint16_t sliceSorted)
+void CubieCube::setXEdges(uint16_t xEdges)
 {
-    Edge sliceEdges[4] = {FR, FL, BL, BR};
-    Edge otherEdges[8] = {UR, UF, UL, UB, DR, DF, DL, DB};
+    Edge sliceEdges[4] = {UF, UB, DF, DB};
+    Edge otherEdges[8] = {UR, UL, DR, DL, FR, FL, BL, BR};
 
-    int a = sliceSorted / 24;
-    int b = sliceSorted % 24;
+    int a = xEdges / 24;
+    int b = xEdges % 24;
 
     for (int i = 0; i < 12; ++i) ePerm[i] = Edge::E_NONE;
 
     for (int i = 1; i < 4; ++i)
     {
-        int k = b % (i + i);
+        int k = b % (i + 1);
         b /= i + 1;
         while (k > 0)
         {
-            Edge tmp = sliceEdges[i];
-            for (int j = i; j > 0; --j)
-                sliceEdges[j] = sliceEdges[j - 1];
-            sliceEdges[0] = tmp;
-
+            rotateRight(sliceEdges, 0, i);
             k--;
         }
     }
@@ -403,6 +420,183 @@ void CubieCube::setSliceSorted(uint16_t sliceSorted)
             x++;
         }
     }
+}
+
+uint16_t CubieCube::getYEdges()
+{
+    uint16_t a = 0, b = 0, x = 0;
+    Edge edges[4];
+
+    for (int i = 11; i >= 0; --i)
+    {
+        if (ePerm[i] >= Edge::FR && ePerm[i] <= Edge::BR)
+        {
+            a += choose(11 - i, x + 1);
+            edges[3 - x] = ePerm[i];
+            x++;
+        }
+    }
+    for (int i = 3; i > 0; --i)
+    {
+        int k = 0;
+
+        while (edges[i] != i + 8)
+        {
+            rotateLeft(edges, 0, i);
+            k++;
+        }
+        b = (i + 1) * b + k;
+    }
+    return 24 * a + b;
+}
+
+void CubieCube::setYEdges(uint16_t yEdges)
+{
+    Edge sliceEdges[4] = {FR, FL, BL, BR};
+    Edge otherEdges[8] = {UR, UF, UL, UB, DR, DF, DL, DB};
+
+    int a = yEdges / 24;
+    int b = yEdges % 24;
+
+    for (int i = 0; i < 12; ++i) ePerm[i] = Edge::E_NONE;
+
+    for (int i = 1; i < 4; ++i)
+    {
+        int k = b % (i + 1);
+        b /= i + 1;
+        while (k > 0)
+        {
+            rotateRight(sliceEdges, 0, i);
+            k--;
+        }
+    }
+    int x = 4;
+    for (int i = 0; i < 12; ++i)
+    {
+        if (a - choose(11 - i, x) >= 0)
+        {
+            ePerm[i] = sliceEdges[4 - x];
+            a -= choose(11 - i, x);
+            x--;
+        }
+    }
+    x = 0;
+    for (int i = 0; i < 12; ++i)
+    {
+        if (ePerm[i] == Edge::E_NONE)
+        {
+            ePerm[i] = otherEdges[x];
+            x++;
+        }
+    }
+}
+
+uint16_t CubieCube::getZEdges()
+{
+    uint16_t a = 0, b = 0, x = 0;
+    Edge edges[4];
+
+    for (int i = 11; i >= 0; --i)
+    {
+        if (ePerm[i] % 2 == 0 && ePerm[i] < Edge::FR)
+        {
+            a += choose(11 - i, x + 1);
+            edges[3 - x] = ePerm[i];
+            x++;
+        }
+    }
+    for (int i = 3; i > 0; --i)
+    {
+        int k = 0;
+
+        while (edges[i] != i * 2)
+        {
+            rotateLeft(edges, 0, i);
+            k++;
+        }
+        b = (i + 1) * b + k;
+    }
+    return 24 * a + b;
+}
+
+void CubieCube::setZEdges(uint16_t zEdges)
+{
+    Edge sliceEdges[4] = {UR, UL, DR, DL};
+    Edge otherEdges[8] = {UF, UB, DF, DB, FR, FL, BL, BR};
+
+    int a = zEdges / 24;
+    int b = zEdges % 24;
+
+    for (int i = 0; i < 12; ++i) ePerm[i] = Edge::E_NONE;
+
+    for (int i = 1; i < 4; ++i)
+    {
+        int k = b % (i + 1);
+        b /= i + 1;
+        while (k > 0)
+        {
+            rotateRight(sliceEdges, 0, i);
+            k--;
+        }
+    }
+    int x = 4;
+    for (int i = 0; i < 12; ++i)
+    {
+        if (a - choose(11 - i, x) >= 0)
+        {
+            ePerm[i] = sliceEdges[4 - x];
+            a -= choose(11 - i, x);
+            x--;
+        }
+    }
+    x = 0;
+    for (int i = 0; i < 12; ++i)
+    {
+        if (ePerm[i] == Edge::E_NONE)
+        {
+            ePerm[i] = otherEdges[x];
+            x++;
+        }
+    }
+}
+
+uint16_t CubieCube::getCorners()
+{
+    Corner corners[8] = {(Corner)0};
+    int res = 0;
+
+    for (int i = 0; i < 8; ++i) corners[i] = cPerm[i];
+
+    for (int i = 7; i > 0; --i)
+    {
+        int k = 0;
+        while (corners[i] != i)
+        {
+            rotateLeft(corners, 0, i);
+            k++;
+        }
+        res *= i + 1;
+        res += k;
+    }
+    return res;
+}
+
+void CubieCube::setCorners(uint16_t value)
+{
+    Corner corners[8] = {URF, UFL, ULB, UBR, DFR, DLF, DBL, DRB};
+
+    for (int i = 1; i < 8; ++i)
+    {
+        int k = value % (i + 1);
+        value /= i + 1;
+        while (k > 0)
+        {
+            rotateRight(corners, 0, i);
+            --k;
+        }
+    }
+
+    for (int i = 0; i < 8; ++i) cPerm[i] = corners[i];
 }
 
 } // namespace Kociemba

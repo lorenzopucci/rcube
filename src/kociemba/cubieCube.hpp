@@ -85,21 +85,18 @@ namespace Kociemba
         // Decode a twist value and apply it to the cube
         void setTwist(uint16_t twist);
 
-        // XEdges is a value that represents the permutation of the 4 edges that
-        // lie in the x=0 plane (UF, DF, DB, UB). YEdges and ZEdges are defined
-        // similarly.
+        // SliceSorted is a value that represents the permutation of the 4
+        // edges of the central slice (FR, FL, BL, BR)
+        uint16_t getSliceSorted();
+        void setSliceSorted(uint16_t sliceSorted);
 
-        uint16_t getXEdges();
-        void setXEdges(uint16_t sliceSorted);
-
-        uint16_t getYEdges();
-        void setYEdges(uint16_t YEdges);
-
-        uint16_t getZEdges();
-        void setZEdges(uint16_t ZEdges);
+        // udEdges is a value that represents the permutation of the 8 edges
+        // of the U and D faces, assuming the cube is in G1 (these edges are only
+        // in the U and D faces)
+        uint16_t getUDEdges();
+        void setUDEdges(uint16_t udEdges);
 
         // Corners is a value that represents the permutation of the 8 corners.
-
         uint16_t getCorners();
         void setCorners(uint16_t corners);
 

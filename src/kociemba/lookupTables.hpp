@@ -15,9 +15,12 @@
 #define N_FLIP 2048
 #define N_TWIST 2187
 #define N_SLICE 495
-#define N_EDGES 11880
+#define N_SLICE_PERM 24
+#define N_SLICE_SORTED 11880
 #define N_CORNERS 40320
+#define N_UDEDGES 40320
 #define N_MOVE 18
+#define N_MOVE_PH2 10
 
 #define STD_PATH "kociemba_lookup_tables"
 
@@ -39,24 +42,21 @@ extern short twistMove[N_TWIST][N_MOVE];
 extern short flipMove[N_FLIP][N_MOVE];
 
 // Stores the effect of the 18 moves on all the 11880 different values of
-// xEdges (xEdgesMove[xEdges][M] = new xEdges after applying M).
+// sliceSorted (sliceSortedMove[sliceSorted][M] = new sliceSorted after applying
+// M).
 // The corresponding file size is 427.7kB
-extern short xEdgesMove[N_EDGES][N_MOVE];
-
-// Stores the effect of the 18 moves on all the 11880 different values of
-// yEdges (yEdgesMove[yEdges][M] = new yEdges after applying M).
-// The corresponding file size is 427.7kB
-extern short yEdgesMove[N_EDGES][N_MOVE];
-
-// Stores the effect of the 18 moves on all the 11880 different values of
-// zEdges (zEdgesMove[zEdges][M] = new zEdges after applying M).
-// The corresponding file size is 427.7kB
-extern short zEdgesMove[N_EDGES][N_MOVE];
+extern short sliceSortedMove[N_SLICE_SORTED][N_MOVE];
 
 // Stores the effect of the 18 moves on all the 40320 different values of
 // corners (cornersMove[corners][M] = new corners after applying M).
+// The corresponding file size is 1.5MB
+extern unsigned short cornersMove[N_CORNERS][N_MOVE];
+
+// Stores the effect of the 10 phase 2 moves on all the 40320 different values of
+// udEdges (udEdgesMove[udEdges][M] = new udEdges after applying M).
 // The corresponding file size is 427.7kB
-extern short cornersMove[N_CORNERS][N_MOVE];
+extern unsigned short udEdgesMove[N_UDEDGES][N_MOVE_PH2];
+
 
 // Stores the number of moves required to reach twist=0 and slice=0 from all the
 // 2187*495 possible combinations of twist and slice values. This is one of the
@@ -69,6 +69,18 @@ extern signed char sliceTwistPrun[N_SLICE * N_TWIST / 2 + 1];
 // pruning table used in phase 1.
 // The corresponding file size is 506.9kB
 extern signed char sliceFlipPrun[N_SLICE * N_FLIP / 2];
+
+// Stores the number of moves required to reach corners=0 and sliceSorted=0 from
+// all the 40320*24 possible combinations of corners and sliceSorted values (when
+// the cube is in G1). This is one of the two pruning tables used in phase 2.
+// The corresponding file size is 483.8kB
+extern signed char sliceCornersPrun[N_SLICE_PERM * N_CORNERS / 2];
+
+// Stores the number of moves required to reach udEdges=0 and sliceSorted=0 from
+// all the 40320*24 possible combinations of udEdges and sliceSorted values (when
+// the cube is in G1). This the second pruning table used in phase 2.
+// The corresponding file size is 483.8kB
+extern signed char sliceUdEdgesPrun[N_SLICE_PERM * N_UDEDGES / 2];
 
 // Since all the values of sliceTwistPrun and sliceFlipPrun are < 16 (actually
 // they are all <=9), to save space in memory, each byte (signed char) contains

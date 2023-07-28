@@ -33,10 +33,10 @@ std::vector<rcube::Move> ph1Moves = {
 };
 
 std::vector<rcube::Move> ph2Moves = {
-    rcube::Move('U', 1), rcube::Move('U', -1), rcube::Move('U', 2),
     rcube::Move('D', 1), rcube::Move('D', -1), rcube::Move('D', 2),
-    rcube::Move('R', 2), rcube::Move('L', 2), rcube::Move('F', 2),
-    rcube::Move('B', 2)
+    rcube::Move('U', 1), rcube::Move('U', -1), rcube::Move('U', 2),
+    rcube::Move('L', 2), rcube::Move('R', 2), rcube::Move('B', 2),
+    rcube::Move('F', 2)
 };
 
 KociembaSolver::KociembaSolver(const rcube::Cube &cube, bool verbose)
@@ -92,7 +92,7 @@ void search (
 
         uint16_t newTwist = Kociemba::twistMove[twist][i];
         uint16_t newFlip = Kociemba::flipMove[flip][i];
-        uint16_t newSlice = Kociemba::yEdgesMove[slice * 24][i] / 24;
+        uint16_t newSlice = Kociemba::sliceSortedMove[slice * 24][i] / 24;
 
         // newDist is only a lower bound for the distance to G1, a sequence of
         // newDist moves to take the cube to G1 does not necessarily exist.
@@ -124,7 +124,7 @@ rcube::Algorithm KociembaSolver::solve()
     Kociemba::CubieCube cc(_cube);
     std::vector<rcube::Algorithm> ph1Solutions;
     
-    search(cc.getTwist(), cc.getFlip(), cc.getYEdges() / 24,
+    search(cc.getTwist(), cc.getFlip(), cc.getSliceSorted() / 24,
         rcube::Algorithm(), 0, 10, &ph1Solutions);
 
     std::cout << "Found " << ph1Solutions.size() << " solutions\n";

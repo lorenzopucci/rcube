@@ -353,76 +353,7 @@ void rotateLeft(T* array, int left, int right)
     array[right] = tmp;
 }
 
-uint16_t CubieCube::getXEdges()
-{
-    uint16_t a = 0, b = 0, x = 0;
-    Edge edges[4];
-
-    for (int i = 11; i >= 0; --i)
-    {
-        if ((int)ePerm[i] % 2 == 1 && ePerm[i] < (int)Edge::FR)
-        {
-            a += choose(11 - i, x + 1);
-            edges[3 - x] = ePerm[i];
-            x++;
-        }
-    }
-    for (int i = 3; i > 0; --i)
-    {
-        int k = 0;
-
-        while (edges[i] != i * 2 + 1)
-        {
-            rotateLeft(edges, 0, i);
-            k++;
-        }
-        b = (i + 1) * b + k;
-    }
-    return 24 * a + b;
-}
-
-void CubieCube::setXEdges(uint16_t xEdges)
-{
-    Edge sliceEdges[4] = {UF, UB, DF, DB};
-    Edge otherEdges[8] = {UR, UL, DR, DL, FR, FL, BL, BR};
-
-    int a = xEdges / 24;
-    int b = xEdges % 24;
-
-    for (int i = 0; i < 12; ++i) ePerm[i] = Edge::E_NONE;
-
-    for (int i = 1; i < 4; ++i)
-    {
-        int k = b % (i + 1);
-        b /= i + 1;
-        while (k > 0)
-        {
-            rotateRight(sliceEdges, 0, i);
-            k--;
-        }
-    }
-    int x = 4;
-    for (int i = 0; i < 12; ++i)
-    {
-        if (a - choose(11 - i, x) >= 0)
-        {
-            ePerm[i] = sliceEdges[4 - x];
-            a -= choose(11 - i, x);
-            x--;
-        }
-    }
-    x = 0;
-    for (int i = 0; i < 12; ++i)
-    {
-        if (ePerm[i] == Edge::E_NONE)
-        {
-            ePerm[i] = otherEdges[x];
-            x++;
-        }
-    }
-}
-
-uint16_t CubieCube::getYEdges()
+uint16_t CubieCube::getSliceSorted()
 {
     uint16_t a = 0, b = 0, x = 0;
     Edge edges[4];
@@ -450,7 +381,7 @@ uint16_t CubieCube::getYEdges()
     return 24 * a + b;
 }
 
-void CubieCube::setYEdges(uint16_t yEdges)
+void CubieCube::setSliceSorted(uint16_t yEdges)
 {
     Edge sliceEdges[4] = {FR, FL, BL, BR};
     Edge otherEdges[8] = {UR, UF, UL, UB, DR, DF, DL, DB};
@@ -491,73 +422,50 @@ void CubieCube::setYEdges(uint16_t yEdges)
     }
 }
 
-uint16_t CubieCube::getZEdges()
+uint16_t CubieCube::getUDEdges()
 {
-    uint16_t a = 0, b = 0, x = 0;
-    Edge edges[4];
+    Edge edges[8];
+    int res = 0;
 
-    for (int i = 11; i >= 0; --i)
+    for (int i = 0; i < 8; ++i)
     {
-        if (ePerm[i] % 2 == 0 && ePerm[i] < Edge::FR)
-        {
-            a += choose(11 - i, x + 1);
-            edges[3 - x] = ePerm[i];
-            x++;
-        }
+        if (ePerm[i] >= Edge::FR) return 50000;
+        edges[i] = ePerm[i];
     }
-    for (int i = 3; i > 0; --i)
+    for (int i = 7; i > 0; --i)
     {
         int k = 0;
-
-        while (edges[i] != i * 2)
+        while (edges[i] != i)
         {
             rotateLeft(edges, 0, i);
             k++;
         }
-        b = (i + 1) * b + k;
+        res *= i + 1;
+        res += k;
     }
-    return 24 * a + b;
+    return res;
 }
 
-void CubieCube::setZEdges(uint16_t zEdges)
+void CubieCube::setUDEdges(uint16_t udEdges)
 {
-    Edge sliceEdges[4] = {UR, UL, DR, DL};
-    Edge otherEdges[8] = {UF, UB, DF, DB, FR, FL, BL, BR};
-
-    int a = zEdges / 24;
-    int b = zEdges % 24;
+    Edge edges[8] = {UR, UF, UL, UB, DR, DF, DL, DB};
+    Edge otherEdges[4] = {FR, FL, BL, BR};
 
     for (int i = 0; i < 12; ++i) ePerm[i] = Edge::E_NONE;
 
-    for (int i = 1; i < 4; ++i)
+    for (int i = 1; i < 8; ++i)
     {
-        int k = b % (i + 1);
-        b /= i + 1;
+        int k = udEdges % (i + 1);
+        udEdges /= i + 1;
         while (k > 0)
         {
-            rotateRight(sliceEdges, 0, i);
-            k--;
+            rotateRight(edges, 0, i);
+            --k;
         }
     }
-    int x = 4;
-    for (int i = 0; i < 12; ++i)
-    {
-        if (a - choose(11 - i, x) >= 0)
-        {
-            ePerm[i] = sliceEdges[4 - x];
-            a -= choose(11 - i, x);
-            x--;
-        }
-    }
-    x = 0;
-    for (int i = 0; i < 12; ++i)
-    {
-        if (ePerm[i] == Edge::E_NONE)
-        {
-            ePerm[i] = otherEdges[x];
-            x++;
-        }
-    }
+
+    for (int i = 0; i < 8; ++i) ePerm[i] = edges[i];
+    for (int i = 0; i < 4; ++i) ePerm[i + 8] = otherEdges[i];
 }
 
 uint16_t CubieCube::getCorners()

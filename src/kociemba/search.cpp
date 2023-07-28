@@ -17,10 +17,7 @@
 
 #include "cubieCube.hpp"
 #include "lookupTables.hpp"
-
-
-#define MIN(a, b) (((a)<(b))?(a):(b))
-#define MAX(a, b) (((a)>(b))?(a):(b))
+#include "misc.hpp"
 
 
 std::vector<rcube::Move> ph1Moves = {
@@ -43,14 +40,6 @@ KociembaSolver::KociembaSolver(const rcube::Cube &cube, bool verbose)
     : _cube(cube), _verbose(verbose)
 {}
 
-inline int getFaceNumber(const rcube::Orientation &orient)
-{
-    // associates a number from 0 to 5 to each face (the order is L, R, D, U,
-    // B, F)
-
-    return (int)orient.axis * 2 + ((orient.direction + 1) / 2);
-}
-
 void search (
     uint16_t twist, // current twist: needs to be brought to 0
     uint16_t flip, // current flip: needs to be brought to 0
@@ -65,12 +54,12 @@ void search (
     int prevMovesFaces[2] = {-2};
     if (prevMoves.algorithm.size() > 0)
     {
-        prevMovesFaces[0] = getFaceNumber(prevMoves.algorithm
+        prevMovesFaces[0] = Kociemba::getFaceNumber(prevMoves.algorithm
             [prevMoves.algorithm.size() - 1].getAffectedFace());
 
         if (prevMoves.algorithm.size() > 1)
         {
-            prevMovesFaces[1] = getFaceNumber(prevMoves.algorithm
+            prevMovesFaces[1] = Kociemba::getFaceNumber(prevMoves.algorithm
                 [prevMoves.algorithm.size() - 2].getAffectedFace());
         }
     }

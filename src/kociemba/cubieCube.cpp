@@ -10,6 +10,7 @@
 #include <map>
 
 #include "cubieCube.hpp"
+#include "misc.hpp"
 
 namespace Kociemba
 {
@@ -69,22 +70,6 @@ std::map<std::vector<rcube::Orientation>,Edge> orientsToEdge = {
     {{{Axis::Z, -1}, {Axis::X, 1}}, BR},
 };
 
-
-// compute binomial coefficients
-int choose(int n, int k)
-{
-    if (n < k) return 0;
-    if (k > n/2) k = n - k;
-
-    int res = 1;
-
-    for (int i = n, j = 1; i != n - k; i--, j++)
-    {
-        res *= i;
-        res /= j;
-    }
-    return res;
-}
 
 CubieCube::CubieCube()
 {
@@ -344,7 +329,7 @@ void rotateRight(T* array, int left, int right)
 template<typename T>
 void rotateLeft(T* array, int left, int right)
 {
-    // shift to the right of one position the elements of an array between
+    // shift to the left of one position the elements of an array between
     // indices left and right
 
     T tmp = array[left];

@@ -13,6 +13,8 @@
 #include "cubieCube.hpp"
 #include "fileManager.hpp"
 #include "lookupTables.hpp"
+#include "misc.hpp"
+
 #include <rcube.hpp>
 
 namespace Kociemba
@@ -29,32 +31,6 @@ signed char sliceFlipPrun[N_SLICE * N_FLIP / 2] = {0};
 signed char sliceCornersPrun[N_SLICE_PERM * N_CORNERS / 2];
 signed char sliceUdEdgesPrun[N_SLICE_PERM * N_UDEDGES / 2];
 
-
-int toPh2Move(int ph1Move)
-{
-    if (ph1Move >= 6 && ph1Move < 12) return ph1Move - 6;
-    switch (ph1Move)
-    {
-        case 1: return 6;
-        case 4: return 7;
-        case 13: return 8;
-        case 16: return 9;
-        default: return -1;
-    }
-}
-
-int toPh1Move(int ph2Move)
-{
-    if (ph2Move < 6) return ph2Move + 6;
-    switch (ph2Move)
-    {
-        case 6: return 1;
-        case 7: return 4;
-        case 8: return 13;
-        case 9: return 16;
-        default: return -1;
-    }
-}
 
 signed char readTable(signed char *table, int index)
 {

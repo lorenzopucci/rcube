@@ -28,8 +28,8 @@ unsigned short udEdgesMove[N_UDEDGES][N_MOVE_PH2] = {{0}};
 
 signed char sliceTwistPrun[N_SLICE * N_TWIST / 2 + 1] = {0};
 signed char sliceFlipPrun[N_SLICE * N_FLIP / 2] = {0};
-signed char sliceCornersPrun[N_SLICE_PERM * N_CORNERS / 2];
-signed char sliceUdEdgesPrun[N_SLICE_PERM * N_UDEDGES / 2];
+signed char sliceCornersPrun[N_SLICE_PERM * N_CORNERS / 2] = {0};
+signed char sliceUdEdgesPrun[N_SLICE_PERM * N_UDEDGES / 2] = {0};
 
 
 signed char readTable(signed char *table, int index)

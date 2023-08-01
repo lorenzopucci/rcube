@@ -19,6 +19,7 @@
 #include "lookupTables.hpp"
 #include "misc.hpp"
 
+#define DUMMY_ALGO "LRDUBFLRDUBFLRDUBFLRDUBFLRDUBF"
 
 std::vector<rcube::Move> ph1Moves = {
     rcube::Move('L', 1), rcube::Move('L', 2), rcube::Move('L', -1),
@@ -36,8 +37,13 @@ std::vector<rcube::Move> ph2Moves = {
     rcube::Move('F', 2)
 };
 
-KociembaSolver::KociembaSolver(const rcube::Cube &cube, bool verbose)
-    : _cube(cube), _verbose(verbose)
+KociembaSolver::KociembaSolver(const rcube::Cube &cube)
+    : _cube(cube), _quick(true), _threads(1), _timeout(60)
+{}
+
+KociembaSolver::KociembaSolver(const rcube::Cube &cube, int threads,
+    int timeout)
+    : _cube(cube), _threads(threads), _timeout(timeout), _quick(false)
 {}
 
 void searchPh1 (
@@ -96,7 +102,11 @@ void searchPh1 (
         rcube::Algorithm newAlgo = prevMoves;
         newAlgo.push(move);
 
-        if (newDist == 0) solutions->push_back(newAlgo);
+        if (newDist == 0)
+        {
+            solutions->push_back(newAlgo);
+            return;
+        }
 
         searchPh1(newTwist, newFlip, newSlice, newAlgo, newDist, left - 1, solutions);
     }
@@ -107,13 +117,16 @@ void searchPh2 (
     uint16_t udEdges, // current udEdges: needs to be brought to 0
     uint16_t sliceSorted, // current sliceSorted: needs to be brought to 0
     rcube::Algorithm prevMoves, // already applied moves for phase 2
-    int dist, // lower bound for the number of moves needed to solve the cube
     int left, // number of moves after which the maximum length allowed to
               // phase 2 is exceeded
-    rcube::Algorithm *shortestSol // stores all the solutions found
+    rcube::Algorithm *shortestSol, // stores the sortest solution found
+    int ph1Len, // length of phase 1 solution
+    int *shortestLen, // shortest overall solution found (shared between threads)
+    long endTime // startTime + timeout
     )
 {
-    if (prevMoves.length() >= shortestSol->length()) return;
+    if (prevMoves.length() + ph1Len + 1 >= *shortestLen) return;
+    if (time(NULL) > endTime) return;
 
     int prevMovesFaces[2] = {-2};
     if (prevMoves.algorithm.size() > 0)
@@ -162,11 +175,35 @@ void searchPh2 (
         rcube::Algorithm newAlgo = prevMoves;
         newAlgo.push(move);
 
-        if (newDist == 0 && newAlgo.length() < shortestSol->length())
-            *shortestSol = newAlgo;
+        if (newDist == 0)
+        {
+            if (newAlgo.length() + ph1Len < *shortestLen)
+            {
+                *shortestSol = newAlgo;
+                *shortestLen = newAlgo.length() + ph1Len;
+            }
+            return;
+        }
 
         searchPh2(newCorners, newUDEdges, newSliceSorted, newAlgo,
-            newDist, left - 1, shortestSol);
+            left - 1, shortestSol, ph1Len, shortestLen, endTime);
+    }
+}
+
+void runPh2Search(Kociemba::CubieCube cc, const rcube::Algorithm &ph1Solution,
+    rcube::Algorithm *solution, int *shortestLen, const long &endTime)
+{
+    *solution = rcube::Algorithm(DUMMY_ALGO);
+
+    int maxDepth = 12;
+    while (solution->to_string() == DUMMY_ALGO)
+    {
+        if (time(NULL) > endTime) return;
+
+        searchPh2(cc.getCorners(), cc.getUDEdges(), cc.getSliceSorted(),
+            rcube::Algorithm(), maxDepth, solution, ph1Solution.length(),
+            shortestLen, endTime);
+        maxDepth++;
     }
 }
 
@@ -180,32 +217,68 @@ rcube::Algorithm KociembaSolver::solve()
     Kociemba::initTables();
     Kociemba::CubieCube cc(_cube);
     std::vector<rcube::Algorithm> ph1Solutions;
+    long endTime = time(NULL) + _timeout;
     
-    searchPh1(cc.getTwist(), cc.getFlip(), cc.getSliceSorted() / 24,
-        rcube::Algorithm(), 0, 10, &ph1Solutions);
-
-    //std::cout << "Found " << ph1Solutions.size() << " solutions\n";
+    int maxDepth = 4;
+    while (ph1Solutions.size() < _threads)
+    {
+        searchPh1(cc.getTwist(), cc.getFlip(), cc.getSliceSorted() / 24,
+            rcube::Algorithm(), 0, maxDepth, &ph1Solutions);
+        maxDepth++;
+    }
 
     std::sort(ph1Solutions.begin(), ph1Solutions.end(), compareAlgo);
 
-    /*for (int i = 0; i < MIN(20, ph1Solutions.size()); ++i)
+    // quick mode: only run phase 2 on the best solution of phase 1
+    if (_quick)
     {
-        std::cout << ph1Solutions[i].length() << "- " << ph1Solutions[i].to_string() << std::endl;
-    }*/
+        Kociemba::CubieCube cc1 = cc;
+        cc1.performAlgorithm(ph1Solutions[0]);
+        rcube::Algorithm ph2Solution;
+        int shortestLen = 32;
+        
+        runPh2Search(cc1, ph1Solutions[0], &ph2Solution, &shortestLen, endTime);
+        
+        rcube::Algorithm solution = ph1Solutions[0] + ph2Solution;
+        solution.normalize();
 
-    if (ph1Solutions.size() == 0) return rcube::Algorithm();
+        std::cout << "[KOCIEMBA] Final solution: " << solution.to_string() <<
+            " (" << solution.length() << " moves)\n";
 
-    _cube.performAlgorithm(ph1Solutions[0]);
-    cc = Kociemba::CubieCube(_cube);
+        return solution;
+    }
 
-    rcube::Algorithm ph2Solution("LRDUBFLRDUBFLRDUBFLRDUBFLRDUBF");
+    // slow mode: run phase 2 on the best <_threads> phase 1 solutions in
+    // separate threads
     
-    searchPh2(cc.getCorners(), cc.getUDEdges(), cc.getSliceSorted(),
-        rcube::Algorithm(), 0, 15, &ph2Solution);
+    rcube::Algorithm ph2Solutions[_threads] = {rcube::Algorithm(DUMMY_ALGO)};
+    std::thread ph2Threads[_threads];
+    int shortestLen = 32;
 
-    //std::cout << ph2Solution.length() << "- " << ph2Solution.to_string() << std::endl;
+    for (int i = 0; i < _threads; ++i)
+    {
+        Kociemba::CubieCube cc1 = cc;
+        cc1.performAlgorithm(ph1Solutions[i]);
+        
+        std::thread thread(runPh2Search, cc1, ph1Solutions[i],
+            ph2Solutions + i, &shortestLen, endTime);
 
-    rcube::Algorithm solution = ph1Solutions[0] + ph2Solution;
+        ph2Threads[i] = move(thread);
+    }
+
+    for (int i = 0; i < _threads; ++i)
+    {
+        if (ph2Threads[i].joinable()) ph2Threads[i].join();
+    }
+    
+    int i = 0;
+    for (; i < _threads; ++i)
+    {
+        if (ph1Solutions[i].length() + ph2Solutions[i].length() == shortestLen)
+            break;
+    }
+
+    rcube::Algorithm solution = ph1Solutions[i] + ph2Solutions[i];
     solution.normalize();
 
     std::cout << "[KOCIEMBA] Final solution: " << solution.to_string() <<

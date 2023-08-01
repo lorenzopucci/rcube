@@ -13,7 +13,7 @@ UI_DIR := ui
 
 CXX := g++
 CC := gcc
-CFLAGS := -Wall -I$(INCLUDE_DIR)
+CFLAGS := -Wall -I$(INCLUDE_DIR) -lpthread
 
 ifeq ($(DEBUG),true)
 	CFLAGS += -g

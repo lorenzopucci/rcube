@@ -251,6 +251,12 @@ void CubieCube::performMove(const rcube::Move &mv)
     multiply(CubieCube(mv));
 }
 
+void CubieCube::performAlgorithm(const rcube::Algorithm &algo)
+{
+    for (rcube::Move mv : algo.algorithm)
+        performMove(mv);
+}
+
 void CubieCube::restoreCube()
 {
     for (int i = 0; i < 12; ++i)
@@ -490,6 +496,32 @@ void CubieCube::setCorners(uint16_t value)
     }
 
     for (int i = 0; i < 8; ++i) cPerm[i] = corners[i];
+}
+
+uint8_t CubieCube::getCornerParity()
+{
+    int res = 0;
+    for (int i = 7; i > 0; --i)
+    {
+        for (int j = i - 1; j >= 0; --j)
+        {
+            if (cPerm[j] > cPerm[i]) res++;
+        }
+    }
+    return res % 2;
+}
+
+uint8_t CubieCube::getEdgeParity()
+{
+    int res = 0;
+    for (int i = 11; i > 0; --i)
+    {
+        for (int j = i - 1; j >= 0; --j)
+        {
+            if (ePerm[j] > ePerm[i]) res++;
+        }
+    }
+    return res % 2;
 }
 
 } // namespace Kociemba

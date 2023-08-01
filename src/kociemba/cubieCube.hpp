@@ -61,6 +61,9 @@ namespace Kociemba
         // apply a rcube::Move (this boils down to a multiplication)
         void performMove(const rcube::Move &mv);
 
+        // apply a rcube::Algorithm
+        void performAlgorithm(const rcube::Algorithm &algo);
+
         // restore the cube to the solved state
         void restoreCube();
 
@@ -99,6 +102,9 @@ namespace Kociemba
         // Corners is a value that represents the permutation of the 8 corners.
         uint16_t getCorners();
         void setCorners(uint16_t corners);
+
+        uint8_t getCornerParity();
+        uint8_t getEdgeParity();
 
         Edge ePerm[12];
         uint8_t eOri[12];

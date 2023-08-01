@@ -35,15 +35,31 @@ private:
     Color _crossColor;
 };
 
+/*
+* This is an implementation of the two phase Kociemba algorithm, which is able
+* to solve the cube in less than 25 moves (in average).
+* It is possible to trade the solution's length for computing time by adjusting
+* some parameters (see below).
+*/
 
 class KociembaSolver
 {
 public:
-    KociembaSolver(const rcube::Cube &cube, bool verbose = false);
+    // Quick mode: solves the cube almost instantly but the solution is not the
+    // shortest possible.
+    KociembaSolver(const rcube::Cube &cube);
+
+    // Slow mode: finds a shorter solution but takes more time to run
+    // threads: number of phase 1 solutions on which to perform phase 2's search
+    // timeout: maximum computing time allowed (in seconds). When it is exceeded,
+    // the sortest solution found so far will be returned.
+    KociembaSolver(const rcube::Cube &cube, int threads, int timeout);
 
     rcube::Algorithm solve();
 
 private:
     rcube::Cube _cube;
-    bool _verbose;
+    bool _quick;
+    int _timeout;
+    int _threads;
 };

@@ -31,7 +31,7 @@ is not vaild or does not represent a solvable cube.
 
 ### `void rcube::Cube::performMove(const rcube::Move &move)`
 
-- `move`: the move to perform (see [`rcube::Move`](move.md));
+- `move`: the move to perform;
 
 Applies a move to the cube. A move can be the rotation of a layer or the
 rotation of the cube itself (change of viewpoint).
@@ -274,8 +274,7 @@ right place, but the right sticker will also be at the given orientation. If
 
 Returns a 2D representation of the cube (basically a
 `rcube::Orientation → rcube::Face` map, where each face is a
-`rcube::Coordinates2D → Color` map). For more details, see
-`rcube::Net` [here](others.md).
+`rcube::Coordinates2D → Color` map).
 
 <br>
 
@@ -325,4 +324,4 @@ about the Lua API [read this](lua.md).
 - `crossColor`: the color of the face to start from
 
 Initializes a `CfopSolver` with the given arguments and solves the cube. Returns
-the algorithm used. For more detail, read [this](solving.md)
+the algorithm used.

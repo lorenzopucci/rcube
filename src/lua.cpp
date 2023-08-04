@@ -64,6 +64,7 @@ void initLua(lua_State *L)
     lua_register(L, "reverseAlgo", &runFunction<&RcubeLua::reverseAlgo>);
     lua_register(L, "removeRotations", &runFunction<&RcubeLua::removeRotations>);
     lua_register(L, "solveCfop", &runFunction<&RcubeLua::solveCfop>);
+    lua_register(L, "solveKociemba", &runFunction<&RcubeLua::solveKociemba>);
 }
 
 int rcube::Cube::runScript(const std::string &path)

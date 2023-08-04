@@ -325,3 +325,16 @@ about the Lua API [read this](lua.md).
 
 Initializes a `CfopSolver` with the given arguments and solves the cube. Returns
 the algorithm used.
+
+### `rcube::Algorithm solveKociemba()`
+
+Solves the cube using the Kociemba algorithm in quick mode. Returns the
+algorithm used.
+
+### `rcube::Algorithm solveKociemba(int threads, int timeout)`
+
+- `threads`: number of phase 1 solutions to process in phase 2
+- `timeout`: maximum computing time allowed
+
+Solves the cube using the Kociemba algorithm in slow mode with the given
+parameters. Returns the algorithm used.

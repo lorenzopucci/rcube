@@ -279,4 +279,11 @@ int RcubeLua::solveCfop(lua_State *L)
     return 1;
 }
 
+int RcubeLua::solveKociemba(lua_State *L)
+{
+    rcube::Algorithm solution = _cube->solveKociemba();
+    lua_pushstring(L, solution.to_string().c_str());
+    return 1;
+}
+
 #endif

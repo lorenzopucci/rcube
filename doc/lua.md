@@ -175,3 +175,8 @@ returned as a string.
 
 Equivalent to `rcube::Cube::solveCfop`. The algorithm used to solve the cube is
 returned as a string.
+
+### `<string> solveKociemba()`
+
+Equivalent to `rcube::Cube::solveKociemba`. The algorithm used to solve the
+cube is returned as a string.

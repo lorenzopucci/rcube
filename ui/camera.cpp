@@ -185,7 +185,7 @@ void EventHandler::onKey(GLFWwindow* window, int key, int scancode, int action,
         {
             if (camera->pressingCtrl && action == GLFW_PRESS)
             {
-                rcube::Algorithm algo = userPtr->cube3d->cube->solveCfop(true);
+                rcube::Algorithm algo = userPtr->cube3d->cube->solveKociemba();
                 userPtr->cubeUpdated = false;
 
                 if (userPtr->moveCallback == NULL) break;

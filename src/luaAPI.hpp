@@ -57,6 +57,8 @@ public:
 
     int solveCfop(lua_State *L);
 
+    int solveKociemba(lua_State *L);
+
     rcube::Cube *_cube;
 };
 

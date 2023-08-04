@@ -500,3 +500,21 @@ rcube::Algorithm rcube::Cube::solveCfop(bool verbose, Color crossColor)
 
     return solution;
 }
+
+rcube::Algorithm rcube::Cube::solveKociemba()
+{
+    KociembaSolver solver(*this);
+    rcube::Algorithm solution = solver.solve();
+    performAlgorithm(solution);
+
+    return solution;
+}
+
+rcube::Algorithm rcube::Cube::solveKociemba(int threads, int timeout)
+{
+    KociembaSolver solver(*this, threads, timeout);
+    rcube::Algorithm solution = solver.solve();
+    performAlgorithm(solution);
+
+    return solution;
+}

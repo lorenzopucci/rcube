@@ -663,6 +663,23 @@ namespace rcube
         * @return: the algorithm used to solve the cube
         */
 
+        rcube::Algorithm solveKociemba();
+        /*
+        * Solves the cube using the Kociemba algorithm (see include/solving.hpp)
+        * in quick mode.
+        * @return: the solution
+        */
+
+        rcube::Algorithm solveKociemba(int threads, int timeout);
+        /*
+        * Solves the cube using the Kociemba algorithm (see include/solving.hpp)
+        * in slow mode.
+        * @param thread: number of phase 1 solutions to process in phase 2
+        * @param timeout: maximum xomputing time allowed
+        * @return: the shortest solution found
+        */
+
+
     private:
         // internally, the cube is abstracted as an array of 6 rcube::Center, 12
         // rcube::Edge and 8 rcube::Corner

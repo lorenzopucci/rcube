@@ -104,6 +104,12 @@ void searchPh1 (
 
         if (newDist == 0)
         {
+            // check if it has already been found
+            for (auto it = solutions->begin(); it < solutions->end(); ++it)
+            {
+                if (it->to_string() == newAlgo.to_string()) return;
+            }
+            
             solutions->push_back(newAlgo);
             return;
         }

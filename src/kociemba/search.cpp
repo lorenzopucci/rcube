@@ -46,6 +46,13 @@ KociembaSolver::KociembaSolver(const rcube::Cube &cube, int threads,
     : _cube(cube), _threads(threads), _timeout(timeout), _quick(false)
 {}
 
+void KociembaSolver::useRobotMode(const rcube::Orientation &face)
+{
+    if (face.axis == Axis::Y) return;
+    
+    _robotFace = Kociemba::getFaceNumber(face);
+}
+
 void searchPh1 (
     uint16_t twist, // current twist: needs to be brought to 0
     uint16_t flip, // current flip: needs to be brought to 0
@@ -54,7 +61,8 @@ void searchPh1 (
     int dist, // lower bound for the number of moves needed to reach G1
     int left, // number of moves after which the maximum length allowed to
               // phase 1 is exceeded
-    std::vector<rcube::Algorithm> *solutions // stores all the solutions found
+    std::vector<rcube::Algorithm> *solutions, // stores all the solutions found
+    int toDiscard
     )
 {
     int prevMovesFaces[2] = {-2};
@@ -73,6 +81,8 @@ void searchPh1 (
     for (int i = 0; i < 18; ++i)
     {
         int f = i / 3; // number of the face
+
+        if (f == toDiscard) continue;
 
         // Pairs of successive moves to the same face can be ignored
         if (f == prevMovesFaces[0]) continue;
@@ -114,7 +124,8 @@ void searchPh1 (
             return;
         }
 
-        searchPh1(newTwist, newFlip, newSlice, newAlgo, newDist, left - 1, solutions);
+        searchPh1(newTwist, newFlip, newSlice, newAlgo, newDist, left - 1,
+            solutions, toDiscard);
     }
 }
 
@@ -128,7 +139,8 @@ void searchPh2 (
     rcube::Algorithm *shortestSol, // stores the sortest solution found
     int ph1Len, // length of phase 1 solution
     int *shortestLen, // shortest overall solution found (shared between threads)
-    long endTime // startTime + timeout
+    long endTime, // startTime + timeout
+    int toDiscard
     )
 {
     if (prevMoves.length() + ph1Len + 1 >= *shortestLen) return;
@@ -150,6 +162,8 @@ void searchPh2 (
     for (int i = 0; i < 10; ++i)
     {
         int f = Kociemba::toPh1Move(i) / 3; // number of the face
+
+        if (f == toDiscard) continue;
 
         // Pairs of successive moves to the same face can be ignored
         if (f == prevMovesFaces[0]) continue;
@@ -192,12 +206,13 @@ void searchPh2 (
         }
 
         searchPh2(newCorners, newUDEdges, newSliceSorted, newAlgo,
-            left - 1, shortestSol, ph1Len, shortestLen, endTime);
+            left - 1, shortestSol, ph1Len, shortestLen, endTime, toDiscard);
     }
 }
 
 void runPh2Search(Kociemba::CubieCube cc, const rcube::Algorithm &ph1Solution,
-    rcube::Algorithm *solution, int *shortestLen, const long &endTime)
+    rcube::Algorithm *solution, int *shortestLen, const long &endTime,
+    int toDiscard)
 {
     *solution = rcube::Algorithm(DUMMY_ALGO);
 
@@ -208,7 +223,7 @@ void runPh2Search(Kociemba::CubieCube cc, const rcube::Algorithm &ph1Solution,
 
         searchPh2(cc.getCorners(), cc.getUDEdges(), cc.getSliceSorted(),
             rcube::Algorithm(), maxDepth, solution, ph1Solution.length(),
-            shortestLen, endTime);
+            shortestLen, endTime, toDiscard);
         maxDepth++;
     }
 }
@@ -229,7 +244,7 @@ rcube::Algorithm KociembaSolver::solve()
     while (ph1Solutions.size() < _threads)
     {
         searchPh1(cc.getTwist(), cc.getFlip(), cc.getSliceSorted() / 24,
-            rcube::Algorithm(), 0, maxDepth, &ph1Solutions);
+            rcube::Algorithm(), 0, maxDepth, &ph1Solutions, _robotFace);
         maxDepth++;
     }
 
@@ -243,7 +258,8 @@ rcube::Algorithm KociembaSolver::solve()
         rcube::Algorithm ph2Solution;
         int shortestLen = 32;
         
-        runPh2Search(cc1, ph1Solutions[0], &ph2Solution, &shortestLen, endTime);
+        runPh2Search(cc1, ph1Solutions[0], &ph2Solution, &shortestLen, endTime,
+            _robotFace);
         
         rcube::Algorithm solution = ph1Solutions[0] + ph2Solution;
         solution.normalize();
@@ -267,7 +283,7 @@ rcube::Algorithm KociembaSolver::solve()
         cc1.performAlgorithm(ph1Solutions[i]);
         
         std::thread thread(runPh2Search, cc1, ph1Solutions[i],
-            ph2Solutions + i, &shortestLen, endTime);
+            ph2Solutions + i, &shortestLen, endTime, _robotFace);
 
         ph2Threads[i] = move(thread);
     }

@@ -55,6 +55,11 @@ public:
     // the sortest solution found so far will be returned.
     KociembaSolver(const rcube::Cube &cube, int threads, int timeout);
 
+    // Robot mode will not perform moves on a given face, which can be L,R,B,F
+    // but not U and D (designed for robots with only 5 motors). This mode can
+    // reduce performances
+    void useRobotMode(const rcube::Orientation &face);
+
     rcube::Algorithm solve();
 
 private:
@@ -62,4 +67,5 @@ private:
     bool _quick;
     int _timeout;
     int _threads;
+    int _robotFace = -1;
 };

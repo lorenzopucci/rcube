@@ -211,19 +211,19 @@ void searchPh2 (
 }
 
 void runPh2Search(Kociemba::CubieCube cc, const rcube::Algorithm &ph1Solution,
-    rcube::Algorithm *solution, int *shortestLen, const long &endTime,
-    int toDiscard)
+    rcube::Algorithm *solution, const long &endTime, int toDiscard)
 {
     *solution = rcube::Algorithm(DUMMY_ALGO);
+    int shortestLen = 32;
 
     int maxDepth = 12;
-    while (solution->to_string() == DUMMY_ALGO)
+    while (shortestLen == 32)
     {
         if (time(NULL) > endTime) return;
 
         searchPh2(cc.getCorners(), cc.getUDEdges(), cc.getSliceSorted(),
             rcube::Algorithm(), maxDepth, solution, ph1Solution.length(),
-            shortestLen, endTime, toDiscard);
+            &shortestLen, endTime, toDiscard);
         maxDepth++;
     }
 }
@@ -256,10 +256,8 @@ rcube::Algorithm KociembaSolver::solve()
         Kociemba::CubieCube cc1 = cc;
         cc1.performAlgorithm(ph1Solutions[0]);
         rcube::Algorithm ph2Solution;
-        int shortestLen = 32;
         
-        runPh2Search(cc1, ph1Solutions[0], &ph2Solution, &shortestLen, endTime,
-            _robotFace);
+        runPh2Search(cc1, ph1Solutions[0], &ph2Solution, endTime, _robotFace);
         
         rcube::Algorithm solution = ph1Solutions[0] + ph2Solution;
         solution.normalize();
@@ -275,7 +273,6 @@ rcube::Algorithm KociembaSolver::solve()
     
     rcube::Algorithm ph2Solutions[_threads] = {rcube::Algorithm(DUMMY_ALGO)};
     std::thread ph2Threads[_threads];
-    int shortestLen = 32;
 
     for (int i = 0; i < _threads; ++i)
     {
@@ -283,7 +280,7 @@ rcube::Algorithm KociembaSolver::solve()
         cc1.performAlgorithm(ph1Solutions[i]);
         
         std::thread thread(runPh2Search, cc1, ph1Solutions[i],
-            ph2Solutions + i, &shortestLen, endTime, _robotFace);
+            ph2Solutions + i, endTime, _robotFace);
 
         ph2Threads[i] = move(thread);
     }
@@ -292,19 +289,19 @@ rcube::Algorithm KociembaSolver::solve()
     {
         if (ph2Threads[i].joinable()) ph2Threads[i].join();
     }
-    
-    int i = 0;
-    for (; i < _threads; ++i)
+
+    std::vector<rcube::Algorithm> solutions;
+
+    for (int i = 0; i < _threads; ++i)
     {
-        if (ph1Solutions[i].length() + ph2Solutions[i].length() == shortestLen)
-            break;
+        solutions.push_back(ph1Solutions[i] + ph2Solutions[i]);
+        solutions[i].normalize();
     }
 
-    rcube::Algorithm solution = ph1Solutions[i] + ph2Solutions[i];
-    solution.normalize();
+    std::sort(solutions.begin(), solutions.end(), compareAlgo);
 
-    std::cout << "[KOCIEMBA] Final solution: " << solution.to_string() <<
-        " (" << solution.length() << " moves)\n";
+    std::cout << "[KOCIEMBA] Final solution: " << solutions[0].to_string() <<
+        " (" << solutions[0].length() << " moves)\n";
 
-    return solution;
+    return solutions[0];
 }

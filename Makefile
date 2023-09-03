@@ -38,7 +38,7 @@ UI_OBJECTS = $(patsubst $(UI_DIR)/%.cpp,$(BIN_DIR)/ui_%.o,$(UI_FILES))
 RCUBE_CFLAGS :=
 RCUBE_LD_FLAGS :=
 
-ifneq ($(LUA),false)
+ifeq ($(LUA),true)
 	RCUBE_LD_LIBS := lua
 	RCUBE_CFLAGS := $(shell pkg-config --cflags $(RCUBE_LD_LIBS))
 	RCUBE_LD_FLAGS := $(shell pkg-config --libs $(RCUBE_LD_LIBS))

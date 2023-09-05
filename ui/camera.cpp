@@ -185,7 +185,12 @@ void EventHandler::onKey(GLFWwindow* window, int key, int scancode, int action,
         {
             if (camera->pressingCtrl && action == GLFW_PRESS)
             {
-                rcube::Algorithm algo = userPtr->cube3d->cube->solveKociemba();
+                int th = userPtr->config.kociemba_threads;
+                int to = userPtr->config.kociemba_timeout;
+
+                rcube::Algorithm algo = userPtr->cube3d->cube
+                    ->solveKociemba(th, to);
+                    
                 userPtr->cubeUpdated = false;
 
                 if (userPtr->moveCallback == NULL) break;
@@ -211,7 +216,9 @@ void EventHandler::onKey(GLFWwindow* window, int key, int scancode, int action,
             if (camera->pressingCtrl && action == GLFW_PRESS)
             {
                 rcube::Algorithm dest;
-                userPtr->cube3d->cube->scramble(15, &dest);
+                int len = userPtr->config.scramble_length;
+
+                userPtr->cube3d->cube->scramble(len, &dest);
 
                 std::cout << "Scramble: " << dest.to_string() << std::endl;
                 

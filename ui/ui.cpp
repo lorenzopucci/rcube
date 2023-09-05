@@ -9,6 +9,8 @@
 
 #include <map>
 #include <iostream>
+#include <fstream>
+#include <algorithm>
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -31,6 +33,47 @@
 
 #define WINDOW_WIDTH 640
 #define WINDOW_HEIGHT 480
+
+
+void parseConfigFile(Config *cfg)
+{
+    std::ifstream file("rcube.cfg");
+
+    if (!file.good()) return;
+
+    std::string line;
+    while (std::getline(file, line))
+    {
+        // Remove all spaces
+        line.erase(remove_if(line.begin(), line.end(), isspace), line.end());
+
+        if (line.length() < 3) continue;
+
+        int eqPos = 0;
+        for (; eqPos < line.length(); eqPos++)
+        {
+            if (line[eqPos] == '=') break;
+        }
+        if (eqPos >= line.length() - 1) continue;
+
+        std::string key = line.substr(0, eqPos);
+        std::string sVal = line.substr(eqPos + 1, line.length() - eqPos);
+        int val;
+
+        try
+        {
+            val = std::stoi(sVal);
+        }
+        catch (const std::invalid_argument& e)
+        {
+            continue;
+        }
+        
+        if      (key == "scramble_length") cfg->scramble_length = val;
+        else if (key == "kociemba_threads") cfg->kociemba_threads = val;
+        else if (key == "kociemba_timeout") cfg->kociemba_timeout = val;
+    }
+}
 
 int rcubeUI::runUI (rcube::Cube *cube, std::function<void(rcube::Move)>
     moveCallback)
@@ -78,8 +121,11 @@ int rcubeUI::runUI (rcube::Cube *cube, std::function<void(rcube::Move)>
     Timer timer(&text, 10, 10);
     Cube cube3d(cube);
 
+    Config config;
+    parseConfigFile(&config);
+
     GlfwUserPtrData *userPtr = new GlfwUserPtrData {camera, &text,
-        &timer, &cube3d, moveCallback};
+        &timer, &cube3d, moveCallback, config};
 
     glfwSetWindowUserPointer(window, userPtr);
     glfwSetScrollCallback(window, EventHandler::onScroll);

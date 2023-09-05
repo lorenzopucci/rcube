@@ -30,3 +30,16 @@ A `{'U', 0}` move will be returned when the window is closed.
 
 Remember to exclude `bin/ui_main.o` when linking the program, otherwise you
 will have two main functions!
+
+## Config file
+If a file named `rcube.cfg` is found in the current directory, it will be used
+as a config file. Here are the parameters you can set and their default values:
+
+```
+scramble_length = 15
+kociemba_threads = 4
+kociemba_timeout = 1
+```
+
+If there is no such file, or it contains some syntax errors, the default values
+will be used without throwing any error.

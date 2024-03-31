@@ -14,6 +14,12 @@
 bool handleLetters(Color color, char given, char otherCase,
     std::map<char, Color> *letterMapping)
 {
+    // This is the part of stickerMatches which handles letters that do not
+    // indicate a color directly (i.e. variables)
+
+    // Letters of type A = {A,...,L}
+    // Letters of type B = {M,...,Z} (see documentation)
+
     bool isTypeB = (int)given >= 77 && (int)otherCase >= 77;
 
     if (letterMapping->find(given) != letterMapping->end())
@@ -31,25 +37,30 @@ bool handleLetters(Color color, char given, char otherCase,
 
         return color != letterMapping->at(otherCase);
     }
-    else
-    {
-        if (isTypeB)
-        {
-            // make sure no other letter is pointing to that color
-            for (auto it : *letterMapping)
-            {
-                if (it.second == color && tolower(it.first) >= 109) return false;
-            }
-        }
 
-        letterMapping->insert(std::pair<char, Color>(given, color));
-        return true;
+    // Neither given, nor otherCase has been found: needs to be added
+
+    if (isTypeB)
+    {
+        // make sure no other letter is pointing to that color
+        for (auto it : *letterMapping)
+        {
+            if (it.second == color && tolower(it.first) >= 109) return false;
+        }
     }
+
+    letterMapping->insert(std::pair<char, Color>(given, color));
+    return true;
 }
 
 bool stickerMatches(const Color &color, const char &match,
     std::map<char, Color> *letterMapping)
 {
+    // Returns true if <match> (a character from the regex) matches color <color>
+    // according to <letterMapping>. If <letterMapping> does not include that
+    // character, it will be added. False is returned only when the pair
+    // (<match>, <color>) conflicts with the data in <letterMapping>.
+
     switch (match)
     {
         case '*':
@@ -121,8 +132,9 @@ bool stickerMatches(const Color &color, const char &match,
 
 int getCharPos(const rcube::Coordinates2D &coords)
 {
-    return ((abs(coords.coords[Axis::Y] - 1)) * 3) +
-        coords.coords[Axis::X] + 1;
+    // Maps 2D coordinates of a face to indices in a faceMatches regex
+
+    return ((abs(coords.coords[Axis::Y] - 1)) * 3) + coords.coords[Axis::X] + 1;
 }
 
 bool rcube::Cube::faceMatches (
@@ -135,6 +147,7 @@ bool rcube::Cube::faceMatches (
     // check the syntax
     if (expr.size() != 9) return false;
 
+    // stores which color each letter represents
     std::map<char, Color> letterMapping;
 
     // check the center
@@ -142,14 +155,16 @@ bool rcube::Cube::faceMatches (
         return false;
 
 
-    for (int rot = 0; rot < 4; ++rot)
+    for (int rot = 0; rot < 4; ++rot) // try each rotation until a match is found
     {
         letterMapping.clear();
+
         // if the center is a letter, it must be reincluded in the map
         stickerMatches(getCenterFrom(face)->color, expr[4], &letterMapping);
 
-        rcube::Corner *first;
+        rcube::Corner *first; // Pointer to the corner corresponding to expr[0]
 
+        // Iterate through corners and edges to check if all of them match
         for (int i = 0; i < 12; ++i)
         {
             for (int k = 0; k < 2; ++k)
@@ -157,13 +172,11 @@ bool rcube::Cube::faceMatches (
                 if (edges[i].stickers[k].orientation != face) continue;
 
                 rcube::Coordinates2D patternCoords(edges[i].location, face);
-
                 patternCoords.rotate(rot);
 
                 if (!stickerMatches(edges[i].stickers[k].color,
                     expr[getCharPos(patternCoords)], &letterMapping))
                         goto nextIt;
-
             }
 
             if (i >= 8) continue;
@@ -176,7 +189,6 @@ bool rcube::Cube::faceMatches (
                 if (corners[i].stickers[k].orientation != face) continue;
 
                 rcube::Coordinates2D patternCoords(corners[i].location, face);
-
                 patternCoords.rotate(rot);
                 int pos = getCharPos(patternCoords);
 
@@ -188,6 +200,7 @@ bool rcube::Cube::faceMatches (
             }
         }
 
+        // Move <first> to desired position (if given)
         if (dest != rcube::Coordinates(0, 0, 0))
         {
             if (dest.coords[face.axis] != face.direction) return true;
@@ -195,7 +208,7 @@ bool rcube::Cube::faceMatches (
             rcube::Move mv(face, 1);
 
             int i = 0;
-            for (; i < 4; ++i)
+            for (; i < 4; ++i) // Apply move until desired position is reached
             {
                 if (first->location == dest) break;
                 performMove(mv);
@@ -216,7 +229,7 @@ nextIt:
 
 struct MatchingPath
 {
-    // A MatchingPath is one of the ways in which a string can match a layer.
+    // A MatchingPath is one of the ways in which a regex can match a layer.
     // It is determined by a starting sticker (coordinates + orientation) and
     // by the face around which the matching algorithm is performed (layer)
 
@@ -230,9 +243,9 @@ struct MatchingPath
         &startStk, const rcube::Orientation &layer,
         const std::map<char, Color> &lm);
 
+    // get the distance of a block from the starting point
     int getBlockNum(const rcube::Coordinates &blockPos,
         const rcube::Orientation &stk);
-    // get the distance of a block from the starting point
 
     int getFaceBlockNum(const rcube::Coordinates &pos);
 };
@@ -244,6 +257,10 @@ MatchingPath::MatchingPath(const rcube::Coordinates &startBlock, const
     _startBlock = startBlock;
     _layer = layer;
     _letterMapping = lm;
+
+    // rotStep and rotFactors are defined so that (-rotStep * rotFactor *
+    // startSt.direction) is the number of 90° twists to turn the face of
+    // expr[0,1,2] to that of expr[3,4,5]
 
     int rotStep = 1;
     if ((_layer.axis + 1) % 3 == startStk.axis)
@@ -325,7 +342,7 @@ bool rcube::Cube::layerMatches(
 
         // then, check for each edge and center if it fits in all paths. If not,
         // erase the path from the vector
-        for (int i = 0; i < 6; ++i)
+        for (int i = 0; i < 6; ++i) // centers
         {
             if (centers[i].location.coords[layer.axis] != 0)
                 continue;
@@ -342,7 +359,7 @@ bool rcube::Cube::layerMatches(
                 ++x;
             }
         }
-        for (int i = 0; i < 12; ++i)
+        for (int i = 0; i < 12; ++i) // edges
         {
             if (edges[i].location.coords[layer.axis] != 0) continue;
 
@@ -368,42 +385,60 @@ bool rcube::Cube::layerMatches(
         if (dest == rcube::Coordinates(0, 0, 0)) return true;
         if (dest.coords[layer.axis] != layer.direction) return true;
 
+        // move the first edge to the desired position (if given)
+
         rcube::Move mv(layer, 1);
+        int moveCount = 0;
 
         for (int i = 0; i < 12; ++i)
         {
             if (edges[i].location.coords[layer.axis] != layer.direction)
                 continue;
 
+            // there might be multiple paths, however some may result in the
+            // first edge not aligning correctly with with <orient>. If one
+            // satisfies this condition, it will be chosen
+
             for (auto path : possiblePaths)
             {
                 if (edges[i].location != path._startBlock) continue;
 
-                rcube::Sticker *startStk;
+                rcube::Sticker *startStk; // sticker corresponding to expr[1]
                 for (int x = 0; x < 2; ++x)
                 {
-                    if (edges[i].stickers[x].orientation ==
-                        path._facesOrder[0])
-                    {
+                    if (edges[i].stickers[x].orientation == path._facesOrder[0])
                         startStk = edges[i].stickers + x;
-                    }
                 }
 
                 for (int x = 0; x < 4; ++x)
                 {
                     performMove(mv);
+                    moveCount++;
+
                     if (edges[i].location != dest) continue;
 
                     if (orient == (rcube::Orientation){Axis::X, 0})
                         return true;
-                    if (startStk->orientation == orient) return true;
+                    
+                    if (startStk->orientation == orient)
+                    {
+                        if (algo != nullptr)
+                        {
+                            moveCount = moveCount % 4;
+                            if (moveCount == 3) moveCount = -1;
+                            algo->push(rcube::Move(layer, moveCount));
+                        }
+                        return true;
+                    }
                 }
             }
         }
         return false;
     }
 
-    // first, get a list of all the possible paths
+    // Case in which the layer is next to a face (i.e. not central):
+
+    // first, get a list of all possible paths
     for (int i = 0; i < 8; ++i)
     {
         if (corners[i].location.coords[layer.axis] != layer.direction)
@@ -421,6 +456,7 @@ bool rcube::Cube::layerMatches(
             lmTmp.clear();
         }
     }
+
     // check for each edge and corner if it fits in all paths. If not,
     // erase the path from the vector
     for (int i = 0; i < 12; ++i)
@@ -472,9 +508,10 @@ bool rcube::Cube::layerMatches(
 
     if (possiblePaths.size() == 0) return false;
 
-    if (dest == rcube::Coordinates(0, 0, 0) || orient ==
-        (rcube::Orientation){Axis::X, 0}) return true;
+    if (dest == rcube::Coordinates(0, 0, 0)) return true;
     if (dest.coords[layer.axis] != layer.direction) return true;
+
+    // move the first block to the desired position
 
     rcube::Move mv(layer, 1);
     int moveCount = 0;
@@ -487,7 +524,7 @@ bool rcube::Cube::layerMatches(
         {
             if (corners[i].location != path._startBlock) continue;
 
-            rcube::Sticker *startStk;
+            rcube::Sticker *startStk; // sticker corresponding to expr[0]
             for (int x = 0; x < 3; ++x)
             {
                 if (corners[i].stickers[x].orientation == path._facesOrder[0])
@@ -506,6 +543,7 @@ bool rcube::Cube::layerMatches(
                 {
                     if (algo != nullptr)
                     {
+                        moveCount = moveCount % 4;
                         if (moveCount == 3) moveCount = -1;
                         algo->push(rcube::Move(layer, moveCount));
                     }
@@ -530,6 +568,7 @@ bool rcube::Cube::layerAndFaceMatch(
     std::string faceExpr = expr.substr(0, 9);
     std::string layerExpr = expr.substr(10, 12);
 
+    // The code is very similar to layerMatches
     std::vector<MatchingPath> possiblePaths;
     std::map<char, Color> lmTmp;
 
@@ -583,12 +622,13 @@ bool rcube::Cube::layerAndFaceMatch(
     {
         if (edges[i].location.coords[layer.axis] == layer.direction)
         {
-        for (int k = 0; k < 2; ++k)
+        for (int k = 0; k < 2; ++k) // edges
         {
             rcube::Sticker *stk = edges[i].stickers + k;
 
             for (int x = 0; x < possiblePaths.size();)
             {
+                // the sticker belongs to the face
                 if (stk->orientation == layer && stickerMatches(stk->color,
                     faceExpr[possiblePaths[x].getFaceBlockNum(edges[i].location)],
                     &possiblePaths[x]._letterMapping))
@@ -597,8 +637,9 @@ bool rcube::Cube::layerAndFaceMatch(
                     continue;
                 }
 
+                // the sticker belongs to the layer
                 if (stk->orientation != layer && stickerMatches(stk->color,
-                    layerExpr[possiblePaths[x].getBlockNum( edges[i].location,
+                    layerExpr[possiblePaths[x].getBlockNum(edges[i].location,
                     stk->orientation)], &possiblePaths[x]._letterMapping)
                 )
                 {
@@ -615,12 +656,13 @@ bool rcube::Cube::layerAndFaceMatch(
         if (corners[i].location.coords[layer.axis] != layer.direction)
             continue;
 
-        for (int k = 0; k < 3; ++k)
+        for (int k = 0; k < 3; ++k) // corners
         {
             rcube::Sticker *stk = corners[i].stickers + k;
 
             for (int x = 0; x < possiblePaths.size();)
             {
+                // the sticker belongs to the face
                 if (stk->orientation == layer && stickerMatches(stk->color,
                     faceExpr[possiblePaths[x].getFaceBlockNum(corners[i].location)],
                     &possiblePaths[x]._letterMapping))
@@ -629,6 +671,7 @@ bool rcube::Cube::layerAndFaceMatch(
                     continue;
                 }
 
+                // the sticker belongs to the layer
                 if (stk->orientation != layer && stickerMatches(stk->color,
                     layerExpr[possiblePaths[x].getBlockNum(corners[i].location,
                     stk->orientation)], &possiblePaths[x]._letterMapping)
@@ -644,9 +687,10 @@ bool rcube::Cube::layerAndFaceMatch(
 
     if (possiblePaths.size() == 0) return false;
 
-    if (dest == rcube::Coordinates(0, 0, 0) || orient ==
-        (rcube::Orientation){Axis::X, 0}) return true;
+    if (dest == rcube::Coordinates(0, 0, 0)) return true;
     if (dest.coords[layer.axis] != layer.direction) return true;
+
+    // move the first block to the desired position
 
     rcube::Move mv(layer, 1);
     int moveCount = 0;
@@ -659,7 +703,7 @@ bool rcube::Cube::layerAndFaceMatch(
         {
             if (corners[i].location != path._startBlock) continue;
 
-            rcube::Sticker *startStk;
+            rcube::Sticker *startStk; // sticker corresponding to expr[1]
             for (int x = 0; x < 3; ++x)
             {
                 if (corners[i].stickers[x].orientation == path._facesOrder[0])
